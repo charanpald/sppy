@@ -1,0 +1,5 @@
+*.o 
+*.so 
+*.pyc 
+sparray.egg-info/
+build/

@@ -11,6 +11,10 @@ using namespace boost::numeric::ublas;
 template <class T>
 class mapped_matrix_ext:public mapped_matrix<T> {
   public:
+	mapped_matrix_ext<T>(): 
+		mapped_matrix<T>(1, 1, 1){ 
+		} 
+
 	mapped_matrix_ext<T>(int size1, int size2, int non_zeros=0): 
 		mapped_matrix<T>(size1, size2, non_zeros){ 
 		} 
@@ -23,11 +27,21 @@ class mapped_matrix_ext:public mapped_matrix<T> {
 		(*this)(i, j) = val; 
 		} 
 
-        mapped_matrix_ext<T>& add(mapped_matrix_ext<T>& matrix_A)  { 
-                //return (*this) + A;    
-                (*this) += matrix_A;
-                return *this;            
-                }
+    mapped_matrix_ext<T>& add(mapped_matrix_ext<T>& matrix_A)  { 
+            (*this) += matrix_A;
+            return *this;            
+            }
+
+    mapped_matrix_ext<T>& minus(mapped_matrix_ext<T>& matrix_A)  { 
+            (*this) -= matrix_A;
+            return *this;            
+            }
+
+    mapped_matrix_ext<T>& multiply(T val)  { 
+            (*this) *= val;
+            return *this;            
+            }
+
   };
 
 #endif

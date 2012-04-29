@@ -4,18 +4,32 @@ cimport numpy
 
 cdef extern from "mapped_matrix_ext.h": 
    cdef cppclass mapped_matrix_ext[T]:  
+      mapped_matrix_ext()
       mapped_matrix_ext(int, int, int)
       int size1()
       int size2() 
       T get_item(int, int)
       void set_item(int, int, T) 
-      mapped_matrix_ext* add(mapped_matrix_ext*)
+      mapped_matrix_ext[T]& add(mapped_matrix_ext[T]&)
+      mapped_matrix_ext[T]& minus(mapped_matrix_ext[T]&)
+      mapped_matrix_ext[T]& multiply(T)
+
 
       
 #TODO: Allow for different dtypes 
 #Sum method 
 #Slicing 
 #Optimise 
+#Operators: add, multiply, divide, minus
+#Other: dot product, max, min, put, take, trace, transpose 
+#mean, std, var 
+
+cdef mapped_matrix_ext[double] *A = new mapped_matrix_ext[double](3, 3, 5) 
+cdef mapped_matrix_ext[double] *B = new mapped_matrix_ext[double](3, 3, 5)    
+cdef mapped_matrix_ext[double] C
+cdef mapped_matrix_ext[double] *D
+C = A.add(deref(B))
+D = &C
 
 cdef class map_array:
     cdef mapped_matrix_ext[double] *thisptr     
@@ -23,6 +37,8 @@ cdef class map_array:
         self.thisptr = new mapped_matrix_ext[double](shape[0], shape[1], nnz)
     def __dealloc__(self):
         del self.thisptr
+    def getNDim(self): 
+        return 2 
     def getShape(self):
         return (self.thisptr.size1(), self.thisptr.size2())
     def __getitem__(self, inds):
@@ -65,12 +81,16 @@ cdef class map_array:
             
         self.thisptr.set_item(i, j, val)
     
-    """
-    #Doesn't work due to no ref to self.thisptr oddly 
-    def __add__(self, A): 
-        print(self)
-        print(self.thisptr.size1()) 
-    """
+    def add(self, map_array A): 
+        C = map_array(self.shape, 10)
+        C.thisptr = &self.thisptr.add(deref(A.thisptr))
+        return  C
+        
+    def minus(self, map_array A): 
+        C = map_array(self.shape, 10)
+        C.thisptr = &self.thisptr.minus(deref(A.thisptr))
+        return  C
+    
      
     def __str__(self): 
         outputStr = "map_array([" 
@@ -89,5 +109,6 @@ cdef class map_array:
         return outputStr 
 
     shape = property(getShape)
+    ndim = property(getNDim)
 
 

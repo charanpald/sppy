@@ -59,7 +59,17 @@ class map_array_test(unittest.TestCase):
         except ValueError: 
             pass 
 
-
+    def testAdd(self): 
+        self.B = map_array((5, 5), 10)
+        self.B[0, 1] = 1 
+        self.B[1, 1] = 2 
+        self.B[2, 2] = 5 
+        
+        C = self.B.add(self.A)
+        
+        print(C)
+        print(self.B)
+        print(self.A)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

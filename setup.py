@@ -7,6 +7,5 @@ setup(name = 'sparray',
       version = 0.1,
       author = 'Charanpal Dhanjal',
       author_email = 'charanpal@gmail.com',
-      summary = 'A sparse matrix package based on Boost uBLAS',
-      ext_modules=[Extension("sparray.map", ["sparray/map.pyx"], language="c++")],  
+      ext_modules=[Extension("sparray.map", ["sparray/map.pyx"], language="c++", include_dirs=["/usr/include/eigen3/"])],  
       cmdclass={'build_ext': build_ext})

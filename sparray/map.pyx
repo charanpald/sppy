@@ -1,46 +1,32 @@
-from cython.operator cimport dereference as deref, preincrement as inc #dereference and increment operators
+from cython.operator cimport dereference as deref, preincrement as inc 
 import numpy 
 cimport numpy 
 
-cdef extern from "mapped_matrix_ext.h": 
-   cdef cppclass mapped_matrix_ext[T]:  
-      mapped_matrix_ext()
-      mapped_matrix_ext(int, int, int)
-      int size1()
-      int size2() 
-      T get_item(int, int)
-      void set_item(int, int, T) 
-      mapped_matrix_ext[T]& add(mapped_matrix_ext[T]&)
-      mapped_matrix_ext[T]& minus(mapped_matrix_ext[T]&)
-      mapped_matrix_ext[T]& multiply(T)
 
+cdef extern from "SparseMatrixExt.h": 
+   cdef cppclass SparseMatrixExt[T]:  
+      SparseMatrixExt()
+      SparseMatrixExt(int, int)
+      int rows()
+      int cols() 
+      int size() 
+      void insert(int, int)
 
-      
-#TODO: Allow for different dtypes 
-#Sum method 
-#Slicing 
-#Optimise 
-#Operators: add, multiply, divide, minus
-#Other: dot product, max, min, put, take, trace, transpose 
-#mean, std, var 
-
-cdef mapped_matrix_ext[double] *A = new mapped_matrix_ext[double](3, 3, 5) 
-cdef mapped_matrix_ext[double] *B = new mapped_matrix_ext[double](3, 3, 5)    
-cdef mapped_matrix_ext[double] C
-cdef mapped_matrix_ext[double] *D
-C = A.add(deref(B))
-D = &C
-
-cdef class map_array:
-    cdef mapped_matrix_ext[double] *thisptr     
-    def __cinit__(self, shape, nnz):
-        self.thisptr = new mapped_matrix_ext[double](shape[0], shape[1], nnz)
+cdef class cmpr_array:
+    cdef SparseMatrixExt[double] *thisptr     
+    def __cinit__(self, shape):
+        self.thisptr = new SparseMatrixExt[double](shape[0], shape[1])
     def __dealloc__(self):
         del self.thisptr
     def getNDim(self): 
         return 2 
     def getShape(self):
-        return (self.thisptr.size1(), self.thisptr.size2())
+        return (self.thisptr.rows(), self.thisptr.cols())
+        
+    def getSize(self): 
+        return self.thisptr.size()
+        
+    """
     def __getitem__(self, inds):
         i, j = inds 
         if type(i) == int and type(j) == int: 
@@ -107,8 +93,9 @@ cdef class map_array:
             else: 
                 outputStr += "])\n"    
         return outputStr 
+    """
 
     shape = property(getShape)
     ndim = property(getNDim)
 
-
+    

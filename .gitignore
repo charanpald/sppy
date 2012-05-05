@@ -4,3 +4,6 @@
 a.out 
 sparray.egg-info/
 build/
+/sparray/SparseMatrixExtTest
+/sparray/csr_array.so
+/sparray/csr_array.cpp

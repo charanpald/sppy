@@ -7,5 +7,5 @@ setup(name = 'sparray',
       version = 0.1,
       author = 'Charanpal Dhanjal',
       author_email = 'charanpal@gmail.com',
-      ext_modules=[Extension("sparray.map", ["sparray/map.pyx"], language="c++", include_dirs=["/usr/include/eigen3/"])],  
+      ext_modules=[Extension("sparray.csr_array", ["sparray/csr_array.pyx"], language="c++", include_dirs=["/usr/include/eigen3/"])],  
       cmdclass={'build_ext': build_ext})

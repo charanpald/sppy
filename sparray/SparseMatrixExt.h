@@ -17,9 +17,10 @@ class SparseMatrixExt:public SparseMatrix<T> {
 	SparseMatrixExt<T>(int rows, int cols): 
 		SparseMatrix<T>(rows, cols){ 
 		}
-
-
-
+    
+    void insertVal(int row, int col, T val) { 
+        this->insert(row, col) = val;
+        }
   };
 
 #endif

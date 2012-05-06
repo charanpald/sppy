@@ -5,7 +5,7 @@ import numpy
 
 from sparray.csr_array import csr_array 
 
-class map_array_test(unittest.TestCase):
+class csr_arrayTest(unittest.TestCase):
     def setUp(self):
         logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
         
@@ -36,6 +36,7 @@ class map_array_test(unittest.TestCase):
         
     def testGetnnz(self): 
        A = csr_array((5, 7))
+       self.assertEquals(A.getnnz(), 0)
        A[0, 0] = 1.0
        
        self.assertEquals(A.getnnz(), 1)
@@ -49,12 +50,15 @@ class map_array_test(unittest.TestCase):
        
        A[4, 4] = 0.0
        self.assertEquals(A.getnnz(), 5)
+       
+       B = csr_array((5, 7))
+       B[(numpy.array([1, 2, 3]), numpy.array([4, 5, 6]))] = 1
+       self.assertEquals(B.getnnz(), 3)
     
-    @unittest.skip("")
     def testSetItem(self):
         nrow = 5 
         ncol = 7
-        A = csr_array((nrow, ncol), 10)
+        A = csr_array((nrow, ncol))
         A[0, 1] = 1
         A[1, 3] = 5.2
         A[3, 3] = -0.2
@@ -79,6 +83,23 @@ class map_array_test(unittest.TestCase):
             self.fail()
         except ValueError: 
             pass 
+        
+        result = A[(numpy.array([0, 1, 3]), numpy.array([1, 3, 3]))] 
+        self.assertEquals(result[0], 1)
+        self.assertEquals(result[1], 5.2)
+        self.assertEquals(result[2], -0.2)
+        
+        #Replace value of A 
+        A[0, 1] = 2
+        self.assertEquals(A[0, 1], 2)
+        self.assertAlmostEquals(A[1, 3], 5.2, 5)
+        self.assertAlmostEquals(A[3, 3], -0.2)
+        
+        for i in range(nrow): 
+            for j in range(ncol): 
+                if (i, j) != (0, 1) and (i, j) != (1, 3) and (i, j) != (3, 3): 
+                    self.assertEquals(A[i, j], 0)
+       
 
     @unittest.skip("")
     def testAdd(self): 

@@ -12,6 +12,7 @@ cdef extern from "SparseMatrixExt.h":
       int size() 
       void insertVal(int, int, T)
       int nonZeros()
+      T coeff(int, int)
 
 cdef class csr_array:
     cdef SparseMatrixExt[double] *thisptr     
@@ -24,25 +25,23 @@ cdef class csr_array:
     def getShape(self):
         return (self.thisptr.rows(), self.thisptr.cols())
     def getSize(self): 
-        return self.thisptr.size()
-        
+        return self.thisptr.size()    
     def getnnz(self): 
         return self.thisptr.nonZeros()
-        
-    """
     def __getitem__(self, inds):
         i, j = inds 
         if type(i) == int and type(j) == int: 
-            if i < 0 or i>=self.thisptr.size1(): 
+            if i < 0 or i>=self.thisptr.rows(): 
                 raise ValueError("Invalid row index " + str(i)) 
-            if j < 0 or j>=self.thisptr.size2(): 
+            if j < 0 or j>=self.thisptr.cols(): 
                 raise ValueError("Invalid col index " + str(j))      
-            return self.thisptr.get_item(i, j)
+            return self.thisptr.coeff(i, j)
         elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
             result = numpy.zeros(i.shape[0])
-            for ind in range(i.shape[0]): 
-                    result[ind] = self.thisptr.get_item(i[ind], j[ind])
+            for ix in range(i.shape[0]): 
+                    result[ix] = self.thisptr.coeff(i[ix], j[ix])
             return result
+    """
         elif type(i) == numpy.ndarray and type(j) == slice:
             if j.start == None: 
                 start = 0
@@ -61,14 +60,17 @@ cdef class csr_array:
                         
     """
     def __setitem__(self, inds, val):
-        cdef unsigned int i, j 
         i, j = inds 
-        if i < 0 or i>=self.thisptr.rows(): 
-            raise ValueError("Invalid row index " + str(i)) 
-        if j < 0 or j>=self.thisptr.cols(): 
-            raise ValueError("Invalid col index " + str(j))      
-        
-        self.thisptr.insertVal(i, j, val)
+        if type(i) == int and type(j) == int: 
+            if i < 0 or i>=self.thisptr.rows(): 
+                raise ValueError("Invalid row index " + str(i)) 
+            if j < 0 or j>=self.thisptr.cols(): 
+                raise ValueError("Invalid col index " + str(j))      
+            
+            self.thisptr.insertVal(i, j, val)
+        elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
+            for ix in range(len(i)): 
+                self.thisptr.insertVal(i[ix], j[ix], val)
     
     """
     def add(self, map_array A): 

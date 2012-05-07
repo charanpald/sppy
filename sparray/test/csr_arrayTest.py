@@ -3,6 +3,7 @@ import sys
 import unittest
 import numpy
 
+
 from sparray.csr_array import csr_array 
 
 class csr_arrayTest(unittest.TestCase):

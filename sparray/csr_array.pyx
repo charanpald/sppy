@@ -72,6 +72,11 @@ cdef class csr_array:
             for ix in range(len(i)): 
                 self.thisptr.insertVal(i[ix], j[ix], val)
     
+    def put(self, val, rowInds, colInds): 
+        for ix in range(len(rowInds)): 
+            self.thisptr.insertVal(rowInds[ix], colInds[ix], val)
+        
+    
     """
     def add(self, map_array A): 
         C = map_array(self.shape, 10)

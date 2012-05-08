@@ -101,6 +101,35 @@ class csr_arrayTest(unittest.TestCase):
                 if (i, j) != (0, 1) and (i, j) != (1, 3) and (i, j) != (3, 3): 
                     self.assertEquals(A[i, j], 0)
        
+       
+    def testStr(self): 
+        nrow = 5 
+        ncol = 7
+        A = csr_array((nrow, ncol))
+        A[0, 1] = 1
+        A[1, 3] = 5.2
+        A[3, 3] = -0.2
+        
+        print(A)
+
+    def testSum(self): 
+        nrow = 5 
+        ncol = 7
+        A = csr_array((nrow, ncol))
+        A[0, 1] = 1
+        A[1, 3] = 5.2
+        A[3, 3] = -0.2
+        
+        self.assertEquals(A.sum(), 6.0)
+        
+        A[3, 4] = -1.2
+        self.assertEquals(A.sum(), 4.8)
+        
+        A[0, 0] = 1.34
+        self.assertEquals(A.sum(), 6.14)
+        
+        A[0, 0] = 0 
+        self.assertEquals(A.sum(), 4.8)
 
     @unittest.skip("")
     def testAdd(self): 

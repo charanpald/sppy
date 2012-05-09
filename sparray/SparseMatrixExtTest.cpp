@@ -3,36 +3,29 @@
 
 #include <iostream>
 #include <Eigen/Sparse>
+#include "include/DynamicSparseMatrixExt.h"
 
 using Eigen::SparseMatrix;
 
 int main()
 {
-    SparseMatrix<double, Eigen::RowMajor> m(3,3);
+    DynamicSparseMatrixExt<double> m(3,3);
     m.insert(0,0) = 3;
     m.insert(1,0) = 2.5;
     m.insert(0,1) = -1;
+    m.insert(2,0) = -1;    
+    m.insert(2,2) = 5.12;
     
-    for (int k=0; k<m.outerSize(); ++k) {
-      for (SparseMatrix<double, Eigen::RowMajor>::InnerIterator it(m,k); it; ++it)
-      {
-        it.value();
-        it.row();   // row index
-        it.col();   // col index (here it is equal to k)
-        it.index(); // inner index, here it is equal to it.row()
+    m.printValues();
 
-        std::cout << it.row() << ", " <<  it.col() << ", " <<  it.value() << std::endl; 
-        
-      }
- }
+    int array1[] = { 0, 2 };
+    int size1 = 2;
+    int array2[] = { 0, 2 };
+    int size2 = 2; 
 
-    std::cout << "Printing full matrix" << std::endl; 
-    for (int i=0;i<3;i++) { 
-        for (int j=0;j<3;j++) { 
-            std::cout << i << ", " <<  j << ", " <<  m.coeff(i, j) << std::endl;             
-            }        
-        }
+    DynamicSparseMatrixExt<double> *m2 = m.slice(array1, size1, array2, size2);
 
+    std::cout << std::endl; 
+    m2->printValues();
 
-  //std::cout << m << std::endl;
 }

@@ -14,6 +14,7 @@ cdef extern from "include/DynamicSparseMatrixExt.h":
       int nonZeros()
       T coeff(int, int)
       T sum()
+      DynamicSparseMatrixExt[T]* slice(int*, int, int*, int) 
 
 cdef class dyn_array:
     cdef DynamicSparseMatrixExt[double] *thisPtr     
@@ -43,20 +44,29 @@ cdef class dyn_array:
             for ix in range(i.shape[0]): 
                     result[ix] = self.thisPtr.coeff(i[ix], j[ix])
             return result
-        elif type(i) == numpy.ndarray and type(j) == slice:
-            if j.start == None: 
-                start = 0
-            else: 
-                start = j.start 
-            if j.stop == None: 
-                stop = self.shape[0]
-            else:
-                stop = j.start  
-            sliceSize = stop - start 
-            result = map_array((i.shape[0], sliceSize), 10)
-            for ind1 in range(i.shape[0]): 
-                for ind2 in range(start, stop): 
-                    result[ind1, ind2] = self.thisPtr.get_item(i[ind1], ind2)
+        elif (type(i) == numpy.ndarray or type(i) == slice) and (type(j) == slice or type(j) == numpy.ndarray):
+            indList = []            
+            for k in range(len(inds)):  
+                index = inds[k] 
+                if type(index) == numpy.ndarray: 
+                    indList.append(index) 
+                elif type(index) == slice: 
+                    if index.start == None: 
+                        start = 0
+                    else: 
+                        start = index.start
+                    if index.stop == None: 
+                        stop = self.shape[k]
+                    else:
+                        stop = index.start  
+                    indArr = numpy.arange(start, stop)
+                    indList.append(indArr)
+            
+            result = dyn_array((indList[0].shape[0], indList[1].shape[0]))
+            for ind1 in range(indList[0].shape[0]): 
+                for ind2 in range(indList[1].shape[0]): 
+                    result[ind1, ind2] = self.thisPtr.coeff(indList[0][ind1], indList[1][ind2])
+                    
             return result
                         
     def __setitem__(self, inds, val):

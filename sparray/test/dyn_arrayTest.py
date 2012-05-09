@@ -16,6 +16,15 @@ class dyn_arrayTest(unittest.TestCase):
         #self.A[2, 1] = 5 
         
         
+        nrow = 5 
+        ncol = 7
+        self.B = dyn_array((nrow, ncol))
+        self.B[0, 1] = 1
+        self.B[1, 3] = 5.2
+        self.B[3, 3] = -0.2
+        self.B[0, 6] = -1.23
+        self.B[4, 4] = 12.2        
+        
     def testInit(self): 
         A = dyn_array((5, 7))
         #A[0, 1] = 1 
@@ -34,7 +43,7 @@ class dyn_arrayTest(unittest.TestCase):
         #Test dtypes 
         A = dyn_array((5, 5))
         A[0, 0] = 1.5 
-        print(A[0, 0])
+        
         
     def testNDim(self): 
         A = dyn_array((5, 7))
@@ -136,19 +145,27 @@ class dyn_arrayTest(unittest.TestCase):
         A[0, 0] = 0 
         self.assertEquals(A.sum(), 4.8)
 
-    @unittest.skip("")
-    def testAdd(self): 
-        self.B = dyn_array((5, 5), 10)
-        self.B[0, 1] = 1 
-        self.B[1, 1] = 2 
-        self.B[2, 2] = 5 
+    def testGet(self): 
+        self.assertEquals(self.B[0, 1], 1)
+        self.assertEquals(self.B[1, 3], 5.2)
+        self.assertEquals(self.B[3, 3], -0.2)
+        self.assertEquals(self.B.getnnz(), 5)
         
-        C = self.B.add(self.A)
+        #self.B
+        C = self.B[numpy.array([0, 1, 3]), numpy.array([1, 3, 3])]
+        self.assertEquals(C.shape[0], 3)
+        self.assertEquals(C[0], 1)
+        self.assertEquals(C[1], 5.2)
+        self.assertEquals(C[2], -0.2)
         
-        print(C)
-        print(self.B)
-        print(self.A)
-
+        C = self.B[numpy.array([0, 1, 3]), :]
+        self.assertEquals(C.shape, (3, 7))
+        self.assertEquals(C.getnnz(), 4)
+        self.assertEquals(C[0, 1], 1)
+        self.assertEquals(C[1, 3], 5.2)
+        self.assertEquals(C[2, 3], -0.2)
+        self.assertEquals(C[0, 6], -1.23)
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

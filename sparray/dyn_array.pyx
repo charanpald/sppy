@@ -1,7 +1,7 @@
 from cython.operator cimport dereference as deref, preincrement as inc 
 import numpy 
 cimport numpy 
-
+numpy.import_array()
 
 cdef extern from "include/DynamicSparseMatrixExt.h": 
    cdef cppclass DynamicSparseMatrixExt[T]:  
@@ -33,6 +33,13 @@ cdef class dyn_array:
         return self.thisPtr.nonZeros()
     def __getitem__(self, inds):
         i, j = inds 
+        
+        try: 
+            i = int(i)
+            j = int(j)
+        except: 
+            pass 
+            
         if type(i) == int and type(j) == int: 
             if i < 0 or i>=self.thisPtr.rows(): 
                 raise ValueError("Invalid row index " + str(i)) 
@@ -68,7 +75,28 @@ cdef class dyn_array:
                     result[ind1, ind2] = self.thisPtr.coeff(indList[0][ind1], indList[1][ind2])
                     
             return result
-                        
+    
+    def arraySlice(self, numpy.ndarray[numpy.int32_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int32_t, ndim=1] colInds): 
+        """
+        Explicitly perform an array slice. Only works with ordered indices. 
+        """
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowIndsC 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colIndsC 
+        
+        result = dyn_array(rowInds.shape[0], colInds.shape[0])        
+        
+        rowIndsC = numpy.ascontiguousarray(rowInds, dtype=numpy.int32) 
+        colIndsC = numpy.ascontiguousarray(colInds, dtype=numpy.int32) 
+        
+        result.thisPtr = self.thisPtr.slice(&rowIndsC[0], rowIndsC.shape[0], &colIndsC[0], colIndsC.shape[0]) 
+        return result 
+        
+    def nonzero(self): 
+        """
+        Return a tuple of arrays corresponding to nonzero elements. 
+        """
+        pass 
+                    
     def __setitem__(self, inds, val):
         i, j = inds 
         if type(i) == int and type(j) == int: 

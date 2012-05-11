@@ -158,6 +158,7 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(C[1], 5.2)
         self.assertEquals(C[2], -0.2)
         
+        """
         C = self.B[numpy.array([0, 1, 3]), :]
         self.assertEquals(C.shape, (3, 7))
         self.assertEquals(C.getnnz(), 4)
@@ -165,6 +166,18 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(C[1, 3], 5.2)
         self.assertEquals(C[2, 3], -0.2)
         self.assertEquals(C[0, 6], -1.23)
+        """
+        
+    def testArraySlice(self): 
+        rowInds = numpy.array([0, 1], numpy.int32)
+        colInds = numpy.array([1, 3, 6], numpy.int32)
+        A = self.B.arraySlice(rowInds, colInds)
+        
+        for i in range(A.shape[0]): 
+            for j in range(A.shape[1]): 
+                self.assertEquals(A[i, j], self.B[rowInds[i], colInds[j]])
+                
+
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

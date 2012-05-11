@@ -32,6 +32,8 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
         }
     } 
 
+    //Have function to give nonzero elements by passing in points to arrays 
+
     DynamicSparseMatrixExt<T>* slice(int* array1, int size1, int* array2, int size2) { 
         //Array indices must be sorted 
         DynamicSparseMatrixExt *mat = new DynamicSparseMatrixExt<T>(size1, size2);

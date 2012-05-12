@@ -28,4 +28,15 @@ int main()
     std::cout << std::endl; 
     m2->printValues();
 
+    //Try non zeros 
+    int rowInds[m.nonZeros()];
+    int colInds[m.nonZeros()]; 
+
+    m.nonZeroInds(rowInds, colInds);
+
+    for(int i=0;i<m.nonZeros();i++) { 
+        std::cout << rowInds[i] << " " << colInds[i] << std::endl;        
+        }
+
+
 }

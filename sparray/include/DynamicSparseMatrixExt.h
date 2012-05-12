@@ -33,6 +33,18 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
     } 
 
     //Have function to give nonzero elements by passing in points to arrays 
+    //Input array points must have the same size as the number of nonzeros in this matrix
+    void nonZeroInds(int* array1, int* array2) { 
+        int i = 0; 
+
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (DynamicSparseMatrixExt<double>::InnerIterator it(*this,k); it; ++it) {
+            array1[i] = it.row(); 
+            array2[i] = it.col();
+            i++; 
+            }  
+        }
+    }
 
     DynamicSparseMatrixExt<T>* slice(int* array1, int size1, int* array2, int size2) { 
         //Array indices must be sorted 

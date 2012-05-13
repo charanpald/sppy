@@ -77,8 +77,13 @@ class dyn_arrayTest(unittest.TestCase):
        A[3, 5] = 1.0
        self.assertEquals(A.getnnz(), 4)
        
+       #If we insert a zero it is not registered as zero 
        A[4, 4] = 0.0
-       self.assertEquals(A.getnnz(), 5)
+       self.assertEquals(A.getnnz(), 4)
+       
+       #But erasing an item keeps it (can call prune)
+       A[3, 5] = 0.0
+       self.assertEquals(A.getnnz(), 4)
        
        B = dyn_array((5, 7))
        B[(numpy.array([1, 2, 3]), numpy.array([4, 5, 6]))] = 1

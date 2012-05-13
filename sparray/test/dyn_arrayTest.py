@@ -187,14 +187,42 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertRaises(ValueError, self.B.__getitem__, (1, -1))  
         self.assertRaises(TypeError, self.B.__getitem__, (1))
         self.assertRaises(ValueError, self.B.__getitem__, "a")
+        self.assertRaises(ValueError, self.B.__getitem__, ("a", "c"))
         
-        #Test array slicing 
+        #Test array indexing using arrays  
         C = self.B[numpy.array([0, 1, 3]), numpy.array([1, 3, 3])]
         self.assertEquals(C.shape[0], 3)
         self.assertEquals(C[0], 1)
         self.assertEquals(C[1], 5.2)
         self.assertEquals(C[2], -0.2)
         
+        C = self.A[numpy.array([0, 1, 3]), numpy.array([1, 3, 3])]
+        self.assertEquals(C[0], 0)
+        self.assertEquals(C[1], 0)
+        self.assertEquals(C[2], 0)
+        
+        A = dyn_array((2, 2))
+        self.assertRaises(ValueError, A.__getitem__, (numpy.array([0, 1]), numpy.array([1, 3])))
+        
+        A = dyn_array((2, 2))
+        self.assertRaises(ValueError, A.__getitem__, (numpy.array([0, 2]), numpy.array([1, 1])))
+        
+        A = dyn_array((0, 0))
+        self.assertRaises(ValueError, A.__getitem__, (numpy.array([0, 1, 3]), numpy.array([1, 3, 3])))
+        
+        
+        #Test submatrix indexing 
+        C = self.B[:, :]
+        
+        for i in range(C.shape[0]): 
+            for j in range(C.shape[1]): 
+                C[i, j] = self.B[i, j]
+                
+        C = self.B[0:5, 0:7]
+        
+        for i in range(C.shape[0]): 
+            for j in range(C.shape[1]): 
+                C[i, j] = self.B[i, j]
         
         C = self.B[numpy.array([0, 1, 3]), :]
         self.assertEquals(C.shape, (3, 7))
@@ -204,15 +232,48 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(C[2, 3], -0.2)
         self.assertEquals(C[0, 6], -1.23)
         
+        C = self.B[numpy.array([0, 1, 3]), 0:7]
+        self.assertEquals(C.shape, (3, 7))
+        self.assertEquals(C.getnnz(), 4)
+        self.assertEquals(C[0, 1], 1)
+        self.assertEquals(C[1, 3], 5.2)
+        self.assertEquals(C[2, 3], -0.2)
+        self.assertEquals(C[0, 6], -1.23)
         
-    def testArraySlice(self): 
+        C = self.B[:, numpy.array([3])]
+        self.assertEquals(C.shape, (5, 1))
+        self.assertEquals(C.getnnz(), 2)
+        self.assertEquals(C[1, 0], 5.2)
+        self.assertEquals(C[3, 0], -0.2)
+                
+    def testSubArray(self): 
         rowInds = numpy.array([0, 1], numpy.int)
         colInds = numpy.array([1, 3, 6], numpy.int)
-        A = self.B.arraySlice(rowInds, colInds)
+        A = self.B.subArray(rowInds, colInds)
         
         for i in range(A.shape[0]): 
             for j in range(A.shape[1]): 
                 self.assertEquals(A[i, j], self.B[rowInds[i], colInds[j]])
+                
+        #Try all rows/cols 
+        rowInds = numpy.arange(5)
+        colInds = numpy.arange(7)
+        
+        A = self.B.subArray(rowInds, colInds)
+        
+        for i in range(A.shape[0]): 
+            for j in range(A.shape[1]): 
+                self.assertEquals(A[i, j], self.B[rowInds[i], colInds[j]])
+                
+        #No rows/cols 
+        rowInds = numpy.array([], numpy.int)
+        colInds = numpy.array([], numpy.int)
+        
+        A = self.B.subArray(rowInds, colInds)
+        self.assertEquals(A.shape, (0, 0))
+        
+        A = self.A.subArray(rowInds, colInds)
+        self.assertEquals(A.shape, (0, 0))
                 
     def testNonZeroInds(self): 
         
@@ -221,10 +282,17 @@ class dyn_arrayTest(unittest.TestCase):
         for i in range(rowInds.shape[0]): 
             self.assertNotEqual(self.B[rowInds[i], colInds[i]], 0)
         
+        self.assertEquals(self.B.getnnz(), rowInds.shape[0])
+        self.assertEquals(self.B.sum(), self.B[rowInds, colInds].sum())
+
+        
         (rowInds, colInds) = self.C.nonzero()
         
         for i in range(rowInds.shape[0]): 
-            self.assertNotEqual(self.C[rowInds[i], colInds[i]], 0)        
+            self.assertNotEqual(self.C[rowInds[i], colInds[i]], 0)   
+            
+        self.assertEquals(self.C.getnnz(), rowInds.shape[0])
+        self.assertEquals(self.C.sum(), self.C[rowInds, colInds].sum())
         
         #Try an array with no non zeros 
         nrow = 5 
@@ -232,6 +300,16 @@ class dyn_arrayTest(unittest.TestCase):
         A = dyn_array((nrow, ncol))
         (rowInds, colInds) = A.nonzero()
         
+        self.assertEquals(A.getnnz(), rowInds.shape[0])
+        self.assertEquals(rowInds.shape[0], 0)
+        self.assertEquals(colInds.shape[0], 0)
+        
+        #Zero size array 
+        nrow = 0 
+        ncol = 0
+        A = dyn_array((nrow, ncol))
+        (rowInds, colInds) = A.nonzero()
+        self.assertEquals(A.getnnz(), rowInds.shape[0])
         self.assertEquals(rowInds.shape[0], 0)
         self.assertEquals(colInds.shape[0], 0)
         

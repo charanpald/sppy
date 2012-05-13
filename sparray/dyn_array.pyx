@@ -91,7 +91,7 @@ cdef class dyn_array:
                 raise ValueError("Invalid col index " + str(j))      
             return self.thisPtr.coeff(i, j)
         elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
-            return self.adArraySlice(numpy.ascontiguousarray(i, dtype=numpy.int) , numpy.ascontiguousarray(j, dtype=numpy.int) )
+            return self.__adArraySlice(numpy.ascontiguousarray(i, dtype=numpy.int) , numpy.ascontiguousarray(j, dtype=numpy.int) )
         elif (type(i) == numpy.ndarray or type(i) == slice) and (type(j) == slice or type(j) == numpy.ndarray):
             indList = []            
             for k in range(len(inds)):  
@@ -106,27 +106,34 @@ cdef class dyn_array:
                     if index.stop == None: 
                         stop = self.shape[k]
                     else:
-                        stop = index.start  
+                        stop = index.stop  
                     indArr = numpy.arange(start, stop)
                     indList.append(indArr)
             
-            return self.arraySlice(indList[0], indList[1])
+            return self.subArray(indList[0], indList[1])
+        else:
+            raise ValueError("Invalid arguments to __getitem__: " + str(inds))
     
-    def adArraySlice(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1] colInds): 
+    def __adArraySlice(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
         """
         Array slicing where one passes two arrays of the same length and elements are picked 
         according to self[rowInds[i], colInds[i]). 
         """
         cdef int ix 
         cdef numpy.ndarray[numpy.float_t, ndim=1, mode="c"] result = numpy.zeros(rowInds.shape[0])
+        
+        if (rowInds >= self.shape[0]).any() or (colInds >= self.shape[1]).any(): 
+            raise ValueError("Indices out of range")
+        
         for ix in range(rowInds.shape[0]): 
                 result[ix] = self.thisPtr.coeff(rowInds[ix], colInds[ix])
         return result
     
-    def arraySlice(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
+    def subArray(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
         """
         Explicitly perform an array slice to return a submatrix with the given
-        indices. Only works with ascending ordered indices. 
+        indices. Only works with ascending ordered indices. This is similar 
+        to using numpy.ix_. 
         """
         cdef numpy.ndarray[int, ndim=1, mode="c"] rowIndsC 
         cdef numpy.ndarray[int, ndim=1, mode="c"] colIndsC 
@@ -136,7 +143,8 @@ cdef class dyn_array:
         rowIndsC = numpy.ascontiguousarray(rowInds, dtype=numpy.int32) 
         colIndsC = numpy.ascontiguousarray(colInds, dtype=numpy.int32) 
         
-        result.thisPtr = self.thisPtr.slice(&rowIndsC[0], rowIndsC.shape[0], &colIndsC[0], colIndsC.shape[0]) 
+        if rowInds.shape[0] != 0 and colInds.shape[0] != 0: 
+            result.thisPtr = self.thisPtr.slice(&rowIndsC[0], rowIndsC.shape[0], &colIndsC[0], colIndsC.shape[0]) 
         return result 
         
     def nonzero(self): 
@@ -166,7 +174,7 @@ cdef class dyn_array:
             self.thisPtr.insertVal(i, j, val)
         elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
             for ix in range(len(i)): 
-                self.thisPtr.insertVal(i[ix], j[ix], val) 
+                self.thisPtr.insertVal(i[ix], j[ix], val)  
     
     def put(self, double val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None , numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
         """

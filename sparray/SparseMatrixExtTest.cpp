@@ -2,10 +2,10 @@
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 
 #include <iostream>
-#include <Eigen/Sparse>
+//#include <Eigen/Sparse>
 #include "include/DynamicSparseMatrixExt.h"
 
-using Eigen::SparseMatrix;
+//using Eigen::SparseMatrix;
 
 int main()
 {
@@ -23,20 +23,11 @@ int main()
     int array2[] = { 0, 2 };
     int size2 = 2; 
 
-    DynamicSparseMatrixExt<double> *m2 = m.slice(array1, size1, array2, size2);
+    DynamicSparseMatrixExt<double> *m2 = new DynamicSparseMatrixExt<double>(size1, size2); 
+    m.slice(array1, size1, array2, size2, m2);
 
     std::cout << std::endl; 
     m2->printValues();
-
-    //Try non zeros 
-    int rowInds[m.nonZeros()];
-    int colInds[m.nonZeros()]; 
-
-    m.nonZeroInds(rowInds, colInds);
-
-    for(int i=0;i<m.nonZeros();i++) { 
-        std::cout << rowInds[i] << " " << colInds[i] << std::endl;        
-        }
 
 
 }

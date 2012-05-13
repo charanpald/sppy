@@ -16,7 +16,7 @@ cdef extern from "include/DynamicSparseMatrixExt.h":
       void nonZeroInds(int*, int*)
       T coeff(int, int)
       T sum()
-      DynamicSparseMatrixExt[T]* slice(int*, int, int*, int) 
+      void slice(int*, int, int*, int, DynamicSparseMatrixExt[T]*) 
 
 cdef class dyn_array:
     cdef DynamicSparseMatrixExt[double] *thisPtr     
@@ -26,11 +26,11 @@ cdef class dyn_array:
         data type but the only option is numpy.float currently. 
         """
         if dtype==numpy.float: 
-            self.thisPtr = new DynamicSparseMatrixExt[double](shape[0], shape[1])
+            self.thisPtr = new DynamicSparseMatrixExt[double](shape[0], shape[1]) 
         else: 
             raise ValueError("Unsupported dtype: " + str(dtype))
             
-    def __dealloc__(self):
+    def __dealloc__(self): 
         """
         Deallocate the DynamicSparseMatrixExt object.  
         """
@@ -79,7 +79,7 @@ cdef class dyn_array:
         i, j = inds 
         
         try: 
-            i = int(i)
+            i = int(i) 
             j = int(j)
         except: 
             pass 
@@ -144,7 +144,7 @@ cdef class dyn_array:
         colIndsC = numpy.ascontiguousarray(colInds, dtype=numpy.int32) 
         
         if rowInds.shape[0] != 0 and colInds.shape[0] != 0: 
-            result.thisPtr = self.thisPtr.slice(&rowIndsC[0], rowIndsC.shape[0], &colIndsC[0], colIndsC.shape[0]) 
+            self.thisPtr.slice(&rowIndsC[0], rowIndsC.shape[0], &colIndsC[0], colIndsC.shape[0], result.thisPtr) 
         return result 
         
     def nonzero(self): 

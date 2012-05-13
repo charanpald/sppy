@@ -21,7 +21,7 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
 		}
     
     void insertVal(int row, int col, T val) { 
-        if (val != 0)
+        if (this->coeff(row, col) != val)
             this->coeffRef(row, col) = val;
         }
 
@@ -47,9 +47,9 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
         }
     }
 
-    DynamicSparseMatrixExt<T>* slice(int* array1, int size1, int* array2, int size2) { 
+    void slice(int* array1, int size1, int* array2, int size2, DynamicSparseMatrixExt<T> *mat) { 
         //Array indices must be sorted 
-        DynamicSparseMatrixExt *mat = new DynamicSparseMatrixExt<T>(size1, size2);
+        //DynamicSparseMatrixExt *mat = new DynamicSparseMatrixExt<T>(size1, size2);
         int size1Ind = 0; 
 
         //Assume column major class - j is col index 
@@ -67,7 +67,6 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
                 }    
             }
 
-        return mat;
         }
   };
 

@@ -21,7 +21,8 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
 		}
     
     void insertVal(int row, int col, T val) { 
-        this->coeffRef(row, col) = val;
+        if (val != 0)
+            this->coeffRef(row, col) = val;
         }
 
     void printValues() { 

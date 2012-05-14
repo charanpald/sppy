@@ -78,19 +78,7 @@ cdef class dyn_array:
         
         i, j = inds 
         
-        try: 
-            i = int(i) 
-            j = int(j)
-        except: 
-            pass 
-            
-        if type(i) == int and type(j) == int: 
-            if i < 0 or i>=self.thisPtr.rows(): 
-                raise ValueError("Invalid row index " + str(i)) 
-            if j < 0 or j>=self.thisPtr.cols(): 
-                raise ValueError("Invalid col index " + str(j))      
-            return self.thisPtr.coeff(i, j)
-        elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
+        if type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
             return self.__adArraySlice(numpy.ascontiguousarray(i, dtype=numpy.int) , numpy.ascontiguousarray(j, dtype=numpy.int) )
         elif (type(i) == numpy.ndarray or type(i) == slice) and (type(j) == slice or type(j) == numpy.ndarray):
             indList = []            
@@ -112,7 +100,14 @@ cdef class dyn_array:
             
             return self.subArray(indList[0], indList[1])
         else:
-            raise ValueError("Invalid arguments to __getitem__: " + str(inds))
+            i = int(i) 
+            j = int(j)
+
+            if i < 0 or i>=self.thisPtr.rows(): 
+                raise ValueError("Invalid row index " + str(i)) 
+            if j < 0 or j>=self.thisPtr.cols(): 
+                raise ValueError("Invalid col index " + str(j))      
+            return self.thisPtr.coeff(i, j)            
     
     def __adArraySlice(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
         """

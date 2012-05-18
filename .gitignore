@@ -7,3 +7,4 @@ build/
 /sparray/SparseMatrixExtTest
 /sparray/csr_array.so
 /sparray/csr_array.cpp
+/sparray/dyn_array.so

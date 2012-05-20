@@ -102,6 +102,12 @@ cdef class dyn_array:
         else:
             i = int(i) 
             j = int(j)
+            
+            #Deal with negative indices
+            if i<0: 
+                i += self.thisPtr.rows()
+            if j<0:
+                j += self.thisPtr.cols()    
 
             if i < 0 or i>=self.thisPtr.rows(): 
                 raise ValueError("Invalid row index " + str(i)) 

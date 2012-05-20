@@ -186,10 +186,14 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(self.B[3, 3], -0.2)
         self.assertEquals(self.B.getnnz(), 5)
         
+        #Test negative indices 
+        self.assertEquals(self.B[-5, -6], 1)
+        self.assertEquals(self.B[-1, -3], 12.2)
+        
         self.assertRaises(ValueError, self.B.__getitem__, (20, 1))  
         self.assertRaises(ValueError, self.B.__getitem__, (1, 20))  
-        self.assertRaises(ValueError, self.B.__getitem__, (-1, 1))  
-        self.assertRaises(ValueError, self.B.__getitem__, (1, -1))  
+        self.assertRaises(ValueError, self.B.__getitem__, (-6, 1))  
+        self.assertRaises(ValueError, self.B.__getitem__, (1, -8))  
         self.assertRaises(TypeError, self.B.__getitem__, (1))
         self.assertRaises(ValueError, self.B.__getitem__, "a")
         self.assertRaises(ValueError, self.B.__getitem__, ("a", "c"))

@@ -19,6 +19,12 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
 	DynamicSparseMatrixExt<T>(int rows, int cols): 
 		DynamicSparseMatrix<T>(rows, cols){ 
 		}
+
+
+    DynamicSparseMatrixExt& operator=(const DynamicSparseMatrixExt& other)  { 
+        DynamicSparseMatrix<T>::operator=(other); 
+        return *this;
+        }
     
     void insertVal(int row, int col, T val) { 
         if (this->coeff(row, col) != val)
@@ -68,6 +74,11 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
             }
 
         }
+
+    void scalarMultiply(double d) { 
+        (*this)*=d; 
+        }
+    
   };
 
 #endif

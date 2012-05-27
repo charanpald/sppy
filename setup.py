@@ -1,9 +1,6 @@
 from distutils.core import setup
 from distutils.extension import Extension
 
-#Set this to the path of the Eigen library on your system 
-include  = ["/usr/include/eigen3/"]
-
 try:
     from Cython.Distutils import build_ext
 except ImportError:
@@ -14,17 +11,30 @@ else:
 cmdclass = { }
 
 if use_cython:
-    ext_modules=[Extension("sparray.csr_array", ["sparray/csr_array.pyx"], language="c++", include_dirs=include),
-                 Extension("sparray.dyn_array", ["sparray/dyn_array.pyx"], language="c++", include_dirs=include)]  
+    ext_modules=[Extension("sparray.csr_array", ["sparray/csr_array.pyx"], language="c++"),
+                 Extension("sparray.dyn_array", ["sparray/dyn_array.pyx"], language="c++")]  
     cmdclass.update({ 'build_ext': build_ext })
 else:
-    ext_modules = [Extension("sparray.csr_array", [ "sparray/csr_array.cpp" ], include_dirs=include),
-                    Extension("sparray.dyn_array", [ "sparray/dyn_array.cpp" ], include_dirs=include)] 
+    ext_modules = [Extension("sparray.csr_array", [ "sparray/csr_array.cpp" ]),
+                    Extension("sparray.dyn_array", [ "sparray/dyn_array.cpp" ])] 
 
 setup(name = 'sparray',
       version = "0.1",
       author = 'Charanpal Dhanjal',
       author_email = 'charanpal@gmail.com',
       packages = ['sparray', 'sparray.test'],
+      install_requires=['numpy>=1.5.0'],
+      url = 'http://packages.python.org/sparray/',
+      license = 'GNU Library or Lesser General Public License (LGPL)',
+      platforms=["OS Independent"],
+      keywords=['numpy', 'sparse matrix'],
+      long_description= 'A sparse matrix library based on Eigen.',
+      classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        ],
       ext_modules=ext_modules, 
       cmdclass=cmdclass)

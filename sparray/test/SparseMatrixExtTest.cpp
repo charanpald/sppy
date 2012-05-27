@@ -2,8 +2,8 @@
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 
 #include <iostream>
-#include <Eigen/Sparse>
-#include "include/DynamicSparseMatrixExt.h"
+#include <eigen3/Eigen/Sparse>
+#include "../include/DynamicSparseMatrixExt.h"
 
 using Eigen::SparseMatrix;
 

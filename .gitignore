@@ -8,6 +8,6 @@ build/
 /sparray/csr_array.so
 /sparray/csr_array.cpp
 /sparray/dyn_array.so
-/dist/sparray-0.1.tar.gz
+/dist/
 /MANIFEST
 /sparray/test/SparseMatrixExtTest

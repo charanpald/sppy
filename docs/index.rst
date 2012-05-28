@@ -14,7 +14,7 @@ Download for Windows, Linux or Mac OS using:
 
 - The Python Package Index (PyPI) `here <http://pypi.python.org/pypi/sparray/>`_ 
 
-To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_ and `Eigen <http://eigen.tuxfamily.org/>`_. The code has been verified on Python 2.7.2 and Numpy 1.6.1 but should work with other versions. The automatic testing routine requires Python 2.7 or later.
+To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_ and `Eigen <http://eigen.tuxfamily.org/>`_. The code has been verified on Python 2.7.2, Numpy 1.6.1 and Eigen 3.0.5. The automatic testing routine requires Python 2.7 or later.
 
 The source code repository is available `here <https://github.com/charanpald/sparray>`_ for those that want the bleeding edge, or are interested in development.  
 

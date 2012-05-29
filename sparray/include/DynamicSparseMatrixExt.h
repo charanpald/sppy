@@ -21,6 +21,11 @@ class DynamicSparseMatrixExt:public DynamicSparseMatrix<T> {
 		}
 
 
+	DynamicSparseMatrixExt<T>(const DynamicSparseMatrix<T> other): 
+		DynamicSparseMatrix<T>(other){ 
+		}
+
+
     DynamicSparseMatrixExt& operator=(const DynamicSparseMatrixExt& other)  { 
         DynamicSparseMatrix<T>::operator=(other); 
         return *this;

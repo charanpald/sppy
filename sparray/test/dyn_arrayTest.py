@@ -2,6 +2,8 @@ import logging
 import sys
 import unittest
 import numpy
+import numpy.testing as nptst 
+import math 
 
 
 from sparray.dyn_array import dyn_array 
@@ -321,8 +323,73 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(A.getnnz(), rowInds.shape[0])
         self.assertEquals(rowInds.shape[0], 0)
         self.assertEquals(colInds.shape[0], 0)
+
+    def testDiag(self): 
+        nptst.assert_array_equal(self.A.diag(), numpy.zeros(5))
+        nptst.assert_array_equal(self.B.diag(), numpy.array([  0,    0,    0,   -0.2,  12.2]))
+        nptst.assert_array_equal(self.C.diag(), numpy.zeros(100))
         
+        D = dyn_array((3, 3))
+        D[0, 0] = -1
+        D[1, 1] = 3.2 
+        D[2, 2] = 34 
         
+        nptst.assert_array_equal(D.diag(), numpy.array([-1, 3.2, 34]))
+        
+        E = dyn_array((0, 0)) 
+        nptst.assert_array_equal(E.diag(), numpy.array([]))
+        
+    def testMean(self): 
+        self.assertEquals(self.A.mean(), 0)
+        self.assertAlmostEquals(self.B.mean(), 0.4848571428571428)
+        self.assertAlmostEquals(self.C.mean(), 0.001697)
+        
+        D = dyn_array((0, 0)) 
+        self.assertTrue(math.isnan(D.mean()))
+    
+    def testCopy(self): 
+        A = dyn_array((5, 5)) 
+        A[0, 0] = 1
+        A[1, 0] = 2
+        A[4, 2] = 3
+        self.assertEquals(A[0, 0], 1)
+        self.assertEquals(A[1, 0], 2)
+        self.assertEquals(A[4, 2], 3)
+        
+        B = A.copy() 
+        A[0, 0] = 2
+        A[1, 0] = 3
+        A[4, 2] = 4
+        A[4, 4] = 5
+        
+        self.assertEquals(A[0, 0], 2)
+        self.assertEquals(A[1, 0], 3)
+        self.assertEquals(A[4, 2], 4)   
+        self.assertEquals(A[4, 4], 5) 
+        self.assertEquals(A.getnnz(), 4)
+        
+        self.assertEquals(B[0, 0], 1)
+        self.assertEquals(B[1, 0], 2)
+        self.assertEquals(B[4, 2], 3)
+        self.assertEquals(B.getnnz(), 3)
+        
+    def testMultiply(self): 
+        val = 2.0 
+        C = self.B * val
+        
+        self.assertEquals(self.B[0, 1], 1)
+        self.assertEquals(self.B[1, 3], 5.2)
+        self.assertEquals(self.B[3, 3], -0.2)
+        self.assertEquals(self.B[0, 6], -1.23)
+        self.assertEquals(self.B[4, 4], 12.2)
+        
+        self.assertEquals(C[0, 1], self.B[0, 1]*val)
+        self.assertEquals(C[1, 3], self.B[1, 3]*val)
+        self.assertEquals(C[3, 3], self.B[3, 3]*val)
+        self.assertEquals(C[0, 6], self.B[0, 6]*val)
+        self.assertEquals(C[4, 4], self.B[4, 4]*val)
+
+
 if __name__ == "__main__":
     unittest.main()
     

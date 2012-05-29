@@ -7,6 +7,7 @@ numpy.import_array()
 cdef extern from "include/DynamicSparseMatrixExt.h": 
    cdef cppclass DynamicSparseMatrixExt[T]:  
       DynamicSparseMatrixExt()
+      DynamicSparseMatrixExt(DynamicSparseMatrixExt[T]) 
       DynamicSparseMatrixExt(int, int)
       int rows()
       int cols() 
@@ -17,6 +18,7 @@ cdef extern from "include/DynamicSparseMatrixExt.h":
       T coeff(int, int)
       T sum()
       void slice(int*, int, int*, int, DynamicSparseMatrixExt[T]*) 
+      void scalarMultiply(double)
 
 cdef class dyn_array:
     cdef DynamicSparseMatrixExt[double] *thisPtr     
@@ -190,6 +192,15 @@ cdef class dyn_array:
         Sum all of the elements in this array. 
         """
         return self.thisPtr.sum()
+        
+    def mean(self): 
+        """
+        Find the mean value of this array. 
+        """
+        if self.thisPtr.size() != 0: 
+            return self.thisPtr.sum()/self.thisPtr.size() 
+        else: 
+            return float("nan")
      
     def __str__(self): 
         """
@@ -203,6 +214,39 @@ cdef class dyn_array:
             outputStr += "(" + str(rowInds[i]) + ", " + str(colInds[i]) + ")" + " " + str(vals[i]) + "\n"
         
         return outputStr 
+        
+    def diag(self): 
+        """
+        Return a numpy array containing the diagonal entries of this matrix. If 
+        the matrix is non-square then the diagonal array is the same size as the 
+        smallest dimension. 
+        """
+        cdef unsigned int maxInd = min(self.shape[0], self.shape[1])
+        cdef unsigned int i   
+        cdef numpy.ndarray[numpy.float_t, ndim=1, mode="c"] result = numpy.zeros(maxInd)
+        
+        for i in range(maxInd): 
+            result[i] = self.thisPtr.coeff(i, i)
+            
+        return result
+         
+    def __mul__(self, double x):
+        """
+        Return a new array multiplied by a scalar value x. 
+        """
+        cdef dyn_array result = self.copy() 
+        result.thisPtr.scalarMultiply(x)
+        return result 
+        
+    def copy(self): 
+        """
+        Return a copied version of this array. 
+        """
+        cdef dyn_array result = dyn_array(self.shape)
+        del result.thisPtr
+        result.thisPtr = new DynamicSparseMatrixExt[double](deref(self.thisPtr))
+        return result 
+        
     
     shape = property(__getShape)
     size = property(__getSize)

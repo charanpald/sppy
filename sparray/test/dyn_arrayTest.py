@@ -31,6 +31,15 @@ class dyn_arrayTest(unittest.TestCase):
         self.C[0, 62] = -1.23
         self.C[4, 41] = 12.2      
         
+        self.D = dyn_array((5, 5))
+        self.D[0, 0] = 23.1
+        self.D[2, 0] = -3.1
+        self.D[3, 0] = -10.0 
+        self.D[2, 1] = -5 
+        self.D[3, 1] = 5
+        
+        self.E = dyn_array((0, 0))
+        
     def testInit(self): 
         A = dyn_array((5, 7))
         self.assertEquals(A.shape, (5, 7))
@@ -181,6 +190,15 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(self.A.sum(), 0.0)
         self.assertEquals(self.B.sum(), 16.97)
         self.assertEquals(self.C.sum(), 16.97)
+        
+        #Test sum along axes 
+        nptst.assert_array_equal(self.A.sum(0), numpy.zeros(5))
+        nptst.assert_array_equal(self.B.sum(0), numpy.array([0, 1, 0, 5, 12.2, 0, -1.23])) 
+        nptst.assert_array_equal(self.D.sum(0), numpy.array([10, 0, 0, 0, 0])) 
+        
+        nptst.assert_array_equal(self.A.sum(1), numpy.zeros(5))
+        nptst.assert_array_almost_equal(self.B.sum(1), numpy.array([-0.23, 5.2, 0, -0.2, 12.2])) 
+        nptst.assert_array_equal(self.D.sum(1), numpy.array([23.1, 0, -8.1, -5, 0])) 
 
     def testGet(self): 
         self.assertEquals(self.B[0, 1], 1)
@@ -389,6 +407,52 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(C[0, 6], self.B[0, 6]*val)
         self.assertEquals(C[4, 4], self.B[4, 4]*val)
 
+    def testTrace(self): 
+        self.assertEquals(self.A.trace(), 0)
+        self.assertEquals(self.B.trace(), 12)
+        self.assertEquals(self.C.trace(), 0)
+        self.assertEquals(self.D.trace(), 23.1)
+        
+    def testToarray(self): 
+        A = self.A.toarray()
+        self.assertEquals(type(A), numpy.ndarray)
+        self.assertEquals(A.shape, self.A.shape)
+        self.assertEquals(A.sum(), 0)
+        
+        B = self.B.toarray()
+        self.assertEquals(type(B), numpy.ndarray)
+        self.assertEquals(B.shape, self.B.shape)
+        self.assertEquals(B[0, 1], 1)
+        self.assertEquals(B[1, 3], 5.2)
+        self.assertEquals(B[3, 3], -0.2)
+        self.assertEquals(B[0, 6], -1.23)
+        self.assertEquals(B[4, 4], 12.2)
+        self.assertEquals(B.sum(), self.B.sum())
+        
+        D = self.D.toarray()
+        self.assertEquals(type(D), numpy.ndarray)
+        self.assertEquals(D.shape, self.D.shape)
+        self.assertEquals(D[0, 0], 23.1)
+        self.assertEquals(D[2, 0], -3.1)
+        self.assertEquals(D[3, 0], -10.0)
+        self.assertEquals(D[2, 1], -5)
+        self.assertEquals(D[3, 1], 5)
+        self.assertEquals(D.sum(), self.D.sum())
+       
+       
+    def testMin(self):
+       self.assertEquals(self.A.min(), 0)
+       self.assertEquals(self.B.min(), -1.23)
+       self.assertEquals(self.C.min(), -1.23)
+       self.assertEquals(self.D.min(), -10)
+       self.assertTrue(math.isnan(self.E.min()))
+       
+    def testMax(self):
+       self.assertEquals(self.A.max(), 0)
+       self.assertEquals(self.B.max(), 12.2)
+       self.assertEquals(self.C.max(), 12.2)
+       self.assertEquals(self.D.max(), 23.1)
+       self.assertTrue(math.isnan(self.E.max()))
 
 if __name__ == "__main__":
     unittest.main()

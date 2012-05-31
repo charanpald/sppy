@@ -187,11 +187,35 @@ cdef class dyn_array:
         for ix in range(len(rowInds)): 
             self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)
 
-    def sum(self): 
+    def sum(self, axis=None): 
         """
-        Sum all of the elements in this array. 
+        Sum all of the elements in this array. If one specifies an axis 
+        then we sum along the axis. 
         """
-        return self.thisPtr.sum()
+        cdef numpy.ndarray[double, ndim=1, mode="c"] result    
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        
+        if axis==None: 
+            return self.thisPtr.sum()
+        elif axis==0: 
+            result = numpy.zeros(self.shape[1], dtype=numpy.float) 
+            (rowInds, colInds) = self.nonzero()
+            
+            for i in range(rowInds.shape[0]): 
+                result[colInds[i]] += self.thisPtr.coeff(rowInds[i], colInds[i])   
+        elif axis==1: 
+            result = numpy.zeros(self.shape[0], dtype=numpy.float) 
+            (rowInds, colInds) = self.nonzero()
+            
+            for i in range(rowInds.shape[0]): 
+                result[rowInds[i]] += self.thisPtr.coeff(rowInds[i], colInds[i])  
+        else:
+            raise ValueError("Invalid axis: " + str(axis))
+            
+        return result 
+                
         
     def mean(self): 
         """
@@ -229,6 +253,13 @@ cdef class dyn_array:
             result[i] = self.thisPtr.coeff(i, i)
             
         return result
+        
+    def trace(self): 
+        """
+        Returns the trace of the array which is simply the sum of the diagonal 
+        entries. 
+        """
+        return self.diag().sum()
          
     def __mul__(self, double x):
         """
@@ -247,7 +278,67 @@ cdef class dyn_array:
         result.thisPtr = new DynamicSparseMatrixExt[double](deref(self.thisPtr))
         return result 
         
-    
+    def toarray(self): 
+        """
+        Convert this sparse matrix into a numpy array. 
+        """
+        cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros(self.shape, numpy.float)
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        
+        (rowInds, colInds) = self.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            result[rowInds[i], colInds[i]] += self.thisPtr.coeff(rowInds[i], colInds[i])   
+            
+        return result 
+        
+        
+    def min(self): 
+        """
+        Find the minimum element of this array. 
+        """
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        cdef double minVal = float("inf")
+        
+        if self.size == 0: 
+            minVal = float("nan")
+        elif self.getnnz() != self.size: 
+            minVal = 0 
+        
+        (rowInds, colInds) = self.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            if self.thisPtr.coeff(rowInds[i], colInds[i]) < minVal: 
+                minVal = self.thisPtr.coeff(rowInds[i], colInds[i])
+            
+        return minVal 
+        
+    def max(self): 
+        """
+        Find the maximum element of this array. 
+        """
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        cdef double maxVal = -float("inf")
+        
+        if self.size == 0: 
+            maxVal = float("nan")
+        elif self.getnnz() != self.size: 
+            maxVal = 0 
+        
+        (rowInds, colInds) = self.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            if self.thisPtr.coeff(rowInds[i], colInds[i]) > maxVal: 
+                maxVal = self.thisPtr.coeff(rowInds[i], colInds[i])
+            
+        return maxVal 
+        
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)

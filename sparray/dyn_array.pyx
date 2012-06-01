@@ -6,7 +6,7 @@ numpy.import_array()
 
 cdef extern from "include/DynamicSparseMatrixExt.h": 
    cdef cppclass DynamicSparseMatrixExt[T]:  
-      DynamicSparseMatrixExt()
+      DynamicSparseMatrixExt() 
       DynamicSparseMatrixExt(DynamicSparseMatrixExt[T]) 
       DynamicSparseMatrixExt(int, int)
       int rows()
@@ -141,7 +141,7 @@ cdef class dyn_array:
         cdef numpy.ndarray[int, ndim=1, mode="c"] rowIndsC 
         cdef numpy.ndarray[int, ndim=1, mode="c"] colIndsC 
         
-        result = dyn_array((rowInds.shape[0], colInds.shape[0]))     
+        cdef dyn_array result = dyn_array((rowInds.shape[0], colInds.shape[0]))     
         
         rowIndsC = numpy.ascontiguousarray(rowInds, dtype=numpy.int32) 
         colIndsC = numpy.ascontiguousarray(colInds, dtype=numpy.int32) 
@@ -217,12 +217,17 @@ cdef class dyn_array:
         return result 
                 
         
-    def mean(self): 
+    def mean(self, axis=None): 
         """
         Find the mean value of this array. 
         """
-        if self.thisPtr.size() != 0: 
-            return self.thisPtr.sum()/self.thisPtr.size() 
+        if self.thisPtr.size() != 0:
+            if axis ==None: 
+                return self.thisPtr.sum()/self.thisPtr.size()
+            elif axis == 0: 
+                return self.sum(0)/self.shape[0]
+            elif axis == 1: 
+                return self.sum(1)/self.shape[1]
         else: 
             return float("nan")
      
@@ -339,6 +344,101 @@ cdef class dyn_array:
             
         return maxVal 
         
+    def var(self): 
+        """
+        Return the variance of the elements of this array. 
+        """
+        cdef double mean = self.mean() 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        cdef double result = 0
+        
+        if self.size == 0: 
+            result = float("nan")
+        
+        (rowInds, colInds) = self.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            result += (self.thisPtr.coeff(rowInds[i], colInds[i]) - mean)**2
+        
+        result += (self.size - self.getnnz())*mean**2
+        result /= self.size
+            
+        return result 
+    
+    def std(self): 
+        """
+        Return the standard deviation of the array elements. 
+        """
+        return numpy.sqrt(self.var())
+        
+    def __abs__(self): 
+        """
+        Return a matrix whose elements are the absolute values of this array. 
+        """
+        cdef dyn_array result = dyn_array(self.shape)
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        
+        (rowInds, colInds) = self.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            result.thisPtr.insertVal(rowInds[i], colInds[i], abs(self.thisPtr.coeff(rowInds[i], colInds[i])))
+            
+        return result 
+    
+    def __neg__(self): 
+        """
+        Return the negation of this array. 
+        """
+        cdef dyn_array result = dyn_array(self.shape)
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        
+        (rowInds, colInds) = self.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            result.thisPtr.insertVal(rowInds[i], colInds[i], -self.thisPtr.coeff(rowInds[i], colInds[i]))
+            
+        return result 
+    
+
+    def __add__(self, dyn_array A): 
+        """
+        Add two matrices together. 
+        """
+        cdef dyn_array result = self.copy()
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        
+        (rowInds, colInds) = A.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            result.thisPtr.insertVal(rowInds[i], colInds[i], result.thisPtr.coeff(rowInds[i], colInds[i]) + A.thisPtr.coeff(rowInds[i], colInds[i]))
+            
+        return result     
+        
+    def __sub__(self, dyn_array A): 
+        """
+        Subtract one matrix from another.  
+        """
+        cdef dyn_array result = self.copy()
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        
+        (rowInds, colInds) = A.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            result.thisPtr.insertVal(rowInds[i], colInds[i], result.thisPtr.coeff(rowInds[i], colInds[i]) - A.thisPtr.coeff(rowInds[i], colInds[i]))
+            
+        return result 
+        
+    
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)

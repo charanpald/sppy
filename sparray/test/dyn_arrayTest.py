@@ -364,6 +364,16 @@ class dyn_arrayTest(unittest.TestCase):
         
         D = dyn_array((0, 0)) 
         self.assertTrue(math.isnan(D.mean()))
+        
+        nptst.assert_array_equal(self.A.mean(0), self.A.sum(0)/self.A.shape[0])
+        nptst.assert_array_equal(self.B.mean(0), self.B.sum(0)/self.B.shape[0])
+        nptst.assert_array_equal(self.C.mean(0), self.C.sum(0)/self.C.shape[0])
+        nptst.assert_array_equal(self.D.mean(0), self.D.sum(0)/self.D.shape[0])
+        
+        nptst.assert_array_equal(self.A.mean(1), self.A.sum(1)/self.A.shape[1])
+        nptst.assert_array_equal(self.B.mean(1), self.B.sum(1)/self.B.shape[1])
+        nptst.assert_array_equal(self.C.mean(1), self.C.sum(1)/self.C.shape[1])
+        nptst.assert_array_equal(self.D.mean(1), self.D.sum(1)/self.D.shape[1])
     
     def testCopy(self): 
         A = dyn_array((5, 5)) 
@@ -453,6 +463,69 @@ class dyn_arrayTest(unittest.TestCase):
        self.assertEquals(self.C.max(), 12.2)
        self.assertEquals(self.D.max(), 23.1)
        self.assertTrue(math.isnan(self.E.max()))
+       
+    def testVar(self):
+       self.assertEquals(self.A.var(), self.A.toarray().var())
+       self.assertAlmostEquals(self.B.var(), self.B.toarray().var())
+       self.assertAlmostEquals(self.C.var(), self.C.toarray().var())
+       self.assertAlmostEquals(self.D.var(), self.D.toarray().var())
+       
+    def testStd(self):
+       self.assertEquals(self.A.std(), self.A.toarray().std())
+       self.assertAlmostEquals(self.B.std(), self.B.toarray().std())
+       self.assertAlmostEquals(self.C.std(), self.C.toarray().std())
+       self.assertAlmostEquals(self.D.std(), self.D.toarray().std())
+          
+    def testAbs(self): 
+       nptst.assert_array_equal(abs(self.A).toarray(), abs(self.A.toarray()))
+       nptst.assert_array_equal(abs(self.B).toarray(), abs(self.B.toarray()))
+       nptst.assert_array_equal(abs(self.C).toarray(), abs(self.C.toarray()))
+       nptst.assert_array_equal(abs(self.D).toarray(), abs(self.D.toarray()))
+       
+    def testNeg(self): 
+       nptst.assert_array_equal((-self.A).toarray(), -self.A.toarray())
+       nptst.assert_array_equal((-self.B).toarray(), -self.B.toarray())
+       nptst.assert_array_equal((-self.C).toarray(), -self.C.toarray())
+       nptst.assert_array_equal((-self.D).toarray(), -self.D.toarray())
+       
+    def testAdd(self): 
+       nptst.assert_array_equal((self.A + self.A).toarray(), self.A.toarray()*2)
+       nptst.assert_array_equal((self.B + self.B).toarray(), self.B.toarray()*2)
+       nptst.assert_array_equal((self.C + self.C).toarray(), self.C.toarray()*2)
+       nptst.assert_array_equal((self.D + self.D).toarray(), self.D.toarray()*2)
+       
+       A = dyn_array((5, 5))
+       A[0, 1] = 4
+       A[1, 3] = 2
+       A[3, 3] = 1
+       
+       B = dyn_array((5, 5))
+       B[0, 2] = 9.2
+       B[2, 3] = -5
+       B[3, 4] = 12
+       
+       nptst.assert_array_equal((A + B).toarray(), A.toarray()+B.toarray())
+       
+
+    def testSub(self): 
+       nptst.assert_array_equal((self.A - self.A).toarray(), self.A.toarray()*0)
+       nptst.assert_array_equal((self.B - self.B).toarray(), self.B.toarray()*0)
+       nptst.assert_array_equal((self.C - self.C).toarray(), self.C.toarray()*0)
+       nptst.assert_array_equal((self.D - self.D).toarray(), self.D.toarray()*0)
+       
+       nptst.assert_array_equal((self.B*2 - self.B).toarray(), self.B.toarray())
+       
+       A = dyn_array((5, 5))
+       A[0, 1] = 4
+       A[1, 3] = 2
+       A[3, 3] = 1
+       
+       B = dyn_array((5, 5))
+       B[0, 2] = 9.2
+       B[2, 3] = -5
+       B[3, 4] = 12
+       
+       nptst.assert_array_equal((A - B).toarray(), A.toarray()-B.toarray())
 
 if __name__ == "__main__":
     unittest.main()

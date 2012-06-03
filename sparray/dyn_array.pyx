@@ -1,4 +1,4 @@
-# cython: profile=True
+# cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 import numpy 
 cimport numpy 
@@ -437,6 +437,26 @@ cdef class dyn_array:
             result.thisPtr.insertVal(rowInds[i], colInds[i], result.thisPtr.coeff(rowInds[i], colInds[i]) - A.thisPtr.coeff(rowInds[i], colInds[i]))
             
         return result 
+     
+    def hadamard(self, dyn_array A): 
+        """
+        Find the element-wise matrix (hadamard) product. 
+        """
+        cdef dyn_array result = dyn_array(A.shape)
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef unsigned int i
+        
+        if A.getnnz() < self.getnnz(): 
+            (rowInds, colInds) = A.nonzero()
+        else: 
+            (rowInds, colInds) = self.nonzero()
+            
+        for i in range(rowInds.shape[0]): 
+            result.thisPtr.insertVal(rowInds[i], colInds[i], self.thisPtr.coeff(rowInds[i], colInds[i]) * A.thisPtr.coeff(rowInds[i], colInds[i]))
+            
+        return result 
+        
         
     
     shape = property(__getShape)

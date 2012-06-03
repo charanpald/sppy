@@ -526,7 +526,31 @@ class dyn_arrayTest(unittest.TestCase):
        B[3, 4] = 12
        
        nptst.assert_array_equal((A - B).toarray(), A.toarray()-B.toarray())
+       
 
+    def testHadamard(self): 
+       nptst.assert_array_equal((self.A.hadamard(self.A)).toarray(), (self.A.toarray())**2)
+       nptst.assert_array_equal((self.B.hadamard(self.B)).toarray(), self.B.toarray()**2)
+       nptst.assert_array_equal((self.C.hadamard(self.C)).toarray(), self.C.toarray()**2)
+       nptst.assert_array_equal((self.D.hadamard(self.D)).toarray(), self.D.toarray()**2)
+       
+       A = dyn_array((5, 5))
+       A[0, 1] = 4
+       A[2, 3] = -1.2
+       A[1, 3] = 2
+       A[3, 3] = 1
+       
+       B = dyn_array((5, 5))
+       B[0, 2] = 9.2
+       B[2, 3] = -5
+       B[3, 4] = 12
+       B[3, 3] = 12
+       
+       C = dyn_array((5, 5))
+       
+       nptst.assert_array_equal((A.hadamard(B)).toarray(), A.toarray()*B.toarray())
+       nptst.assert_array_equal((A.hadamard(C)).toarray(), C.toarray())
+       
 if __name__ == "__main__":
     unittest.main()
     

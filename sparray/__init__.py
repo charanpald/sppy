@@ -1,4 +1,3 @@
-from sparray.csr_array import csr_array
 from sparray.dyn_array import dyn_array
 from sparray.version import __version__
 

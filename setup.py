@@ -12,12 +12,10 @@ else:
 cmdclass = { }
 
 if use_cython:
-    ext_modules=[Extension("sparray.csr_array", ["sparray/csr_array.pyx"], language="c++"),
-                 Extension("sparray.dyn_array", ["sparray/dyn_array.pyx"], language="c++")]  
+    ext_modules=[Extension("sparray.csr_array", ["sparray/dyn_array.pyx"], language="c++")]  
     cmdclass.update({ 'build_ext': build_ext })
 else:
-    ext_modules = [Extension("sparray.csr_array", [ "sparray/csr_array.cpp" ]),
-                    Extension("sparray.dyn_array", [ "sparray/dyn_array.cpp" ])] 
+    ext_modules = [Extension("sparray.csr_array", [ "sparray/dyn_array.cpp" ])] 
 
 setup(name = 'sparray',
       version = "0.1",

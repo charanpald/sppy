@@ -190,6 +190,7 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(self.A.sum(), 0.0)
         self.assertEquals(self.B.sum(), 16.97)
         self.assertEquals(self.C.sum(), 16.97)
+        self.assertEquals(self.D.sum(), 10)
         
         #Test sum along axes 
         nptst.assert_array_equal(self.A.sum(0), numpy.zeros(5))

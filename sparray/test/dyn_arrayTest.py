@@ -447,7 +447,7 @@ class dyn_arrayTest(unittest.TestCase):
         self.assertEquals(D[3, 0], -10.0)
         self.assertEquals(D[2, 1], -5)
         self.assertEquals(D[3, 1], 5)
-        self.assertEquals(D.sum(), self.D.sum())
+        self.assertAlmostEquals(D.sum(), self.D.sum())
        
        
     def testMin(self):

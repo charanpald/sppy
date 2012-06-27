@@ -4,11 +4,11 @@ import numpy
 cimport numpy 
 numpy.import_array()
 
-cdef extern from "include/DynamicSparseMatrixExt.h": 
-   cdef cppclass DynamicSparseMatrixExt[T]:  
-      DynamicSparseMatrixExt() 
-      DynamicSparseMatrixExt(DynamicSparseMatrixExt[T]) 
-      DynamicSparseMatrixExt(int, int)
+cdef extern from "include/SparseMatrixExt.h": 
+   cdef cppclass SparseMatrixExt[T]:  
+      SparseMatrixExt() 
+      SparseMatrixExt(SparseMatrixExt[T]) 
+      SparseMatrixExt(int, int)
       int rows()
       int cols() 
       int size() 
@@ -17,24 +17,24 @@ cdef extern from "include/DynamicSparseMatrixExt.h":
       void nonZeroInds(int*, int*)
       T coeff(int, int)
       T sum()
-      void slice(int*, int, int*, int, DynamicSparseMatrixExt[T]*) 
+      void slice(int*, int, int*, int, SparseMatrixExt[T]*) 
       void scalarMultiply(double)
 
 cdef class dyn_array:
-    cdef DynamicSparseMatrixExt[double] *thisPtr     
+    cdef SparseMatrixExt[double] *thisPtr     
     def __cinit__(self, shape, dtype=numpy.float):
         """
         Create a new column major dynamic array. One can pass in a numpy 
         data type but the only option is numpy.float currently. 
         """
         if dtype==numpy.float: 
-            self.thisPtr = new DynamicSparseMatrixExt[double](shape[0], shape[1]) 
+            self.thisPtr = new SparseMatrixExt[double](shape[0], shape[1]) 
         else: 
             raise ValueError("Unsupported dtype: " + str(dtype))
             
     def __dealloc__(self): 
         """
-        Deallocate the DynamicSparseMatrixExt object.  
+        Deallocate the SparseMatrixExt object.  
         """
         del self.thisPtr
         
@@ -172,7 +172,7 @@ cdef class dyn_array:
             if i < 0 or i>=self.thisPtr.rows(): 
                 raise ValueError("Invalid row index " + str(i)) 
             if j < 0 or j>=self.thisPtr.cols(): 
-                raise ValueError("Invalid col index " + str(j))      
+                raise ValueError("Invalid col index " + str(j))        
             
             self.thisPtr.insertVal(i, j, val)
         elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
@@ -280,7 +280,7 @@ cdef class dyn_array:
         """
         cdef dyn_array result = dyn_array(self.shape)
         del result.thisPtr
-        result.thisPtr = new DynamicSparseMatrixExt[double](deref(self.thisPtr))
+        result.thisPtr = new SparseMatrixExt[double](deref(self.thisPtr))
         return result 
         
     def toarray(self): 

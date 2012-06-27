@@ -3,54 +3,28 @@
 
 #include <iostream>
 #include <eigen3/Eigen/Sparse>
-#include "../include/DynamicSparseMatrixExt.h"
 
 using Eigen::SparseMatrix;
 
-
-void testScalarMultiply() { 
-    DynamicSparseMatrixExt<double, Eigen::ColMajor> m(3,3);
-    m.insert(0,0) = 3;
-    m.insert(1,0) = 2.5;
-    m.insert(0,1) = -1;
-    m.insert(2,0) = -1;    
-    m.insert(2,2) = 5.12;
-    
-    DynamicSparseMatrixExt<double, Eigen::ColMajor> m2(m);
-    m.scalarMultiply(2.0);
-
-    m.printValues();
-    m2.printValues();
-}
-
-void testMatrixAdd() { 
-    DynamicSparseMatrixExt<double, Eigen::ColMajor> m(3,3);
-    m.insert(0,0) = 3;
-    m.insert(1,0) = 2.5;
-    m.insert(0,1) = -1;
-    m.insert(2,0) = -1;    
-    m.insert(2,2) = 5.12;
-
-    DynamicSparseMatrixExt<double, Eigen::ColMajor> m2(3, 3);
-    m2.insert(0, 0) = 2;
-    
-    DynamicSparseMatrixExt<double> m3(3, 3);
-
-    m.printValues();
-    m3.printValues();
-
-    m = m2; 
-    m.printValues();
-
-    m3 = m + m2; 
-    
-}
-
-
 int main()
 {
+    int n = 5; 
+    Eigen::SparseMatrix<double> A(n, n); 
 
+    A.coeffRef(0, 0) = 23.1;
+    A.coeffRef(2, 0) = -3.1;
+    A.coeffRef(3, 0) = -10.0;
+    A.coeffRef(2, 1) = -5;
+    A.coeffRef(3, 1) = 5;
+    std::cout << A.sum() << std::endl; 
 
-    testMatrixAdd();
+    Eigen::SparseMatrix<double> B(5, 7); 
+
+    B.coeffRef(0, 1) = 1;
+    B.coeffRef(1, 3) = 5.2;
+    B.coeffRef(3, 3) = -0.2;
+    B.coeffRef(4, 4) = 12.2;
+    B.coeffRef(0, 6) = -1.23;
+    std::cout << B.sum() << std::endl; 
 
 }

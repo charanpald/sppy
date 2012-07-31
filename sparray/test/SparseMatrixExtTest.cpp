@@ -3,19 +3,21 @@
 
 #include <iostream>
 #include <eigen3/Eigen/Sparse>
+#include "../include/SparseMatrixExt.h"
 
 using Eigen::SparseMatrix;
 
 int main()
 {
     int n = 5; 
-    Eigen::SparseMatrix<double> A(n, n); 
+    SparseMatrixExt<double> A(5, 7); 
 
-    A.coeffRef(0, 0) = 23.1;
-    A.coeffRef(2, 0) = -3.1;
-    A.coeffRef(3, 0) = -10.0;
-    A.coeffRef(2, 1) = -5;
-    A.coeffRef(3, 1) = 5;
+    A.insertVal(0, 1, 1);
+    A.insertVal(1, 3, 5.2);
+    A.insertVal(3, 3, -0.2);
+    //A.coeffRef(0, 1) = 1;
+    //A.coeffRef(1, 3) = 5.2;
+    //A.coeffRef(3, 3) = -0.2;
     std::cout << A.sum() << std::endl; 
 
     Eigen::SparseMatrix<double> B(5, 7); 

@@ -1,4 +1,4 @@
-from sparray.dyn_array import dyn_array
+from sparray.csarray import csarray
 from sparray.version import __version__
 
 def test():

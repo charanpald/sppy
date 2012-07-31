@@ -14,7 +14,6 @@ def test():
         import logging
 
         logging.disable(logging.WARNING)
-        print(os.path.dirname(__file__))
         sourceDir = os.path.dirname(__file__) + os.sep
         print("Running tests from " + sourceDir)
 
@@ -23,4 +22,5 @@ def test():
         unittest.TextTestRunner(verbosity=1).run(overallTestSuite)
     except ImportError as error:
         traceback.print_exc(file=sys.stdout)
+
 

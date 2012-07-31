@@ -11,3 +11,5 @@ build/
 /dist/
 /MANIFEST
 /sparray/test/SparseMatrixExtTest
+/sparray/csarray.cpp
+/sparray/csarray.so

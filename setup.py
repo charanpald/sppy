@@ -12,7 +12,7 @@ else:
 cmdclass = { }
 
 if use_cython:
-    ext_modules=[Extension("sparray.csarray", ["sparray/csarray.pyx"], language="c++")]  
+    ext_modules=[Extension("sparray.csarray", ["sparray/csarray.pyx"], language="c++"), Extension("sparray.csarray_sub", ["sparray/csarray_sub.pyx"], language="c++")]  
     cmdclass.update({ 'build_ext': build_ext })
 else:
     ext_modules = [Extension("sparray.csarray", [ "sparray/csarray.cpp" ])] 

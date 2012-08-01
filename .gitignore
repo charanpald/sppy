@@ -5,11 +5,9 @@ a.out
 sparray.egg-info/
 build/
 /sparray/SparseMatrixExtTest
-/sparray/csr_array.so
-/sparray/csr_array.cpp
-/sparray/dyn_array.so
 /dist/
 /MANIFEST
 /sparray/test/SparseMatrixExtTest
-/sparray/csarray.cpp
-/sparray/csarray.so
+/sparray/*.so
+/sparray/*.cpp
+/sparray/csarray_sub.pyx

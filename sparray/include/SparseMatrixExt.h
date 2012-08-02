@@ -44,7 +44,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
     void printValues() { 
         for (int k=0; k<this->outerSize(); ++k) {
-          for (SparseMatrixExt<double, Eigen::ColMajor>::InnerIterator it(*this,k); it; ++it) {
+          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
             std::cout << "(" << it.row() << ", " << it.col() << ") " << it.value() << std::endl;  
             }  
         }
@@ -56,7 +56,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         int i = 0; 
 
         for (int k=0; k<this->outerSize(); ++k) {
-          for (SparseMatrixExt<double, Eigen::ColMajor>::InnerIterator it(*this,k); it; ++it) {
+          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
             array1[i] = it.row(); 
             array2[i] = it.col();
             i++; 

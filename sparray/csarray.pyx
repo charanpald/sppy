@@ -7,7 +7,7 @@ cimport numpy
 numpy.import_array()
 
 
-class csarray(object): 
+class csarray: 
     def __init__(self, shape, dtype=numpy.float): 
         if dtype == numpy.float: 
             self._array = csarray_double(shape)
@@ -23,7 +23,18 @@ class csarray(object):
             return getattr(self, name)
         except: 
             return getattr(self._array, name)
-    
+
+    def __getitem__(self, inds):
+        return self._array.__getitem__(inds) 
+        
+    def __setitem__(self, inds, val):
+        self._array.__setitem__(inds, val) 
+        
+    def __abs__(self): 
+        return self._array.__abs__()
+        
+    def __neg__(self): 
+        return self._array.__neg__()
 
     def __add__(self, A): 
         return self._array.__add__(A._array)

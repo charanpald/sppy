@@ -35,7 +35,7 @@ setup(name = 'sparray',
       keywords=['numpy', 'sparse matrix'],
       long_description= 'A sparse matrix library based on Eigen.',
       classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
         'Operating System :: OS Independent',

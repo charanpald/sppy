@@ -9,16 +9,22 @@ except ImportError:
 else:
     use_cython = True
 
+def execfile3(file, globals=globals(), locals=locals()):
+    with open(file, "r") as fh:
+        exec(fh.read()+"\n", globals, locals)
+
+execfile3('sparray/version.py')
+
 cmdclass = { }
 
 if use_cython:
     ext_modules=[Extension("sparray.csarray", ["sparray/csarray.pyx"], language="c++"), Extension("sparray.csarray_sub", ["sparray/csarray_sub.pyx"], language="c++")]  
     cmdclass.update({ 'build_ext': build_ext })
 else:
-    ext_modules = [Extension("sparray.csarray", [ "sparray/csarray.cpp" ])] 
+    ext_modules = [Extension("sparray.csarray", [ "sparray/csarray.cpp" ]), Extension("sparray.csarray_sub", ["sparray/csarray_sub.cpp"])] 
 
 setup(name = 'sparray',
-      version = "0.1",
+      version = __version__,
       author = 'Charanpal Dhanjal',
       author_email = 'charanpal@gmail.com',
       packages = ['sparray', 'sparray.test'],

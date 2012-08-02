@@ -1,4 +1,5 @@
 from sparray.csarray import csarray
+from sparray.util import diag, eye, rand
 from sparray.version import __version__
 
 def test():

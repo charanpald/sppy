@@ -4,6 +4,7 @@
 a.out 
 sparray.egg-info/
 build/
+docs/_build/
 /sparray/SparseMatrixExtTest
 /dist/
 /MANIFEST

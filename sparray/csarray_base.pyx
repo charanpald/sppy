@@ -19,6 +19,8 @@ cdef extern from "include/SparseMatrixExt.h":
       T sum()
       void slice(int*, int, int*, int, SparseMatrixExt[T]*) 
       void scalarMultiply(double)
+      void makeCompressed()
+      void reserve(int)
 
 cdef template[DataType] class csarray:
     cdef SparseMatrixExt[DataType] *thisPtr     
@@ -165,6 +167,7 @@ cdef template[DataType] class csarray:
         value in the array is set. 
         """
         i, j = inds 
+        
         if type(i) == int and type(j) == int: 
             if i < 0 or i>=self.thisPtr.rows(): 
                 raise ValueError("Invalid row index " + str(i)) 
@@ -173,8 +176,12 @@ cdef template[DataType] class csarray:
             
             self.thisPtr.insertVal(i, j, val) 
         elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
-            for ix in range(len(i)): 
-                self.thisPtr.insertVal(i[ix], j[ix], val)  
+            if type(val) == numpy.ndarray: 
+                for ix in range(len(i)): 
+                    self.thisPtr.insertVal(i[ix], j[ix], val[ix])  
+            else:
+                for ix in range(len(i)): 
+                    self.thisPtr.insertVal(i[ix], j[ix], val)  
     
     def put(self, DataType val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None , numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
         """
@@ -228,16 +235,14 @@ cdef template[DataType] class csarray:
         """
         if self.thisPtr.size() != 0:
             if axis ==None: 
-                return self.sum()/self.thisPtr.size()
+                return self.sum()/float(self.thisPtr.size())
             elif axis == 0: 
-                return self.sum(0)/self.shape[0]
+                return self.sum(0)/float(self.shape[0])
             elif axis == 1: 
-                return self.sum(1)/self.shape[1]
+                return self.sum(1)/float(self.shape[1])
         else: 
             return float("nan")
      
-
-        
     def diag(self): 
         """
         Return a numpy array containing the diagonal entries of this matrix. If 
@@ -348,11 +353,11 @@ cdef template[DataType] class csarray:
         """
         Return the variance of the elements of this array. 
         """
-        cdef DataType mean = self.mean() 
+        cdef double mean = self.mean() 
         cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
         cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
         cdef unsigned int i
-        cdef DataType result = 0
+        cdef double result = 0
         
         if self.size == 0: 
             return float("nan")
@@ -363,7 +368,7 @@ cdef template[DataType] class csarray:
             result += (self.thisPtr.coeff(rowInds[i], colInds[i]) - mean)**2
         
         result += (self.size - self.getnnz())*mean**2
-        result /= self.size
+        result /= float(self.size)
             
         return result 
     
@@ -456,8 +461,20 @@ cdef template[DataType] class csarray:
             result.thisPtr.insertVal(rowInds[i], colInds[i], self.thisPtr.coeff(rowInds[i], colInds[i]) * A.thisPtr.coeff(rowInds[i], colInds[i]))
             
         return result 
+
+    def compress(self): 
+        """
+        Turn this matrix into compressed sparse format by freeing extra memory 
+        space in the buffer. 
+        """
+        self.thisPtr.makeCompressed()
         
-        
+    
+    def reserve(self, int n): 
+        """
+        Reserve n nonzero entries and turns the matrix into uncompressed mode. 
+        """
+        self.thisPtr.reserve(n)
     
     shape = property(__getShape)
     size = property(__getSize)

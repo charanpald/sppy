@@ -16,14 +16,34 @@ class csarray:
         else: 
             raise ValueError("Unknown dtype: " + str(dtype))
             
-        self.dtype = dtype
+        self._dtype = dtype
             
     def __getattr__(self, name):
         try: 
             return getattr(self, name)
         except: 
             return getattr(self._array, name)
-            
+    
+
+    def __add__(self, A): 
+        return self._array.__add__(A._array)
+        
+    def __sub__(self, A): 
+        return self._array.__sub__(A._array)
+        
+    def hadamard(self, A): 
+        return self._array.hadamard(A._array)
+        
+    def __mul__(self, x):
+        newArray = self.copy() 
+        newArray._array = newArray._array*x
+        return newArray
+        
+    def copy(self): 
+        newArray = csarray(self.shape, self.dtype)
+        newArray._array = self._array.copy()
+        return newArray 
+     
     def __str__(self): 
         """
         Return a string representation of the non-zero elements of the array. 
@@ -38,3 +58,8 @@ class csarray:
                 outputStr += "\n"
         
         return outputStr 
+    
+    def __getDType(self): 
+        return self._dtype
+    
+    dtype = property(__getDType)

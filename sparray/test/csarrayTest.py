@@ -183,14 +183,14 @@ class csarrayTest(unittest.TestCase):
         A[1, 3] = 5.2
         A[3, 3] = -0.2
         
-        outputStr = "csarray dtype:<type 'float'> shape:(5, 7) non-zeros:3\n" 
+        outputStr = "csarray dtype:float64 shape:(5, 7) non-zeros:3\n" 
         outputStr += "(0, 1) 1.0\n"
         outputStr += "(1, 3) 5.2\n"
         outputStr += "(3, 3) -0.2"
         self.assertEquals(str(A), outputStr) 
         
         B = csarray((5, 5))
-        outputStr = "csarray dtype:<type 'float'> shape:(5, 5) non-zeros:0\n" 
+        outputStr = "csarray dtype:float64 shape:(5, 5) non-zeros:0\n" 
         self.assertEquals(str(B), outputStr) 
 
     def testSum(self): 

@@ -7,7 +7,7 @@ cimport numpy
 numpy.import_array()
 
 
-class csarray: 
+class csarray(object): 
     def __init__(self, shape, dtype=numpy.float): 
         if dtype == numpy.float: 
             self._array = csarray_double(shape)
@@ -48,7 +48,7 @@ class csarray:
         """
         Return a string representation of the non-zero elements of the array. 
         """
-        outputStr = "csarray dtype:" + str(self.dtype) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + "\n"
+        outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + "\n"
         (rowInds, colInds) = self.nonzero()
         vals = self[rowInds, colInds]
         

@@ -8,6 +8,12 @@ where T is a template type.
 """
 import string 
 import re 
+import logging 
+import sys 
+import numpy 
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG) 
+numpy.set_printoptions(suppress=True)
 
 templateList = [["int"], ["long"], ["float"], ["double"]]
 
@@ -42,9 +48,13 @@ for line in lines:
     else: 
         inClass = False 
 
+inFile.close()     
+logging.debug("Read input file " + inFileName)
+
 for templateTypes in templateList:
     newClassName = className + "_" + string.join(templateTypes)
     outFile.write("cdef class " + newClassName +  ":\n")
+    logging.debug("Writing class " + newClassName)
     
     for line in classDefLines:
         for i, templateType in enumerate(templateTypes): 
@@ -52,7 +62,6 @@ for templateTypes in templateList:
             outLine = (string.replace(outLine, templateParams[i], templateType))  
         outFile.write(outLine)
             
-
-inFile.close() 
 outFile.close() 
-print("Done")
+logging.debug("Wrote output file " + outFileName)
+

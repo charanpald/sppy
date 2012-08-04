@@ -21,6 +21,7 @@ cdef extern from "include/SparseMatrixExt.h":
       void scalarMultiply(double)
       void makeCompressed()
       void reserve(int)
+      T sumValues()
 
 cdef template[DataType] class csarray:
     cdef SparseMatrixExt[DataType] *thisPtr     
@@ -202,6 +203,7 @@ cdef template[DataType] class csarray:
         cdef unsigned int i
         
         if axis==None: 
+            """
             scalarResult = 0 
             (rowInds, colInds) = self.nonzero()
             
@@ -209,6 +211,8 @@ cdef template[DataType] class csarray:
                 scalarResult += self.thisPtr.coeff(rowInds[i], colInds[i])  
             
             return scalarResult
+            """
+            return self.thisPtr.sumValues()
             #There seems to be a very temporamental problem with thisPtr.sum()
             #return self.thisPtr.sum()
         elif axis==0: 

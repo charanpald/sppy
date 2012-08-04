@@ -50,6 +50,17 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         }
     } 
 
+    T sumValues() { 
+        T result = 0; 
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
+            result += it.value();  
+            }  
+        }
+
+        return result; 
+    } 
+
     //Have function to give nonzero elements by passing in points to arrays 
     //Input array points must have the same size as the number of nonzeros in this matrix
     void nonZeroInds(int* array1, int* array2) { 

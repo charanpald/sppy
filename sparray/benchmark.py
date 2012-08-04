@@ -5,7 +5,7 @@ import sys
 import time 
 import numpy 
 import logging 
-from sparray import dyn_array 
+from sparray import csarray 
 from scipy.sparse import csc_matrix, csr_matrix
 
 
@@ -61,15 +61,15 @@ def setGetBenchmark(ns):
                 v = A1[rowInds[j], colInds[j]]
         getTimeArray[1, s] =  time.clock() - startTime
         
-        logging.debug("Benchmarking set from dyn_array")
+        logging.debug("Benchmarking set from csarray")
         startTime = time.clock()
         for i in range(repetitions):
-            A1 = dyn_array((n, n))            
+            A1 = csarray((n, n))            
             for j in range(numVals): 
                 A1[rowInds[j], colInds[j]] = vals[j]
         setTimeArray[2, s] =  time.clock() - startTime
         
-        logging.debug("Benchmarking get from dyn_array")
+        logging.debug("Benchmarking get from csarray")
         startTime = time.clock()
         for i in range(repetitions):
             A1 = csc_matrix((n, n))            
@@ -132,13 +132,16 @@ def addMultBenchmark(ns):
             B = A1 * A2
         multTimeArray[1, s] =  time.clock() - startTime 
         
-        print("Benchmarking dyn_array")
-        A1 = dyn_array((n, n))       
-        A2 = dyn_array((n, n)) 
+        print("Benchmarking csarray")
+        A1 = csarray((n, n))       
+        A2 = csarray((n, n)) 
         
         for j in range(numVals): 
             A1[rowInds1[j], colInds1[j]] = vals[j]
             A2[rowInds2[j], colInds2[j]] = vals[j]
+        
+        A1.compress()
+        A2.compress()        
         
         startTime = time.clock()
         for i in range(repetitions): 
@@ -188,11 +191,13 @@ def meanSumBenchmark(ns):
             b = A.sum()
         sumTimeArray[1, s] =  time.clock() - startTime 
         
-        print("Benchmarking dyn_array")
-        A = dyn_array((n, n))       
+        print("Benchmarking csarray")
+        A = csarray((n, n))       
         
         for j in range(numVals): 
             A[rowInds[j], colInds[j]] = vals[j]
+            
+        A.compress()
 
         startTime = time.clock()
         for i in range(repetitions): 

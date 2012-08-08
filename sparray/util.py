@@ -37,5 +37,20 @@ def rand(m, n, density, dtype=numpy.float):
     
     return result 
     
+
+def zeros(shape, dtype=numpy.float): 
+    """
+    Create a zeros matrix of the given shape and dtype. 
+    """
+    result = csarray(shape, dtype)
+    return result
     
+def ones(shape, dtype=numpy.float): 
+    """
+    Create a ones matrix of the given shape and dtype. Generally a bad idea 
+    for large matrices. 
+    """
+    result = csarray(shape, dtype)
+    result.ones()
+    return result
     

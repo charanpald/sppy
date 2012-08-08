@@ -9,11 +9,19 @@ numpy.import_array()
 
 
 class csarray(object): 
-    def __init__(self, shape, dtype=numpy.float): 
+    def __init__(self, S, dtype=numpy.float): 
         """
         Create a new csarray using the given shape and dtype. If the dtype is 
         float or int we assume 64 bits. 
         """
+        if type(S) == tuple: 
+            shape = S
+        elif type(S) == numpy.ndarray or type(S) == csarray:
+            shape = S.shape
+        else: 
+            raise ValueError("Invalid parameter: " + str(S))
+            
+        
         if dtype == numpy.float32: 
             self._array = csarray_float(shape)        
         elif dtype == numpy.float64 or dtype==numpy.float: 
@@ -28,6 +36,10 @@ class csarray(object):
             self._array = csarray_long(shape)
         else: 
             raise ValueError("Unknown dtype: " + str(dtype))
+            
+        if type(S) == numpy.ndarray or type(S) == csarray:
+            nonzeros = S.nonzero()
+            self._array[nonzeros] = S[nonzeros]
             
         self._dtype = dtype
             

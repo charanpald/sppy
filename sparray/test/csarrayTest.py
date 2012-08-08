@@ -61,7 +61,7 @@ class csarrayTest(unittest.TestCase):
         
         #Test bad input params 
         self.assertRaises(IndexError, csarray, (0,))
-        self.assertRaises(TypeError, csarray, 0)
+        self.assertRaises(ValueError, csarray, 0)
         
         #TODO: Test other dtypes 
         A = csarray((5, 5))
@@ -70,6 +70,27 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(self.F[0, 0], 23)
         self.F[1, 1] = 51.2        
         self.assertEquals(self.F[1, 1], 51)
+        
+        #Test assignment with a numpy array 
+        A = numpy.array([[3.1, 0, 100], [1.11, 0, 4], [0, 0, 5.2]])
+        B = csarray(A)
+        
+        nptst.assert_array_equal(B.toarray(), A)
+        
+        B = csarray(A, dtype=numpy.int8)
+        nptst.assert_array_equal(B.toarray(), numpy.array(A, numpy.int8))
+        
+        #Assignment to other csarray 
+        B = csarray(self.B, numpy.int)
+        
+        for i in range(B.shape[0]): 
+            for j in range(B.shape[1]): 
+                self.assertEquals(B[i, j], int(self.B[i, j]))
+                
+        F = csarray(self.F, numpy.float)
+        F[0, 0] += 0.1
+        
+        self.assertEquals(F[0, 0], 23.1)
         
         
     def testNDim(self): 

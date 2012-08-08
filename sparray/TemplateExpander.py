@@ -15,7 +15,7 @@ import numpy
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG) 
 numpy.set_printoptions(suppress=True)
 
-templateList = [["int"], ["long"], ["float"], ["double"]]
+templateList = [["signed char"], ["short"], ["int"], ["long"], ["float"], ["double"]]
 
 inFileName = "csarray_base.pyx"
 outFileName = "csarray_sub.pyx"
@@ -52,7 +52,7 @@ inFile.close()
 logging.debug("Read input file " + inFileName)
 
 for templateTypes in templateList:
-    newClassName = className + "_" + string.join(templateTypes)
+    newClassName = className + "_" + string.replace(string.join(templateTypes), " ", "_")
     outFile.write("cdef class " + newClassName +  ":\n")
     logging.debug("Writing class " + newClassName)
     

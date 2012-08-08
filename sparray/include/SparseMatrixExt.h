@@ -7,8 +7,6 @@
 using Eigen::SparseMatrix;
 
 template <class T, int S=Eigen::ColMajor>
-
-//Class is column major 
 class SparseMatrixExt:public SparseMatrix<T, S> {
   public:
 	SparseMatrixExt<T, S>(): 
@@ -29,13 +27,6 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         SparseMatrix<T, S>::operator=(other); 
         return *this;
         }
-
-
-    /*SparseMatrixExt& operator+(const SparseMatrixExt& other)  { 
-        SparseMatrixExt &result; 
-        result = this->operator+(other); 
-        return *this;
-        }*/
     
     void insertVal(int row, int col, T val) { 
         if (this->coeff(row, col) != val)
@@ -100,7 +91,45 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
     void scalarMultiply(double d) { 
         (*this)*=d; 
         }
+
+    SparseMatrixExt<T, S> dot(const SparseMatrixExt& other) { 
+        return (SparseMatrixExt<T, S>)((*this) * other); 
+        }
+
+    SparseMatrixExt<T, S> add(const SparseMatrixExt& other) { 
+        return (SparseMatrixExt<T, S>)((*this) + other); 
+        }
     
+    SparseMatrixExt<T, S> subtract(SparseMatrixExt const& other) { 
+        return ((SparseMatrixExt<T, S>)((*this) - other)); 
+        }
+
+    SparseMatrixExt<T, S> trans() { 
+        SparseMatrix<T, S> A = this->transpose();
+        return (SparseMatrixExt<T, S>)A; 
+        }
+
+    SparseMatrixExt<T, S> negate() { 
+        SparseMatrix<T, S> A = -(*this);
+        return (SparseMatrixExt<T, S>)A; 
+        }
+
+    SparseMatrixExt<T, S> abs() { 
+        SparseMatrix<T, S> A = this-> cwiseAbs();
+        return (SparseMatrixExt<T, S>)A; 
+        }
+    
+    SparseMatrixExt<T, S> hadamard(SparseMatrixExt const& other) { 
+        return (SparseMatrixExt<T, S>)this->cwiseProduct(other); 
+        }
+
+    void fill(T val) { 
+        this->reserve(this->rows()*this->cols());
+        for (int i=0; i<this->rows(); i++) 
+            for (int j=0; j<this->cols(); j++) 
+                this->coeffRef(i, j) = val;
+        }
+
   };
 
 #endif

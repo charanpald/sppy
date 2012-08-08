@@ -180,17 +180,18 @@ cdef template[DataType] class csarray:
         """
         i, j = inds 
         
-        if type(i) == int and type(j) == int: 
+        if type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
+            self.put(val, i, j)
+        else:
+            i = int(i) 
+            j = int(j)
             if i < 0 or i>=self.thisPtr.rows(): 
                 raise ValueError("Invalid row index " + str(i)) 
             if j < 0 or j>=self.thisPtr.cols(): 
                 raise ValueError("Invalid col index " + str(j))        
             
             self.thisPtr.insertVal(i, j, val) 
-        elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
-            self.put(val, i, j)
-        else: 
-            raise ValueError("Invalid indexing : " + str(inds))
+
     
     def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None , numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
         """

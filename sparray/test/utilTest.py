@@ -40,7 +40,19 @@ class utilTest(unittest.TestCase):
         X = sparray.rand(10, 10, 0.1)
 
         self.assertEquals(X.shape, (10, 10))
-        self.assertAlmostEqual(X.getnnz()/float(100), 0.1, 1)        
+        self.assertAlmostEqual(X.getnnz()/float(100), 0.1, 1)     
+        
+    def testZeros(self): 
+        X = sparray.zeros((5, 5))
+
+        self.assertEquals(X.shape, (5, 5))
+        nptst.assert_array_equal(X.toarray(), numpy.zeros((5,5)))
+        
+    def testOnes(self): 
+        X = sparray.ones((5, 5))
+
+        self.assertEquals(X.shape, (5, 5))
+        nptst.assert_array_equal(X.toarray(), numpy.ones((5,5)))   
         
 
 if __name__ == "__main__":

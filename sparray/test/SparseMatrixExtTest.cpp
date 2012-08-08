@@ -8,14 +8,16 @@ using Eigen::SparseMatrix;
 int main()
 {
     int n = 5; 
-    SparseMatrix<double> A(5, 7); 
+    SparseMatrixExt<double> A(7, 7); 
+    A.reserve(10);
 
 
     A.coeffRef(0, 1) = 1;
     A.coeffRef(1, 3) = 5.2;
     A.coeffRef(3, 3) = -0.2;
 
-    SparseMatrix<double> B(5, 7); 
+    SparseMatrixExt<double> B(7, 7); 
+    B.reserve(10);
 
     B.coeffRef(0, 1) = 1;
     B.coeffRef(1, 3) = 5.2;
@@ -23,9 +25,9 @@ int main()
     B.coeffRef(4, 4) = 12.2;
     B.coeffRef(0, 6) = -1.23;
 
-    SparseMatrix<double> C; 
-    C = A * B; 
-    
-    //Get a core dump when this is run 
+    SparseMatrixExt<double> C(5, 5); 
+    C.fill(1);
+    C.printValues(); 
+    //std::cout << C.norm(); 
 
 }

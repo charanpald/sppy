@@ -1,7 +1,8 @@
 # cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 import numpy 
-cimport numpy 
+cimport numpy
+import cython 
 numpy.import_array()
 
 cdef extern from "include/SparseMatrixExt.h":  
@@ -9,27 +10,38 @@ cdef extern from "include/SparseMatrixExt.h":
       SparseMatrixExt() 
       SparseMatrixExt(SparseMatrixExt[T]) 
       SparseMatrixExt(int, int)
-      int rows()
+      double norm()
       int cols() 
-      int size() 
-      void insertVal(int, int, T) 
       int nonZeros()
-      void nonZeroInds(int*, int*)
+      int rows()
+      int size() 
+      SparseMatrixExt[T] abs()
+      SparseMatrixExt[T] add(SparseMatrixExt[T]&)
+      SparseMatrixExt[T] dot(SparseMatrixExt[T]&)
+      SparseMatrixExt[T] hadamard(SparseMatrixExt[T]&)
+      SparseMatrixExt[T] negate()
+      SparseMatrixExt[T] subtract(SparseMatrixExt[T]&)
+      SparseMatrixExt[T] trans()
       T coeff(int, int)
       T sum()
-      void slice(int*, int, int*, int, SparseMatrixExt[T]*) 
-      void scalarMultiply(double)
-      void makeCompressed()
-      void reserve(int)
       T sumValues()
-
+      void insertVal(int, int, T) 
+      void fill(T)
+      void makeCompressed()
+      void nonZeroInds(int*, int*)
+      void printValues()
+      void reserve(int)
+      void scalarMultiply(double)
+      void slice(int*, int, int*, int, SparseMatrixExt[T]*) 
+      
+      
 cdef template[DataType] class csarray:
     cdef SparseMatrixExt[DataType] *thisPtr     
     def __cinit__(self, shape):
         """
-        Create a new column major dynamic array. One can pass in a numpy 
-        data type but the only option is numpy.float currently. 
+        Create a new column major dynamic array.
         """
+
         self.thisPtr = new SparseMatrixExt[DataType](shape[0], shape[1]) 
             
     def __dealloc__(self): 
@@ -84,8 +96,7 @@ cdef template[DataType] class csarray:
             return self.__adArraySlice(numpy.ascontiguousarray(i, dtype=numpy.int) , numpy.ascontiguousarray(j, dtype=numpy.int) )
         elif (type(i) == numpy.ndarray or type(i) == slice) and (type(j) == slice or type(j) == numpy.ndarray):
             indList = []            
-            for k in range(len(inds)):  
-                index = inds[k] 
+            for k, index in enumerate(inds):  
                 if type(index) == numpy.ndarray: 
                     indList.append(index) 
                 elif type(index) == slice: 
@@ -177,20 +188,22 @@ cdef template[DataType] class csarray:
             
             self.thisPtr.insertVal(i, j, val) 
         elif type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
-            if type(val) == numpy.ndarray: 
-                for ix in range(len(i)): 
-                    self.thisPtr.insertVal(i[ix], j[ix], val[ix])  
-            else:
-                for ix in range(len(i)): 
-                    self.thisPtr.insertVal(i[ix], j[ix], val)  
+            self.put(val, i, j)
+        else: 
+            raise ValueError("Invalid indexing : " + str(inds))
     
-    def put(self, DataType val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None , numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
+    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None , numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
         """
-        Select rowInds 
+        Select rowInds and colInds
         """
         cdef unsigned int ix 
+        self.reserve(len(rowInds))
         for ix in range(len(rowInds)): 
-            self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)
+            if type(val) == numpy.ndarray: 
+                self.thisPtr.insertVal(rowInds[ix], colInds[ix], val[ix])
+            else: 
+                self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)
+            
 
     def sum(self, axis=None): 
         """
@@ -373,7 +386,7 @@ cdef template[DataType] class csarray:
         
         result += (self.size - self.getnnz())*mean**2
         result /= float(self.size)
-            
+        
         return result 
     
     def std(self): 
@@ -386,84 +399,55 @@ cdef template[DataType] class csarray:
         """
         Return a matrix whose elements are the absolute values of this array. 
         """
-        cdef csarray[DataType] result = csarray[DataType](self.shape)
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
-        cdef unsigned int i
-        
-        (rowInds, colInds) = self.nonzero()
-            
-        for i in range(rowInds.shape[0]): 
-            result.thisPtr.insertVal(rowInds[i], colInds[i], abs(self.thisPtr.coeff(rowInds[i], colInds[i])))
-            
-        return result  
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.abs())
+        return result 
     
     def __neg__(self): 
         """
         Return the negation of this array. 
         """
-        cdef csarray[DataType] result = csarray[DataType](self.shape)
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
-        cdef unsigned int i
-        
-        (rowInds, colInds) = self.nonzero()
-            
-        for i in range(rowInds.shape[0]): 
-            result.thisPtr.insertVal(rowInds[i], colInds[i], -self.thisPtr.coeff(rowInds[i], colInds[i]))
-            
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.negate())
         return result 
     
 
-    def __add__(self, csarray[DataType] A): 
+    def __add__(csarray[DataType] self, csarray[DataType] A): 
         """
         Add two matrices together. 
         """
-        cdef csarray[DataType] result = self.copy()
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
-        cdef unsigned int i
+        if self.shape != A.shape: 
+            raise ValueError("Cannot add matrices of shapes " + str(self.shape) + " and " + str(A.shape))
         
-        (rowInds, colInds) = A.nonzero()
-            
-        for i in range(rowInds.shape[0]): 
-            result.thisPtr.insertVal(rowInds[i], colInds[i], result.thisPtr.coeff(rowInds[i], colInds[i]) + A.thisPtr.coeff(rowInds[i], colInds[i]))
-            
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.add(deref(A.thisPtr)))
         return result     
         
-    def __sub__(self, csarray[DataType] A): 
+    def __sub__(csarray[DataType] self, csarray[DataType] A): 
         """
         Subtract one matrix from another.  
         """
-        cdef csarray[DataType] result = self.copy()
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
-        cdef unsigned int i
+        if self.shape != A.shape: 
+            raise ValueError("Cannot subtract matrices of shapes " + str(self.shape) + " and " + str(A.shape))
         
-        (rowInds, colInds) = A.nonzero()
-            
-        for i in range(rowInds.shape[0]): 
-            result.thisPtr.insertVal(rowInds[i], colInds[i], result.thisPtr.coeff(rowInds[i], colInds[i]) - A.thisPtr.coeff(rowInds[i], colInds[i]))
-            
-        return result 
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.subtract(deref(A.thisPtr)))
+        return result    
      
     def hadamard(self, csarray[DataType] A): 
         """
         Find the element-wise matrix (hadamard) product. 
         """
-        cdef csarray[DataType] result = csarray[DataType](A.shape)
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
-        cdef unsigned int i
+        if self.shape != A.shape: 
+            raise ValueError("Cannot elementwise multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape))
         
-        if A.getnnz() < self.getnnz(): 
-            (rowInds, colInds) = A.nonzero()
-        else: 
-            (rowInds, colInds) = self.nonzero()
-            
-        for i in range(rowInds.shape[0]): 
-            result.thisPtr.insertVal(rowInds[i], colInds[i], self.thisPtr.coeff(rowInds[i], colInds[i]) * A.thisPtr.coeff(rowInds[i], colInds[i]))
-            
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.hadamard(deref(A.thisPtr)))
         return result 
 
     def compress(self): 
@@ -479,10 +463,43 @@ cdef template[DataType] class csarray:
         Reserve n nonzero entries and turns the matrix into uncompressed mode. 
         """
         self.thisPtr.reserve(n)
-    
+        
+    def dot(self, csarray[DataType] A): 
+        if self.shape[1] != A.shape[0]: 
+            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape))
+        
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.dot(deref(A.thisPtr)))
+        return result 
+        
+    def transpose(self): 
+        """
+        Find the transpose of this matrix. 
+        """
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.trans())
+        return result 
+   
+    #def norm(self, ord="fro"): 
+        """
+        Return the norm of this array. Currently only the Frobenius norm is 
+        supported. 
+        """
+        #return self.thisPtr.norm()
+   
+    def ones(self): 
+        """
+        Fill the array with ones. 
+        """
+        self.thisPtr.fill(1)
+        
+   
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)
     dtype = property(__getDType)
+    T = property(transpose)
 
     

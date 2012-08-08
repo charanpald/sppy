@@ -11,4 +11,5 @@ docs/_build/
 /sparray/test/SparseMatrixExtTest
 /sparray/*.so
 /sparray/*.cpp
+/sparray/*.pyo
 /sparray/csarray_sub.pyx

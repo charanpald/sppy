@@ -1,18 +1,31 @@
 # cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
-from sparray.csarray_sub import csarray_int, csarray_double 
+from sparray.csarray_sub import csarray_int, csarray_double, csarray_float, csarray_long, csarray_short, csarray_signed_char  
+import struct
 import numpy 
 cimport numpy
  
 numpy.import_array()
 
 
-class csarray: 
+class csarray(object): 
     def __init__(self, shape, dtype=numpy.float): 
-        if dtype == numpy.float: 
+        """
+        Create a new csarray using the given shape and dtype. If the dtype is 
+        float or int we assume 64 bits. 
+        """
+        if dtype == numpy.float32: 
+            self._array = csarray_float(shape)        
+        elif dtype == numpy.float64 or dtype==numpy.float: 
             self._array = csarray_double(shape)
-        elif dtype == numpy.int: 
+        elif dtype == numpy.int8: 
+            self._array = csarray_signed_char(shape)    
+        elif dtype == numpy.int16: 
+            self._array = csarray_short(shape)
+        elif dtype == numpy.dtype(int): 
             self._array = csarray_int(shape)
+        elif dtype == numpy.dtype(long) or dtype == numpy.int: 
+            self._array = csarray_long(shape)
         else: 
             raise ValueError("Unknown dtype: " + str(dtype))
             
@@ -31,19 +44,43 @@ class csarray:
         self._array.__setitem__(inds, val) 
         
     def __abs__(self): 
-        return self._array.__abs__()
+        resultArray = self._array.__abs__()
+        result = csarray(resultArray.shape, resultArray.dtype)
+        result._array = resultArray
+        return result
         
     def __neg__(self): 
-        return self._array.__neg__()
+        resultArray = self._array.__neg__()
+        result = csarray(resultArray.shape, resultArray.dtype)
+        result._array = resultArray
+        return result
 
     def __add__(self, A): 
-        return self._array.__add__(A._array)
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.__add__(A._array)
+        return result
         
     def __sub__(self, A): 
-        return self._array.__sub__(A._array)
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.__sub__(A._array)
+        return result
         
     def hadamard(self, A): 
-        return self._array.hadamard(A._array)
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.hadamard(A._array)
+        return result
+        
+    def dot(self, A): 
+        resultArray = self._array.dot(A._array)
+        result = csarray(resultArray.shape, resultArray.dtype)
+        result._array = resultArray
+        return result
+        
+    def transpose(self): 
+        resultArray = self._array.transpose()
+        result = csarray(resultArray.shape, resultArray.dtype)
+        result._array = resultArray
+        return result
         
     def __mul__(self, x):
         newArray = self.copy() 

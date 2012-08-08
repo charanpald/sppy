@@ -653,6 +653,45 @@ class csarrayTest(unittest.TestCase):
        A[1, 3] = 2
        A[3, 3] = 1
        A.compress()
+       
+    def testDot(self): 
+       A = csarray((5, 5))
+       A[0, 1] = 4
+       A[2, 3] = -1.2
+       A[1, 3] = 2
+       A[3, 3] = 1 
+       
+       B = A.dot(A)
+       nptst.assert_array_equal(B.toarray(), A.toarray().dot(A.toarray()))
+       
+       B = self.D.dot(self.D)
+       nptst.assert_array_equal(B.toarray(), self.D.toarray().dot(self.D.toarray()))
+       
+       C = csarray((5, 2))
+       for i in range(5): 
+           for j in range(2): 
+               C[i, j] = 1
+               
+       self.assertRaises(ValueError, C.dot, C)
+       B = A.dot(C)
+       nptst.assert_array_equal(B.toarray(), A.toarray().dot(C.toarray()))        
+       
+
+    def testTranspose(self): 
+        
+       A = csarray((5, 5))
+       A[0, 1] = 4
+       A[2, 3] = -1.2
+       A[1, 3] = 2
+       A[3, 3] = 1 
+       
+       nptst.assert_array_equal(A.transpose().toarray(), A.toarray().T) 
+       nptst.assert_array_equal(self.A.T.toarray(), self.A.toarray().T) 
+       nptst.assert_array_equal(self.B.T.toarray(), self.B.toarray().T)
+       nptst.assert_array_equal(self.C.transpose().toarray(), self.C.toarray().T)
+       nptst.assert_array_equal(self.D.transpose().toarray(), self.D.toarray().T)
+       nptst.assert_array_equal(self.E.transpose().toarray(), self.E.toarray().T)
+       nptst.assert_array_equal(self.F.transpose().toarray(), self.F.toarray().T)
 
 if __name__ == "__main__":
     unittest.main()

@@ -54,7 +54,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
     //Have function to give nonzero elements by passing in points to arrays 
     //Input array points must have the same size as the number of nonzeros in this matrix
-    void nonZeroInds(int* array1, int* array2) { 
+    void nonZeroInds(long* array1, long* array2) { 
         int i = 0; 
 
         for (int k=0; k<this->outerSize(); ++k) {

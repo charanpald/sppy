@@ -501,6 +501,6 @@ cdef template[DataType] class csarray:
     size = property(__getSize)
     ndim = property(__getNDim)
     dtype = property(__getDType)
-    T = property(transpose)
+    
 
     

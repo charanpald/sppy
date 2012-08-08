@@ -123,3 +123,4 @@ class csarray(object):
         return self._dtype
     
     dtype = property(__getDType)
+    T = property(transpose)

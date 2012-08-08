@@ -706,6 +706,8 @@ class csarrayTest(unittest.TestCase):
        A[1, 3] = 2
        A[3, 3] = 1 
        
+       self.assertEquals(type(A.T), csarray)
+       
        nptst.assert_array_equal(A.transpose().toarray(), A.toarray().T) 
        nptst.assert_array_equal(self.A.T.toarray(), self.A.toarray().T) 
        nptst.assert_array_equal(self.B.T.toarray(), self.B.toarray().T)

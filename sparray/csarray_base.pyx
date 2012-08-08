@@ -28,7 +28,7 @@ cdef extern from "include/SparseMatrixExt.h":
       void insertVal(int, int, T) 
       void fill(T)
       void makeCompressed()
-      void nonZeroInds(int*, int*)
+      void nonZeroInds(long*, long*)
       void printValues()
       void reserve(int)
       void scalarMultiply(double)
@@ -165,8 +165,8 @@ cdef template[DataType] class csarray:
         """
         Return a tuple of arrays corresponding to nonzero elements. 
         """
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int32) 
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int32)  
+        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int64) 
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int64)  
         
         if self.getnnz() != 0:
             self.thisPtr.nonZeroInds(&rowInds[0], &colInds[0])
@@ -212,8 +212,8 @@ cdef template[DataType] class csarray:
         then we sum along the axis. 
         """
         cdef numpy.ndarray[double, ndim=1, mode="c"] result    
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
         cdef unsigned int i
         
         if axis==None: 
@@ -305,8 +305,8 @@ cdef template[DataType] class csarray:
         Convert this sparse matrix into a numpy array. 
         """
         cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros(self.shape, numpy.float)
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
         cdef unsigned int i
         
         (rowInds, colInds) = self.nonzero()
@@ -321,8 +321,8 @@ cdef template[DataType] class csarray:
         """
         Find the minimum element of this array. 
         """
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
         cdef unsigned int i
         cdef DataType minVal 
         
@@ -346,8 +346,8 @@ cdef template[DataType] class csarray:
         """
         Find the maximum element of this array. 
         """
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
         cdef unsigned int i
         cdef DataType maxVal
         
@@ -372,8 +372,8 @@ cdef template[DataType] class csarray:
         Return the variance of the elements of this array. 
         """
         cdef double mean = self.mean() 
-        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
         cdef unsigned int i
         cdef double result = 0
         

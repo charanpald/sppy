@@ -193,16 +193,18 @@ cdef template[DataType] class csarray:
             self.thisPtr.insertVal(i, j, val) 
 
     
-    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None , numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
+    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds not None, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds not None): 
         """
         Select rowInds and colInds
         """
         cdef unsigned int ix 
         self.reserve(len(rowInds))
-        for ix in range(len(rowInds)): 
-            if type(val) == numpy.ndarray: 
+        
+        if type(val) == numpy.ndarray: 
+            for ix in range(len(rowInds)): 
                 self.thisPtr.insertVal(rowInds[ix], colInds[ix], val[ix])
-            else: 
+        else:
+            for ix in range(len(rowInds)): 
                 self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)
             
 

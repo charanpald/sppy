@@ -2,8 +2,7 @@ import logging
 import sys
 import numpy
 from apgl.util import *
-from sparray.csr_array import csr_array 
-from sparray.dyn_array import dyn_array 
+from sparray import csarray
 from pysparse import spmatrix
 from apgl.util.PySparseUtils import PySparseUtils 
 
@@ -25,10 +24,13 @@ class arrayProfile():
         self.k = 1000
     
     def profilePut(self):
+        self.rowInds = self.rowInds.tolist()
+        self.colInds = self.colInds.tolist()        
+        
         def runPut(): 
             
             for i in range(self.k):         
-                A = csr_array((self.N, self.N))
+                A = csarray((self.N, self.N))
                 #A[(self.rowInds, self.colInds)] = self.val 
                 A.put(self.val, self.rowInds, self.colInds)
         
@@ -122,9 +124,10 @@ class arrayProfile():
         ProfileUtils.profile('runNonZeros()', globals(), locals())
 
 profiler = arrayProfile()
+profiler.profilePut()
 #profiler.profileSlicePys()
 #profiler.profileSliceSpa()
 #profiler.profileSumPys()
 #profiler.profileSumSpa()
 #profiler.profileGetNonZerosPys()
-profiler.profileGetNonZerosSpa()
+#profiler.profileGetNonZerosSpa()

@@ -6,7 +6,7 @@
 Welcome to sparray's documentation!
 ===================================
 
-The aim of the sparray project is to implement a fast sparse array library by wrapping the corresponding parts of Eigen in Python. The interface is similar to numpy so that existing code requires minimal change to work with sparse arrays.
+SpArray is a fast sparse matrix/array library written in Python and based on the C++ matrix library Eigen. A sparse matrix is one in which many of the elements are zeros, and by storing only non-zero elements, one can often make memory and computational savings over dense matrices which store all elements. The library supports (compressed) sparse matrices and a number of linear algebra operations. Furthermore, SpArray has a similar interface to numpy so that existing code requires minimal change to work with sparse matrices.
 
 Downloading
 -----------
@@ -14,7 +14,7 @@ Download for Windows, Linux or Mac OS using:
 
 -  `The Python Package Index (PyPI) <http://pypi.python.org/pypi/sparray/>`_ 
 
-To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_ and `Eigen 3.1 or higher <http://eigen.tuxfamily.org/>`_. The code has been verified on Python 2.7.2, Numpy 1.6.1 and Eigen 3.1.1. The automatic testing routine requires Python 2.7 or later. The source code repository is available at `github <https://github.com/charanpald/sparray>`_ for those that want the bleeding edge, or are interested in development.  
+To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_ and `Eigen 3.1 or higher <http://eigen.tuxfamily.org/>`_. The code has been verified on Python 2.7.2, Numpy 1.6.1 and Eigen 3.1.1 on Ubuntu 12.04. The automatic testing routine requires Python 2.7 or later. The source code repository is available at `github <https://github.com/charanpald/sparray>`_ for those that want the bleeding edge, or are interested in development.  
 
 Installation 
 -------------
@@ -39,9 +39,9 @@ In order to test the library (recommended), using the following commands in pyth
 
 and check that all tested pass. 
 
-Examples 
---------
-A good way to learn about the features of the library is to look at the source code, in particular :doc:`csarray`. More complete documentation is forthcoming, but for now here are some examples
+Getting Started 
+---------------
+A good way to learn about the features of the library is to look at the source code, in particular :doc:`csarray` which is the sparse matrix class. More complete documentation is forthcoming, but for now here are some examples
 
 :: 
 

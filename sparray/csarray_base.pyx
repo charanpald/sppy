@@ -193,7 +193,7 @@ cdef template[DataType] class csarray:
             self.thisPtr.insertVal(i, j, val) 
 
     
-    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds not None, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds not None): 
+    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None, numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
         """
         Select rowInds and colInds
         """

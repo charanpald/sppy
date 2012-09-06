@@ -1,30 +1,32 @@
-.. sparray documentation master file, created by
+.. SpPy documentation master file, created by
    sphinx-quickstart on Sun May 27 11:59:41 2012.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to sparray's documentation!
+Welcome to SpPy's documentation!
 ===================================
 
-SpArray is a fast sparse matrix/array library written in Python and based on the C++ matrix library Eigen. A sparse matrix is one in which many of the elements are zeros, and by storing only non-zero elements, one can often make memory and computational savings over dense matrices which store all elements. The library supports (compressed) sparse matrices and a number of linear algebra operations. Furthermore, SpArray has a similar interface to numpy so that existing code requires minimal change to work with sparse matrices.
+SpPy is a fast sparse matrix/array library written in Python and based on the C++ matrix library Eigen. A sparse matrix is one in which many of the elements are zeros, and by storing only non-zero elements, one can often make memory and computational savings over dense matrices which store all elements. The library supports (compressed) sparse matrices and a number of linear algebra operations. Furthermore, SpPy has a similar interface to numpy so that existing code requires minimal change to work with sparse matrices.
+
+Update: this project was formerly called sparray, but there was an existing project with that name. 
 
 Downloading
 -----------
 Download for Windows, Linux or Mac OS using: 
 
--  `The Python Package Index (PyPI) <http://pypi.python.org/pypi/sparray/>`_ 
+-  `The Python Package Index (PyPI) <http://pypi.python.org/pypi/SpPy/>`_ 
 
-To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_ and `Eigen 3.1 or higher <http://eigen.tuxfamily.org/>`_. The code has been verified on Python 2.7.2, Numpy 1.6.1 and Eigen 3.1.1 on Ubuntu 12.04. The automatic testing routine requires Python 2.7 or later. The source code repository is available at `github <https://github.com/charanpald/sparray>`_ for those that want the bleeding edge, or are interested in development.  
+To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_ and `Eigen 3.1 or higher <http://eigen.tuxfamily.org/>`_. The code has been verified on Python 2.7.2, Numpy 1.6.1 and Eigen 3.1.1 on Ubuntu 12.04. The automatic testing routine requires Python 2.7 or later. The source code repository is available at `github <https://github.com/charanpald/SpPy>`_ for those that want the bleeding edge, or are interested in development.  
 
 Installation 
 -------------
-Ensure that `pip <http://pypi.python.org/pypi/pip>`_ is installed, and then install sparray in the following way: 
+Ensure that `pip <http://pypi.python.org/pypi/pip>`_ is installed, and then install SpPy in the following way: 
 
 ::
 
-	pip install sparray
+	pip install sppy
 
-If installing from source unzip the sparray-x.y.z.tar.gz file and then run setup.py as follows: 
+If installing from source unzip the SpPy-x.y.z.tar.gz file and then run setup.py as follows: 
 
 ::
 
@@ -34,8 +36,8 @@ In order to test the library (recommended), using the following commands in pyth
 
 ::
 
-	import sparray 
-	sparray.test() 
+	import sppy 
+	sppy.test() 
 
 and check that all tested pass. 
 
@@ -46,7 +48,7 @@ A good way to learn about the features of the library is to look at the source c
 :: 
 
     >>> import numpy 
-    >>> from sparray import csarray 
+    >>> from sppy import csarray 
     >>> #Create a new column major dynamic array of float type
     >>> B = csarray((5, 5)) 
     >>> B[3, 3] = -0.2

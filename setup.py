@@ -13,23 +13,23 @@ def execfile3(file, globals=globals(), locals=locals()):
     with open(file, "r") as fh:
         exec(fh.read()+"\n", globals, locals)
 
-execfile3('sparray/version.py')
+execfile3('sppy/version.py')
 
 cmdclass = { }
 
 if use_cython:
-    ext_modules=[Extension("sparray.csarray", ["sparray/csarray.pyx"], language="c++"), Extension("sparray.csarray_sub", ["sparray/csarray_sub.pyx"], language="c++")]  
+    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++"), Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++")]  
     cmdclass.update({ 'build_ext': build_ext })
 else:
-    ext_modules = [Extension("sparray.csarray", [ "sparray/csarray.cpp" ]), Extension("sparray.csarray_sub", ["sparray/csarray_sub.cpp"])] 
+    ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"])] 
 
-setup(name = 'sparray',
+setup(name = 'sppy',
       version = __version__,
       author = 'Charanpal Dhanjal',
       author_email = 'charanpal@gmail.com',
-      packages = ['sparray', 'sparray.test'],
+      packages = ['sppy', 'sppy.test'],
       install_requires=['numpy>=1.5.0'],
-      url = 'http://packages.python.org/sparray/',
+      url = 'http://packages.python.org/sppy/',
       license = 'GNU Library or Lesser General Public License (LGPL)',
       platforms=["OS Independent"],
       keywords=['numpy', 'sparse matrix'],

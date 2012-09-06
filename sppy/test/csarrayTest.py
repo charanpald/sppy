@@ -5,7 +5,7 @@ import numpy
 import numpy.testing as nptst 
 import math 
 
-from sparray import csarray 
+from sppy import csarray 
 
 class csarrayTest(unittest.TestCase):
     def setUp(self):

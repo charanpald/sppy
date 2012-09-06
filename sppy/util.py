@@ -1,5 +1,5 @@
 import numpy 
-from sparray import csarray 
+from sppy import csarray 
 
 """
 Some utility function to create sparse arrays. 

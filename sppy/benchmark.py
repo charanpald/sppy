@@ -1,11 +1,11 @@
 """
-Compare the performance of sparray and scipy.sparse. 
+Compare the performance of sppy and scipy.sparse. 
 """
 import sys 
 import time 
 import numpy 
 import logging 
-from sparray import csarray 
+from sppy import csarray 
 import matplotlib.pyplot as plt 
 from scipy.sparse import csc_matrix, csr_matrix
 

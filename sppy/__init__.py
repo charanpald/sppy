@@ -1,6 +1,6 @@
-from sparray.csarray import csarray
-from sparray.util import diag, eye, rand, ones, zeros
-from sparray.version import __version__
+from sppy.csarray import csarray
+from sppy.util import diag, eye, rand, ones, zeros
+from sppy.version import __version__
 
 def test():
     """

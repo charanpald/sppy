@@ -2,7 +2,7 @@ Downloading
 -----------
 Download for Windows, Linux or Mac OS using: 
 
--  `The Python Package Index (PyPI) <http://pypi.python.org/pypi/SpPy/>`_ 
+-  `The Python Package Index (PyPI) <http://pypi.python.org/pypi/sppy/>`_ 
 
 To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_ and `Eigen 3.1 or higher <http://eigen.tuxfamily.org/>`_. The code has been verified on Python 2.7.2, Numpy 1.6.1 and Eigen 3.1.1 on Ubuntu 12.04. The automatic testing routine requires Python 2.7 or later. The source code repository is available at `github <https://github.com/charanpald/SpPy>`_ for those that want the bleeding edge, or are interested in development.  
 

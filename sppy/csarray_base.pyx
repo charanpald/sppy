@@ -74,11 +74,6 @@ cdef template[DataType] class csarray:
         """
         return self.thisPtr.nonZeros()
         
-    def __getDType(self): 
-        """
-        Get the dtype of this array. 
-        """
-        return numpy.float
         
     def __getitem__(self, inds):
         """
@@ -502,7 +497,6 @@ cdef template[DataType] class csarray:
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)
-    dtype = property(__getDType)
     
 
     

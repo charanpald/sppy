@@ -1,6 +1,7 @@
 *.o 
 *.so 
 *.pyc
+*~
 sppy.egg-info/
 build/
 docs/_build/

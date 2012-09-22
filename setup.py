@@ -18,10 +18,10 @@ execfile3('sppy/version.py')
 cmdclass = { }
 
 if use_cython:
-    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++"), Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++")]  
+    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++"), Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++"), Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++")]  
     cmdclass.update({ 'build_ext': build_ext })
 else:
-    ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"])] 
+    ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"]), Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.cpp"])] 
 
 setup(name = 'sppy',
       version = __version__,

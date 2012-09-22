@@ -46,6 +46,18 @@ class csarrayTest(unittest.TestCase):
         self.F[2, 1] = -5 
         self.F[3, 1] = 5
         
+        self.a = csarray(10, dtype=numpy.float)
+        self.a[0] = 23 
+        self.a[3] = 1.2
+        self.a[4] = -8
+        
+        self.b = csarray(10, dtype=numpy.int)
+        self.b[0] = 23 
+        self.b[5] = 1
+        self.b[8] = -8
+        
+        self.c = csarray((3, ), dtype=numpy.float)
+        
     def testInit(self): 
         A = csarray((5, 7))
         self.assertEquals(A.shape, (5, 7))
@@ -59,9 +71,15 @@ class csarrayTest(unittest.TestCase):
         A = csarray((0, 0))
         self.assertEquals(A.shape, (0, 0))
         
+        a = csarray((5))
+        self.assertEquals(a.shape, (5,))
+        
+        a = csarray(0)
+        self.assertEquals(a.shape, (0,))
+        
         #Test bad input params 
-        self.assertRaises(IndexError, csarray, (0,))
-        self.assertRaises(ValueError, csarray, 0)
+        self.assertRaises(ValueError, csarray, (0,1,2))
+        self.assertRaises(ValueError, csarray, "a")
         
         #TODO: Test other dtypes 
         A = csarray((5, 5))
@@ -73,6 +91,11 @@ class csarrayTest(unittest.TestCase):
         
         #Test assignment with a numpy array 
         A = numpy.array([[3.1, 0, 100], [1.11, 0, 4], [0, 0, 5.2]])
+        B = csarray(A)
+        
+        nptst.assert_array_equal(B.toarray(), A)
+        
+        A = numpy.array([3.1, 0, 100])
         B = csarray(A)
         
         nptst.assert_array_equal(B.toarray(), A)
@@ -92,6 +115,11 @@ class csarrayTest(unittest.TestCase):
         
         self.assertEquals(F[0, 0], 23.1)
         
+        #This doesn't work as we can't instantiate using an array 
+        #b = csarray(self.b, numpy.int)
+        
+        #for i in range(b.shape[0]): 
+        #    self.assertEquals(b[i], int(self.b[i]))
         
     def testNDim(self): 
         A = csarray((5, 7))
@@ -99,12 +127,19 @@ class csarrayTest(unittest.TestCase):
         
         A = csarray((0, 0))
         self.assertEquals(A.ndim, 2)
+        
+        self.assertEquals(self.a.ndim, 1)
+        self.assertEquals(self.b.ndim, 1)
     
     def testSize(self): 
         self.assertEquals(self.A.size, 25)
         self.assertEquals(self.B.size, 35)
         self.assertEquals(self.C.size, 10000)
         self.assertEquals(self.F.size, 36)
+        
+        self.assertEquals(self.a.size, 10)
+        self.assertEquals(self.b.size, 10)
+        self.assertEquals(self.c.size, 3)
         
     def testGetnnz(self): 
        A = csarray((5, 7))
@@ -142,6 +177,10 @@ class csarrayTest(unittest.TestCase):
        self.assertEquals(self.B.getnnz(), 5)
        self.assertEquals(self.C.getnnz(), 5)
        self.assertEquals(self.F.getnnz(), 5)
+       
+       self.assertEquals(self.a.getnnz(), 3)
+       self.assertEquals(self.b.getnnz(), 3)
+       self.assertEquals(self.c.getnnz(), 0)
     
     def testSetItem(self):
         nrow = 5 

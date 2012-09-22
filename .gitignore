@@ -10,4 +10,5 @@ docs/_build/
 /sppy/*.so
 /sppy/*.cpp
 /sppy/*.pyo
-/sppy/*.pyx
+/sppy/csarray1d_sub.pyx
+/sppy/test/SparseVectorExtTest

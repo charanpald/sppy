@@ -58,6 +58,8 @@ class csarrayTest(unittest.TestCase):
         
         self.c = csarray((3, ), dtype=numpy.float)
         
+        self.d = csarray((0, ), dtype=numpy.float)
+        
     def testInit(self): 
         A = csarray((5, 7))
         self.assertEquals(A.shape, (5, 7))
@@ -194,6 +196,15 @@ class csarrayTest(unittest.TestCase):
         self.assertAlmostEquals(A[1, 3], 5.2)
         self.assertAlmostEquals(A[3, 3], -0.2)
         
+        a = csarray(nrow)
+        a[0] = 1
+        a[1] = 5.2
+        a[3] = -0.2
+        
+        self.assertEquals(a[0], 1)
+        self.assertAlmostEquals(a[1], 5.2)
+        self.assertAlmostEquals(a[3], -0.2)
+        
         for i in range(nrow): 
             for j in range(ncol): 
                 if (i, j) != (0, 1) and (i, j) != (1, 3) and (i, j) != (3, 3): 
@@ -204,6 +215,7 @@ class csarrayTest(unittest.TestCase):
         self.assertRaises(ValueError, A.__setitem__, (1, 100), 1)   
         self.assertRaises(ValueError, A.__setitem__, (-1, 1), 1)   
         self.assertRaises(ValueError, A.__setitem__, (0, -1), 1) 
+        self.assertRaises(ValueError, a.__setitem__, (0, 0), 1) 
         
         result = A[(numpy.array([0, 1, 3]), numpy.array([1, 3, 3]))] 
         self.assertEquals(result[0], 1)
@@ -221,6 +233,9 @@ class csarrayTest(unittest.TestCase):
                 if (i, j) != (0, 1) and (i, j) != (1, 3) and (i, j) != (3, 3): 
                     self.assertEquals(A[i, j], 0)
                     
+        a[0] = 10
+        self.assertEquals(a[0], 10)
+                    
         #Try setting items with arrays 
         A = csarray((nrow, ncol))
         A[numpy.array([0, 1]), numpy.array([2, 3])] = numpy.array([1.2, 2.4])
@@ -233,6 +248,12 @@ class csarrayTest(unittest.TestCase):
         
         self.assertEquals(A[2, 2], 5)
         self.assertEquals(A[4, 3], 5)
+        
+        a = csarray(nrow)
+        a[numpy.array([0, 2])] = numpy.array([1.2, 2.4])
+        self.assertEquals(a.getnnz(), 2)
+        self.assertEquals(a[0], 1.2)
+        self.assertEquals(a[2], 2.4)
        
        
     def testStr(self): 
@@ -252,6 +273,15 @@ class csarrayTest(unittest.TestCase):
         B = csarray((5, 5))
         outputStr = "csarray dtype:float64 shape:(5, 5) non-zeros:0\n" 
         self.assertEquals(str(B), outputStr) 
+        
+        outputStr = "csarray dtype:float64 shape:(10,) non-zeros:3\n"
+        outputStr +="(0) 23.0\n"
+        outputStr +="(3) 1.2\n"
+        outputStr +="(4) -8.0"
+        self.assertEquals(str(self.a), outputStr) 
+        
+        outputStr = "csarray dtype:float64 shape:(3,) non-zeros:0\n" 
+        self.assertEquals(str(self.c), outputStr) 
 
     def testSum(self): 
         nrow = 5 
@@ -279,6 +309,10 @@ class csarrayTest(unittest.TestCase):
         
         self.assertEquals(self.F.sum(), 10)
         
+        self.assertEquals(self.a.sum(), 16.2)
+        self.assertEquals(self.b.sum(), 16)
+        self.assertEquals(self.c.sum(), 0)
+        
         #Test sum along axes 
         nptst.assert_array_equal(self.A.sum(0), numpy.zeros(5))
         nptst.assert_array_equal(self.B.sum(0), numpy.array([0, 1, 0, 5, 12.2, 0, -1.23])) 
@@ -294,9 +328,16 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(self.B[3, 3], -0.2)
         self.assertEquals(self.B.getnnz(), 5)
         
+        self.assertEquals(self.a[0], 23)
+        self.assertEquals(self.a[3], 1.2)
+        self.assertEquals(self.a[4], -8)
+        self.assertEquals(self.a.getnnz(), 3)
+        
         #Test negative indices 
         self.assertEquals(self.B[-5, -6], 1)
         self.assertEquals(self.B[-1, -3], 12.2)
+        
+        self.assertEquals(self.b[-2], -8)
         
         self.assertRaises(ValueError, self.B.__getitem__, (20, 1))  
         self.assertRaises(ValueError, self.B.__getitem__, (1, 20))  
@@ -317,6 +358,11 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(C[0], 0)
         self.assertEquals(C[1], 0)
         self.assertEquals(C[2], 0)
+        
+        d = self.a[numpy.array([0, 3, 4])]
+        self.assertEquals(d[0], 23)
+        self.assertEquals(d[1], 1.2)
+        self.assertEquals(d[2], -8)
         
         A = csarray((2, 2))
         self.assertRaises(ValueError, A.__getitem__, (numpy.array([0, 1]), numpy.array([1, 3])))
@@ -364,6 +410,11 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(C[3, 0], -0.2)
         
         self.assertEquals(self.F[0, 0], 23)
+        
+        d = self.a[0:4]
+        self.assertEquals(d.shape, (4, ))
+        self.assertEquals(d[0], 23)
+        self.assertEquals(d[3], 1.2)
                 
     def testSubArray(self): 
         rowInds = numpy.array([0, 1], numpy.int)
@@ -422,6 +473,10 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(self.F.getnnz(), rowInds.shape[0])
         self.assertEquals(self.F.sum(), self.F[rowInds, colInds].sum())
         
+        (inds, ) = self.a.nonzero()
+        for i in range(inds.shape[0]): 
+            self.assertNotEqual(self.a[inds[i]], 0)  
+        
         #Try an array with no non zeros 
         nrow = 5 
         ncol = 7
@@ -432,6 +487,9 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(rowInds.shape[0], 0)
         self.assertEquals(colInds.shape[0], 0)
         
+        (inds, ) = self.c.nonzero()   
+        self.assertEquals(inds.shape[0], 0)
+        
         #Zero size array 
         nrow = 0 
         ncol = 0
@@ -440,6 +498,9 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(A.getnnz(), rowInds.shape[0])
         self.assertEquals(rowInds.shape[0], 0)
         self.assertEquals(colInds.shape[0], 0)
+        
+        (inds, ) = self.d.nonzero()
+        self.assertEquals(inds.shape[0], 0)
 
     def testDiag(self): 
         nptst.assert_array_equal(self.A.diag(), numpy.zeros(5))
@@ -481,6 +542,11 @@ class csarrayTest(unittest.TestCase):
         nptst.assert_array_equal(self.C.mean(1), self.C.sum(1)/self.C.shape[1])
         nptst.assert_array_equal(self.D.mean(1), self.D.sum(1)/self.D.shape[1])
         nptst.assert_array_equal(self.F.mean(1), self.F.sum(1)/float(self.F.shape[1]))
+        
+        self.assertEquals(self.a.mean(), 1.6199999999999999)
+        self.assertEquals(self.b.mean(), 1.6)
+        self.assertEquals(self.c.mean(), 0.0)
+        self.assertTrue(math.isnan(self.d.mean()))
     
     def testCopy(self): 
         A = csarray((5, 5)) 
@@ -512,6 +578,9 @@ class csarrayTest(unittest.TestCase):
         F[0, 0] = -15
         self.assertEquals(F[0, 0], -15)
         self.assertEquals(self.F[0, 0], 23)
+        
+        #Now try with 1d arrays 
+        #a2 = self.a.copy()
         
     def testMultiply(self): 
         val = 2.0 
@@ -619,6 +688,9 @@ class csarrayTest(unittest.TestCase):
        nptst.assert_array_equal(abs(self.D).toarray(), abs(self.D.toarray()))
        
        nptst.assert_array_equal(abs(self.F).toarray(), abs(self.F.toarray()))
+       
+       print(abs(self.a))
+       nptst.assert_array_equal(abs(self.a).toarray(), abs(self.a.toarray()))
        
     def testNeg(self): 
        nptst.assert_array_equal((-self.A).toarray(), -self.A.toarray())

@@ -75,6 +75,11 @@ class SparseVectorExt:public SparseVector<T> {
                 }
             }    
         }
+
+    SparseVectorExt<T, S> abs() { 
+        SparseVector<T, S> A = this-> cwiseAbs();
+        return (SparseVectorExt<T, S>)A; 
+        }
 /*
     void scalarMultiply(double d) { 
         (*this)*=d; 
@@ -102,10 +107,7 @@ class SparseVectorExt:public SparseVector<T> {
         return (SparseVectorExt<T, S>)A; 
         }
 
-    SparseVectorExt<T, S> abs() { 
-        SparseVector<T, S> A = this-> cwiseAbs();
-        return (SparseVectorExt<T, S>)A; 
-        }
+
     
     SparseVectorExt<T, S> hadamard(SparseVectorExt const& other) { 
         return (SparseVectorExt<T, S>)this->cwiseProduct(other); 

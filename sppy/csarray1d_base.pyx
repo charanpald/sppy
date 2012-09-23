@@ -8,14 +8,13 @@ numpy.import_array()
 cdef extern from "include/SparseVectorExt.h":  
    cdef cppclass SparseVectorExt[T]:  
       #SparseVectorExt() 
-      #SparseVectorExt(SparseVectorExt[T]) 
+      SparseVectorExt(SparseVectorExt[T]) 
       SparseVectorExt(int)
 #      double norm()
-#      int cols() 
       int nonZeros()
       int rows()
       int size() 
-#      SparseVectorExt[T] abs()
+      SparseVectorExt[T] abs()
 #      SparseVectorExt[T] add(SparseVectorExt[T]&)
 #      SparseVectorExt[T] dot(SparseVectorExt[T]&)
 #      SparseVectorExt[T] hadamard(SparseVectorExt[T]&)
@@ -24,12 +23,11 @@ cdef extern from "include/SparseVectorExt.h":
 #      SparseVectorExt[T] trans()
       T coeff(int)
 #      T sum()
-#      T sumValues()
+      T sumValues()
       void insertVal(int, T) 
 #      void fill(T)
 #      void makeCompressed()
       void nonZeroInds(long*)
-#      void printValues()
       void reserve(int)
 #      void scalarMultiply(double)
       void slice(int*, int, SparseVectorExt[T]*) 
@@ -37,7 +35,7 @@ cdef extern from "include/SparseVectorExt.h":
       
 cdef template[DataType] class csarray1d:
     cdef SparseVectorExt[DataType] *thisPtr     
-    def __cinit__(self, shape):
+    def __cinit__(self, int shape):
         """
         Create a new column major dynamic array.
         """
@@ -45,6 +43,7 @@ cdef template[DataType] class csarray1d:
             self.thisPtr = new SparseVectorExt[DataType](shape[0]) 
         else: 
             self.thisPtr = new SparseVectorExt[DataType](shape) 
+            
     def __dealloc__(self): 
         """
         Deallocate the SparseVectorExt object.  
@@ -83,12 +82,15 @@ cdef template[DataType] class csarray1d:
 
         if type(ind) == numpy.ndarray : 
             self.put(val, ind)
-        else:
+        elif type(ind) == int:
             ind = int(ind) 
             if ind < 0 or ind>=self.thisPtr.rows(): 
-                raise ValueError("Invalid row index " + str(ind))       
-            
+                raise ValueError("Invalid index " + str(ind))   
             self.thisPtr.insertVal(ind, val) 
+        else:
+            raise ValueError("Invalid index " + str(ind))  
+            
+            
 
     def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] inds not None): 
         """
@@ -145,8 +147,14 @@ cdef template[DataType] class csarray1d:
          is a slice e.g. a[1:5] then we return the submatrix corresponding to 
         the slice. 
         """        
+        if type(ind) == tuple: 
+            if len(ind)==1: 
+                ind = ind[0]
+            else: 
+                raise ValueError("Invalid input " + str(ind))
         
-        if (type(ind) == numpy.ndarray or type(ind) == slice):
+        
+        if type(ind) == numpy.ndarray or type(ind) == slice:
             indList = []            
             if type(ind) == numpy.ndarray: 
                 indList.append(ind) 
@@ -186,114 +194,44 @@ cdef template[DataType] class csarray1d:
         if inds.shape[0] != 0: 
             self.thisPtr.slice(&indsC[0], indsC.shape[0], result.thisPtr) 
         return result 
-    
+
+    def sum(self, axis=0): 
+        """
+        Sum all of the elements in this array. 
+        """      
+        if axis==0: 
+            return self.thisPtr.sumValues()
+        else:
+            raise ValueError("Invalid axis: " + str(axis))
+            
+        return result 
+
+    def mean(self, axis=0): 
+        """
+        Find the mean value of this array. 
+        """
+        if self.thisPtr.size() != 0:
+            if axis ==0: 
+                return self.sum()/float(self.thisPtr.size())
+        else: 
+            return float("nan")
+
+
+
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)        
         
        
-#    
-#    def __adArraySlice(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
+#    def copy(self): 
 #        """
-#        Array slicing where one passes two arrays of the same length and elements are picked 
-#        according to self[rowInds[i], colInds[i]). 
+#        Return a copied version of this array. 
 #        """
-#        cdef int ix 
-#        cdef numpy.ndarray[numpy.float_t, ndim=1, mode="c"] result = numpy.zeros(rowInds.shape[0])
-#        
-#        if (rowInds >= self.shape[0]).any() or (colInds >= self.shape[1]).any(): 
-#            raise ValueError("Indices out of range")
-#        
-#        for ix in range(rowInds.shape[0]): 
-#                result[ix] = self.thisPtr.coeff(rowInds[ix], colInds[ix])
-#        return result
-#    
-
-#        
-
-#                    
-
-#
-    
-
-            
-#
-#    def sum(self, axis=None): 
-#        """
-#        Sum all of the elements in this array. If one specifies an axis 
-#        then we sum along the axis. 
-#        """
-#        cdef numpy.ndarray[double, ndim=1, mode="c"] result    
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
-#        cdef unsigned int i
-#        
-#        if axis==None: 
-#            """
-#            scalarResult = 0 
-#            (rowInds, colInds) = self.nonzero()
-#            
-#            for i in range(rowInds.shape[0]): 
-#                scalarResult += self.thisPtr.coeff(rowInds[i], colInds[i])  
-#            
-#            return scalarResult
-#            """
-#            return self.thisPtr.sumValues()
-#            #There seems to be a very temporamental problem with thisPtr.sum()
-#            #return self.thisPtr.sum()
-#        elif axis==0: 
-#            result = numpy.zeros(self.shape[1], dtype=numpy.float) 
-#            (rowInds, colInds) = self.nonzero()
-#            
-#            for i in range(rowInds.shape[0]): 
-#                result[colInds[i]] += self.thisPtr.coeff(rowInds[i], colInds[i])   
-#        elif axis==1: 
-#            result = numpy.zeros(self.shape[0], dtype=numpy.float) 
-#            (rowInds, colInds) = self.nonzero()
-#            
-#            for i in range(rowInds.shape[0]): 
-#                result[rowInds[i]] += self.thisPtr.coeff(rowInds[i], colInds[i])  
-#        else:
-#            raise ValueError("Invalid axis: " + str(axis))
-#            
+#        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape)
+#        del result.thisPtr
+#        result.thisPtr = new SparseVectorExt[DataType](deref(self.thisPtr))
 #        return result 
-#                
-#        
-#    def mean(self, axis=None): 
-#        """
-#        Find the mean value of this array. 
-#        """
-#        if self.thisPtr.size() != 0:
-#            if axis ==None: 
-#                return self.sum()/float(self.thisPtr.size())
-#            elif axis == 0: 
-#                return self.sum(0)/float(self.shape[0])
-#            elif axis == 1: 
-#                return self.sum(1)/float(self.shape[1])
-#        else: 
-#            return float("nan")
-#     
-#    def diag(self): 
-#        """
-#        Return a numpy array containing the diagonal entries of this matrix. If 
-#        the matrix is non-square then the diagonal array is the same size as the 
-#        smallest dimension. 
-#        """
-#        cdef unsigned int maxInd = min(self.shape[0], self.shape[1])
-#        cdef unsigned int i   
-#        cdef numpy.ndarray[numpy.float_t, ndim=1, mode="c"] result = numpy.zeros(maxInd)
-#        
-#        for i in range(maxInd): 
-#            result[i] = self.thisPtr.coeff(i, i)
-#            
-#        return result
-#        
-#    def trace(self): 
-#        """
-#        Returns the trace of the array which is simply the sum of the diagonal 
-#        entries. 
-#        """
-#        return self.diag().sum()
+
 #         
 #    def __mul__(self, double x):
 #        """
@@ -303,14 +241,7 @@ cdef template[DataType] class csarray1d:
 #        result.thisPtr.scalarMultiply(x)
 #        return result 
 #        
-#    def copy(self): 
-#        """
-#        Return a copied version of this array. 
-#        """
-#        cdef csarray[DataType] result = csarray[DataType](self.shape)
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](deref(self.thisPtr))
-#        return result 
+
 #        
 
 #        
@@ -394,14 +325,7 @@ cdef template[DataType] class csarray1d:
 #        """
 #        return numpy.sqrt(self.var())
 #        
-#    def __abs__(self): 
-#        """
-#        Return a matrix whose elements are the absolute values of this array. 
-#        """
-#        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.abs())
-#        return result 
+
 #    
 #    def __neg__(self): 
 #        """
@@ -468,14 +392,6 @@ cdef template[DataType] class csarray1d:
 #        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.dot(deref(A.thisPtr)))
 #        return result 
 #        
-#    def transpose(self): 
-#        """
-#        Find the transpose of this matrix. 
-#        """
-#        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.trans())
-#        return result 
 #   
 #    #def norm(self, ord="fro"): 
 #        """
@@ -492,6 +408,13 @@ cdef template[DataType] class csarray1d:
 #        
    
 
-    
+#        def __abs__(self): 
+#        """
+#        Return a matrix whose elements are the absolute values of this array. 
+#        """
+#        cdef csarray1d[DataType] result = csarray1d[DataType]((self.shape[1], self.shape[0]))
+#        del result.thisPtr
+#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.abs())
+#        return result 
 
     

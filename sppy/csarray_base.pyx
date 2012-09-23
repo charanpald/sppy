@@ -214,15 +214,6 @@ cdef template[DataType] class csarray:
         cdef unsigned int i
         
         if axis==None: 
-            """
-            scalarResult = 0 
-            (rowInds, colInds) = self.nonzero()
-            
-            for i in range(rowInds.shape[0]): 
-                scalarResult += self.thisPtr.coeff(rowInds[i], colInds[i])  
-            
-            return scalarResult
-            """
             return self.thisPtr.sumValues()
             #There seems to be a very temporamental problem with thisPtr.sum()
             #return self.thisPtr.sum()
@@ -397,7 +388,7 @@ cdef template[DataType] class csarray:
         """
         Return a matrix whose elements are the absolute values of this array. 
         """
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
+        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], self.shape[1]))
         del result.thisPtr
         result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.abs())
         return result 

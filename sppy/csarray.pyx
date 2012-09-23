@@ -132,14 +132,24 @@ class csarray(object):
         Return a string representation of the non-zero elements of the array. 
         """
         outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + "\n"
-        (rowInds, colInds) = self.nonzero()
-        vals = self[rowInds, colInds]
         
-        for i in range(self.getnnz()): 
-            outputStr += "(" + str(rowInds[i]) + ", " + str(colInds[i]) + ")" + " " + str(vals[i]) 
-            if i != self.getnnz()-1: 
-                outputStr += "\n"
-        
+        if self.ndim == 2: 
+            (rowInds, colInds) = self.nonzero()
+            vals = self[rowInds, colInds]
+            
+            for i in range(self.getnnz()): 
+                outputStr += "(" + str(rowInds[i]) + ", " + str(colInds[i]) + ")" + " " + str(vals[i]) 
+                if i != self.getnnz()-1: 
+                    outputStr += "\n"
+        else: 
+            inds = self.nonzero()[0]
+            vals = self[inds]
+            
+            for i in range(self.getnnz()): 
+                outputStr += "(" + str(inds[i]) + ")" + " " + str(vals[i]) 
+                if i != self.getnnz()-1: 
+                    outputStr += "\n"
+                    
         return outputStr 
     
     def __getDType(self): 

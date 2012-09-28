@@ -580,7 +580,15 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(self.F[0, 0], 23)
         
         #Now try with 1d arrays 
-        #a2 = self.a.copy()
+        a2 = self.a.copy()
+        self.a[0] = 10
+        self.a[3] = 1
+        self.a[4] = 2
+        
+        self.assertEquals(a2[0], 23)
+        self.assertEquals(a2[3], 1.2)
+        self.assertEquals(a2[4], -8)
+        
         
     def testMultiply(self): 
         val = 2.0 
@@ -601,6 +609,12 @@ class csarrayTest(unittest.TestCase):
         G = self.F*val 
         self.assertEquals(self.F[0, 0], 23)
         self.assertEquals(G[0, 0], 46)
+        
+        #Now with vectors 
+        a2 = self.a*val 
+        self.assertEquals(a2[0], self.a[0]*val)
+        self.assertEquals(a2[3], self.a[3]*val)
+        self.assertEquals(a2[4], self.a[4]*val)
 
     def testTrace(self): 
         self.assertEquals(self.A.trace(), 0)
@@ -646,6 +660,23 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(F[3, 1], 5)
         self.assertAlmostEquals(F.sum(), self.F.sum())
         
+        #Vectors 
+        a2 = self.a.toarray()
+        self.assertEquals(type(a2), numpy.ndarray)
+        self.assertEquals(a2.shape, self.a.shape)
+        self.assertEquals(a2[0], 23)
+        self.assertEquals(a2[3], 1.2)
+        self.assertEquals(a2[4], -8)
+        self.assertAlmostEquals(a2.sum(), self.a.sum())
+        
+        b2 = self.b.toarray()
+        self.assertEquals(type(b2), numpy.ndarray)
+        self.assertEquals(b2.shape, self.b.shape)
+        self.assertEquals(b2[0], 23)
+        self.assertEquals(b2[5], 1)
+        self.assertEquals(b2[8], -8)
+        self.assertAlmostEquals(b2.sum(), self.b.sum())
+        
        
     def testMin(self):
        self.assertEquals(self.A.min(), 0)
@@ -655,6 +686,11 @@ class csarrayTest(unittest.TestCase):
        self.assertTrue(math.isnan(self.E.min()))
        self.assertEquals(self.F.min(), -10)
        
+       self.assertEquals(self.a.min(), -8)
+       self.assertEquals(self.b.min(), -8)
+       self.assertEquals(self.c.min(), 0)
+       self.assertTrue(math.isnan(self.d.min()))
+       
     def testMax(self):
        self.assertEquals(self.A.max(), 0)
        self.assertEquals(self.B.max(), 12.2)
@@ -662,6 +698,11 @@ class csarrayTest(unittest.TestCase):
        self.assertEquals(self.D.max(), 23.1)
        self.assertTrue(math.isnan(self.E.max()))
        self.assertEquals(self.F.max(), 23)
+       
+       self.assertEquals(self.a.max(), 23)
+       self.assertEquals(self.b.max(), 23)
+       self.assertEquals(self.c.max(), 0)
+       self.assertTrue(math.isnan(self.d.max()))
      
     #@unittest.skip("")
     def testVar(self):
@@ -672,6 +713,9 @@ class csarrayTest(unittest.TestCase):
        
        self.assertAlmostEquals(self.F.var(), self.F.toarray().var())
        
+       self.assertAlmostEquals(self.a.var(), self.a.toarray().var())
+       self.assertAlmostEquals(self.b.var(), self.b.toarray().var())
+       
     #@unittest.skip("")
     def testStd(self):
        self.assertEquals(self.A.std(), self.A.toarray().std())
@@ -680,17 +724,19 @@ class csarrayTest(unittest.TestCase):
        self.assertAlmostEquals(self.D.std(), self.D.toarray().std())
        
        self.assertAlmostEquals(self.F.std(), self.F.toarray().std())
+       
+       self.assertAlmostEquals(self.a.std(), self.a.toarray().std())
+       self.assertAlmostEquals(self.b.std(), self.b.toarray().std())
           
     def testAbs(self): 
        nptst.assert_array_equal(abs(self.A).toarray(), abs(self.A.toarray()))
        nptst.assert_array_equal(abs(self.B).toarray(), abs(self.B.toarray()))
        nptst.assert_array_equal(abs(self.C).toarray(), abs(self.C.toarray()))
        nptst.assert_array_equal(abs(self.D).toarray(), abs(self.D.toarray()))
-       
        nptst.assert_array_equal(abs(self.F).toarray(), abs(self.F.toarray()))
        
-       print(abs(self.a))
        nptst.assert_array_equal(abs(self.a).toarray(), abs(self.a.toarray()))
+       nptst.assert_array_equal(abs(self.b).toarray(), abs(self.b.toarray()))
        
     def testNeg(self): 
        nptst.assert_array_equal((-self.A).toarray(), -self.A.toarray())
@@ -699,6 +745,9 @@ class csarrayTest(unittest.TestCase):
        nptst.assert_array_equal((-self.D).toarray(), -self.D.toarray())
        
        nptst.assert_array_equal((-self.F).toarray(), -self.F.toarray())
+       
+       nptst.assert_array_equal((-self.a).toarray(), -self.a.toarray())
+       nptst.assert_array_equal((-self.b).toarray(), -self.b.toarray())
        
     def testAdd(self): 
        #print(self.A.__add__(self.A._array))

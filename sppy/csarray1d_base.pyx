@@ -7,7 +7,7 @@ numpy.import_array()
 
 cdef extern from "include/SparseVectorExt.h":  
    cdef cppclass SparseVectorExt[T]:  
-      #SparseVectorExt() 
+      SparseVectorExt() 
       SparseVectorExt(SparseVectorExt[T]) 
       SparseVectorExt(int)
 #      double norm()
@@ -18,31 +18,35 @@ cdef extern from "include/SparseVectorExt.h":
 #      SparseVectorExt[T] add(SparseVectorExt[T]&)
 #      SparseVectorExt[T] dot(SparseVectorExt[T]&)
 #      SparseVectorExt[T] hadamard(SparseVectorExt[T]&)
-#      SparseVectorExt[T] negate()
+      SparseVectorExt[T] negate()
 #      SparseVectorExt[T] subtract(SparseVectorExt[T]&)
-#      SparseVectorExt[T] trans()
       T coeff(int)
 #      T sum()
       T sumValues()
       void insertVal(int, T) 
 #      void fill(T)
-#      void makeCompressed()
       void nonZeroInds(long*)
       void reserve(int)
-#      void scalarMultiply(double)
+      void scalarMultiply(double)
       void slice(int*, int, SparseVectorExt[T]*) 
       
       
 cdef template[DataType] class csarray1d:
     cdef SparseVectorExt[DataType] *thisPtr     
-    def __cinit__(self, int shape):
+    def __cinit__(self, shape):
         """
         Create a new column major dynamic array.
         """
-        if type(shape) == tuple: 
-            self.thisPtr = new SparseVectorExt[DataType](shape[0]) 
+        cdef int shapeVal         
+        
+        if type(shape) == tuple and len(shape) == 1: 
+            shapeVal = shape[0]
+        elif type(shape) == int: 
+            shapeVal = shape
         else: 
-            self.thisPtr = new SparseVectorExt[DataType](shape) 
+            raise ValueError("Invalid input: " + str(shape))
+            
+        self.thisPtr = new SparseVectorExt[DataType](shapeVal) 
             
     def __dealloc__(self): 
         """
@@ -204,7 +208,6 @@ cdef template[DataType] class csarray1d:
         else:
             raise ValueError("Invalid axis: " + str(axis))
             
-        return result 
 
     def mean(self, axis=0): 
         """
@@ -216,125 +219,123 @@ cdef template[DataType] class csarray1d:
         else: 
             return float("nan")
 
+    def __abs__(self): 
+        """
+        Return a matrix whose elements are the absolute values of this array. 
+        """
+        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.abs())
+        return result 
 
+    def copy(self): 
+        """
+        Return a copied version of this array. 
+        """
+        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape)
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](deref(self.thisPtr))
+        return result 
+
+         
+    def __mul__(self, double x):
+        """
+        Return a new array multiplied by a scalar value x. 
+        """
+        cdef csarray1d[DataType] result = self.copy() 
+        result.thisPtr.scalarMultiply(x)
+        return result 
+
+    def min(self): 
+        """
+        Find the minimum element of this array. 
+        """
+        cdef numpy.ndarray[long, ndim=1, mode="c"] inds
+        cdef unsigned int i
+        cdef DataType minVal 
+        
+        if self.size == 0: 
+            return float("nan")
+        elif self.getnnz() != self.size: 
+            minVal = 0 
+        
+        (inds,) = self.nonzero()
+            
+        for i in range(inds.shape[0]): 
+            if self.thisPtr.coeff(inds[i]) < minVal: 
+                minVal = self.thisPtr.coeff(inds[i])
+            
+        return minVal 
+
+    def max(self): 
+        """
+        Find the maximum element of this array. 
+        """
+        cdef numpy.ndarray[long, ndim=1, mode="c"] inds
+        cdef unsigned int i
+        cdef DataType maxVal 
+        
+        if self.size == 0: 
+            return float("nan")
+        elif self.getnnz() != self.size: 
+            maxVal = 0 
+        
+        (inds,) = self.nonzero()
+            
+        for i in range(inds.shape[0]): 
+            if self.thisPtr.coeff(inds[i]) > maxVal: 
+                maxVal = self.thisPtr.coeff(inds[i])
+            
+        return maxVal 
+
+        
+    def var(self): 
+        """
+        Return the variance of the elements of this array. 
+        """
+        cdef double mean = self.mean() 
+        cdef numpy.ndarray[long, ndim=1, mode="c"] inds
+        cdef unsigned int i
+        cdef double result = 0
+        
+        if self.size == 0: 
+            return float("nan")
+        
+        (inds, ) = self.nonzero()
+            
+        for i in range(inds.shape[0]): 
+            result += (self.thisPtr.coeff(inds[i]) - mean)**2
+        
+        result += (self.size - self.getnnz())*mean**2
+        result /= float(self.size)
+        
+        return result 
+    
+    def std(self): 
+        """
+        Return the standard deviation of the array elements. 
+        """
+        return numpy.sqrt(self.var())
+
+        
+
+    
+    def __neg__(self): 
+        """
+        Return the negation of this array. 
+        """
+        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.negate())
+        return result 
 
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)        
         
-       
-#    def copy(self): 
-#        """
-#        Return a copied version of this array. 
-#        """
-#        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape)
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](deref(self.thisPtr))
-#        return result 
 
-#         
-#    def __mul__(self, double x):
-#        """
-#        Return a new array multiplied by a scalar value x. 
-#        """
-#        cdef csarray[DataType] result = self.copy() 
-#        result.thisPtr.scalarMultiply(x)
-#        return result 
-#        
 
-#        
 
-#        
-#        
-#    def min(self): 
-#        """
-#        Find the minimum element of this array. 
-#        """
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
-#        cdef unsigned int i
-#        cdef DataType minVal 
-#        
-#        if self.size == 0: 
-#            return float("nan")
-#        elif self.getnnz() != self.size: 
-#            minVal = 0 
-#        
-#        (rowInds, colInds) = self.nonzero()
-#            
-#        for i in range(rowInds.shape[0]): 
-#            if i == 0: 
-#                minVal = self.thisPtr.coeff(rowInds[i], colInds[i])
-#            
-#            if self.thisPtr.coeff(rowInds[i], colInds[i]) < minVal: 
-#                minVal = self.thisPtr.coeff(rowInds[i], colInds[i])
-#            
-#        return minVal 
-#        
-#    def max(self): 
-#        """
-#        Find the maximum element of this array. 
-#        """
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
-#        cdef unsigned int i
-#        cdef DataType maxVal
-#        
-#        if self.size == 0: 
-#            return float("nan")
-#        elif self.getnnz() != self.size: 
-#            maxVal = 0 
-#        
-#        (rowInds, colInds) = self.nonzero()
-#            
-#        for i in range(rowInds.shape[0]): 
-#            if i == 0: 
-#                maxVal = self.thisPtr.coeff(rowInds[i], colInds[i])            
-#            
-#            if self.thisPtr.coeff(rowInds[i], colInds[i]) > maxVal: 
-#                maxVal = self.thisPtr.coeff(rowInds[i], colInds[i])
-#            
-#        return maxVal 
-#        
-#    def var(self): 
-#        """
-#        Return the variance of the elements of this array. 
-#        """
-#        cdef double mean = self.mean() 
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-#        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
-#        cdef unsigned int i
-#        cdef double result = 0
-#        
-#        if self.size == 0: 
-#            return float("nan")
-#        
-#        (rowInds, colInds) = self.nonzero()
-#            
-#        for i in range(rowInds.shape[0]): 
-#            result += (self.thisPtr.coeff(rowInds[i], colInds[i]) - mean)**2
-#        
-#        result += (self.size - self.getnnz())*mean**2
-#        result /= float(self.size)
-#        
-#        return result 
-#    
-#    def std(self): 
-#        """
-#        Return the standard deviation of the array elements. 
-#        """
-#        return numpy.sqrt(self.var())
-#        
-
-#    
-#    def __neg__(self): 
-#        """
-#        Return the negation of this array. 
-#        """
-#        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.negate())
-#        return result 
 #    
 #
 #    def __add__(csarray[DataType] self, csarray[DataType] A): 
@@ -373,12 +374,7 @@ cdef template[DataType] class csarray1d:
 #        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.hadamard(deref(A.thisPtr)))
 #        return result 
 #
-#    def compress(self): 
-#        """
-#        Turn this matrix into compressed sparse format by freeing extra memory 
-#        space in the buffer. 
-#        """
-#        self.thisPtr.makeCompressed()
+
 #        
 #    
 
@@ -408,13 +404,6 @@ cdef template[DataType] class csarray1d:
 #        
    
 
-#        def __abs__(self): 
-#        """
-#        Return a matrix whose elements are the absolute values of this array. 
-#        """
-#        cdef csarray1d[DataType] result = csarray1d[DataType]((self.shape[1], self.shape[0]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.abs())
-#        return result 
+
 
     

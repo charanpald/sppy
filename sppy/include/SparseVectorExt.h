@@ -76,14 +76,23 @@ class SparseVectorExt:public SparseVector<T> {
             }    
         }
 
-    SparseVectorExt<T, S> abs() { 
-        SparseVector<T, S> A = this-> cwiseAbs();
-        return (SparseVectorExt<T, S>)A; 
+    SparseVectorExt<T> abs() { 
+        SparseVector<T> A = this-> cwiseAbs();
+        return (SparseVectorExt<T>)A; 
         }
-/*
+
     void scalarMultiply(double d) { 
         (*this)*=d; 
         }
+
+
+    SparseVectorExt<T> negate() { 
+        SparseVector<T> A = -(*this);
+        return (SparseVectorExt<T>)A; 
+        }
+
+/*
+
 
     SparseVectorExt<T, S> dot(const SparseVectorExt& other) { 
         return (SparseVectorExt<T, S>)((*this) * other); 
@@ -97,18 +106,7 @@ class SparseVectorExt:public SparseVector<T> {
         return ((SparseVectorExt<T, S>)((*this) - other)); 
         }
 
-    SparseVectorExt<T, S> trans() { 
-        SparseVector<T, S> A = this->transpose();
-        return (SparseVectorExt<T, S>)A; 
-        }
 
-    SparseVectorExt<T, S> negate() { 
-        SparseVector<T, S> A = -(*this);
-        return (SparseVectorExt<T, S>)A; 
-        }
-
-
-    
     SparseVectorExt<T, S> hadamard(SparseVectorExt const& other) { 
         return (SparseVectorExt<T, S>)this->cwiseProduct(other); 
         }

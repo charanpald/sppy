@@ -7,4 +7,5 @@ Changelog
 ---------
 
 Changes in version 0.4: 
+
 * Added support for 1d arrays

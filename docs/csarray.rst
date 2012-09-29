@@ -1,7 +1,7 @@
-csarray
-=======
+Sparse Matrices and Vectors
+===========================
 
-The csarray class represents a 2-dimensional compressed sparse matrix in column major format (row major format is forthcoming). To see more details about the underlying storage mechanism, refer to the `Eigen SparseMatrix page <http://eigen.tuxfamily.org/dox/TutorialSparse.html>`_. 
+The csarray class represents a 1 dimensional sparse vector or a 2-dimensional compressed sparse matrix in column major format (row major format is forthcoming). To see more details about the underlying storage mechanism, refer to the `Eigen SparseMatrix page <http://eigen.tuxfamily.org/dox/TutorialSparse.html>`_. 
 
 Construction
 ------------
@@ -21,6 +21,9 @@ One can also create arrays of int types for example, by using
     >>> import numpy
     >>> from sparray import csarray 
     >>> B = csarray((5, 5), dtype=numpy.int) 
+    >>> b = csarray(5, dtype=numpy.int) 
+
+Notice that b is a 1-dimensional sparse vector.     
     
 The currently supported dtypes are: int8, int16, int32 int64, float32 and float64. An alternative way to construct a csarray is by using an existing numpy array or csarray,
 
@@ -40,7 +43,7 @@ Other ways of creating arrays include the functions zeros, ones, diag, eye: and 
     >>> import sparray
     >>> A = sparray.eye(10) 
     >>> B = sparray.diag(numpy.array([1, 2, 3]) 
-    >>> C = sparray.rand(5, 7, 0.1)
+    >>> C = sparray.rand((5, 7), 0.1)
     >>> D = sparray.zeros((10, 10)) 
     >>> E = sparray.ones((10, 10))  
 
@@ -75,9 +78,9 @@ Many of the same properties can be found in csarray as numpy arrays: B.shape giv
 
 :: 
 
-    >>> A = sparray.rand(5, 7, 0.1) 
-    >>> B = sparray.rand(7, 5, 0.1)
-    >>> C = sparray.rand(5, 7, 0.1)
+    >>> A = sparray.rand((5, 7), 0.1) 
+    >>> B = sparray.rand((7, 5), 0.1)
+    >>> C = sparray.rand((5, 7), 0.1)
     >>> D = csarray(numpy.random.randn(7, 7))
     >>> E = A + C 
     >>> F = A.dot(B) 
@@ -86,5 +89,14 @@ Many of the same properties can be found in csarray as numpy arrays: B.shape giv
     >>> I = B.T
     >>> j = D.trace()
     >>> K = D.toarray()
+    >>> 
+    >>> #Vectors 
+    >>> a = sparray.rand(5, 0.1) 
+    >>> b = sparray.rand(5, 0.1)
+    >>> c = a + b 
+    >>> d = a * b 
+    >>> e = a.dot(b)
+    >>> f = a.toarray()
+    
 
 

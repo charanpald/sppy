@@ -6,14 +6,14 @@
 Welcome to SpPy's documentation!
 ===================================
 
-SpPy is a fast sparse matrix/array library written in Python and based on the C++ matrix library Eigen. A sparse matrix is one in which many of the elements are zeros, and by storing only non-zero elements, one can often make memory and computational savings over dense matrices which store all elements. The library supports (compressed) sparse matrices and a number of linear algebra operations. Furthermore, SpPy has a similar interface to numpy so that existing code requires minimal change to work with sparse matrices.
+SpPy is a fast sparse matrix/array library written in Python and based on the C++ matrix library Eigen. A sparse matrix is one in which many of the elements are zeros, and by storing only non-zero elements, one can often make memory and computational savings over dense matrices which store all elements. The library supports (compressed) sparse matrices, sparse vectors and a number of linear algebra operations. Furthermore, SpPy has a similar interface to numpy so that existing code requires minimal change to work with sparse matrices and vectors.
 
 Update: this project was formerly called sparray. 
 
 
 Getting Started 
 ---------------
-First, read the installation guide in the reference docs linked below. A good way to learn about the features of the library is to look at the source code, in particular :doc:`csarray` which is the sparse matrix class. More complete documentation is forthcoming, but for now here are some examples
+First, read the installation guide in the reference documentation linked below. More complete documentation is forthcoming, but for now here are some examples
 
 :: 
 
@@ -43,10 +43,10 @@ First, read the installation guide in the reference docs linked below. A good wa
     >>> print(B.sum())
     52.57
 
-Reference pages:
+User guide:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    
    install
    csarray

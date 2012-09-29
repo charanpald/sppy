@@ -15,16 +15,16 @@ cdef extern from "include/SparseVectorExt.h":
       int rows()
       int size() 
       SparseVectorExt[T] abs()
-#      SparseVectorExt[T] add(SparseVectorExt[T]&)
-#      SparseVectorExt[T] dot(SparseVectorExt[T]&)
-#      SparseVectorExt[T] hadamard(SparseVectorExt[T]&)
+      SparseVectorExt[T] add(SparseVectorExt[T]&)
+      T dot(SparseVectorExt[T]&)
+      SparseVectorExt[T] hadamard(SparseVectorExt[T]&)
       SparseVectorExt[T] negate()
-#      SparseVectorExt[T] subtract(SparseVectorExt[T]&)
+      SparseVectorExt[T] subtract(SparseVectorExt[T]&)
       T coeff(int)
 #      T sum()
       T sumValues()
       void insertVal(int, T) 
-#      void fill(T)
+      void fill(T)
       void nonZeroInds(long*)
       void reserve(int)
       void scalarMultiply(double)
@@ -317,9 +317,6 @@ cdef template[DataType] class csarray1d:
         """
         return numpy.sqrt(self.var())
 
-        
-
-    
     def __neg__(self): 
         """
         Return the negation of this array. 
@@ -329,81 +326,58 @@ cdef template[DataType] class csarray1d:
         result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.negate())
         return result 
 
+    def __add__(csarray1d[DataType] self, csarray1d[DataType] a): 
+        """
+        Add two matrices together. 
+        """
+        if self.shape != a.shape: 
+            raise ValueError("Cannot add matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+        
+        cdef int shapeVal = self.shape[0]
+        cdef csarray1d[DataType] result = csarray1d[DataType](shapeVal)
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.add(deref(a.thisPtr)))
+        return result    
+        
+    def __sub__(csarray1d[DataType] self, csarray1d[DataType] a): 
+        """
+        Subtract two matrices together. 
+        """
+        if self.shape != a.shape: 
+            raise ValueError("Cannot subtract matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+        
+        cdef int shapeVal = self.shape[0]
+        cdef csarray1d[DataType] result = csarray1d[DataType](shapeVal)
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.subtract(deref(a.thisPtr)))
+        return result 
+
+    def ones(self): 
+        """
+        Fill the array with ones. 
+        """
+        self.thisPtr.fill(1)
+
+    def hadamard(self, csarray1d[DataType] a): 
+        """
+        Find the element-wise matrix (hadamard) product. 
+        """
+        if self.shape != a.shape: 
+            raise ValueError("Cannot elementwise multiply matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+        
+        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.hadamard(deref(a.thisPtr)))
+        return result 
+
+    def dot(self, csarray1d[DataType] a): 
+        if self.shape != a.shape: 
+            raise ValueError("Cannot compute dot product of matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+            
+        return self.thisPtr.dot(deref(a.thisPtr))
+
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)        
-        
 
 
-
-#    
-#
-#    def __add__(csarray[DataType] self, csarray[DataType] A): 
-#        """
-#        Add two matrices together. 
-#        """
-#        if self.shape != A.shape: 
-#            raise ValueError("Cannot add matrices of shapes " + str(self.shape) + " and " + str(A.shape))
-#        
-#        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.add(deref(A.thisPtr)))
-#        return result     
-#        
-#    def __sub__(csarray[DataType] self, csarray[DataType] A): 
-#        """
-#        Subtract one matrix from another.  
-#        """
-#        if self.shape != A.shape: 
-#            raise ValueError("Cannot subtract matrices of shapes " + str(self.shape) + " and " + str(A.shape))
-#        
-#        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.subtract(deref(A.thisPtr)))
-#        return result    
-#     
-#    def hadamard(self, csarray[DataType] A): 
-#        """
-#        Find the element-wise matrix (hadamard) product. 
-#        """
-#        if self.shape != A.shape: 
-#            raise ValueError("Cannot elementwise multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape))
-#        
-#        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.hadamard(deref(A.thisPtr)))
-#        return result 
-#
-
-#        
-#    
-
-#        
-#    def dot(self, csarray[DataType] A): 
-#        if self.shape[1] != A.shape[0]: 
-#            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape))
-#        
-#        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
-#        del result.thisPtr
-#        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.dot(deref(A.thisPtr)))
-#        return result 
-#        
-#   
-#    #def norm(self, ord="fro"): 
-#        """
-#        Return the norm of this array. Currently only the Frobenius norm is 
-#        supported. 
-#        """
-#        #return self.thisPtr.norm()
-#   
-#    def ones(self): 
-#        """
-#        Fill the array with ones. 
-#        """
-#        self.thisPtr.fill(1)
-#        
-   
-
-
-
-    

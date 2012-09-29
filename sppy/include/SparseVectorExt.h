@@ -91,32 +91,26 @@ class SparseVectorExt:public SparseVector<T> {
         return (SparseVectorExt<T>)A; 
         }
 
-/*
-
-
-    SparseVectorExt<T, S> dot(const SparseVectorExt& other) { 
-        return (SparseVectorExt<T, S>)((*this) * other); 
+    SparseVectorExt<T> add(const SparseVectorExt& other) { 
+        return (SparseVectorExt<T>)((*this) + other); 
         }
 
-    SparseVectorExt<T, S> add(const SparseVectorExt& other) { 
-        return (SparseVectorExt<T, S>)((*this) + other); 
-        }
-    
-    SparseVectorExt<T, S> subtract(SparseVectorExt const& other) { 
-        return ((SparseVectorExt<T, S>)((*this) - other)); 
-        }
-
-
-    SparseVectorExt<T, S> hadamard(SparseVectorExt const& other) { 
-        return (SparseVectorExt<T, S>)this->cwiseProduct(other); 
+    SparseVectorExt<T> subtract(SparseVectorExt const& other) { 
+        return ((SparseVectorExt<T>)((*this) - other)); 
         }
 
     void fill(T val) { 
-        this->reserve(this->rows()*this->cols());
         for (int i=0; i<this->rows(); i++) 
-            for (int j=0; j<this->cols(); j++) 
-                this->coeffRef(i, j) = val;
-        }*/
+                this->coeffRef(i) = val;
+        }
+
+    T dot(const SparseVectorExt& other) { 
+        return (T)(this->hadamard(other)).sumValues(); 
+        }
+
+    SparseVectorExt<T> hadamard(SparseVectorExt const& other) { 
+        return (SparseVectorExt<T>)this->cwiseProduct(other); 
+        }
 
   };
 

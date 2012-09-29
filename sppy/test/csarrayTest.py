@@ -770,6 +770,10 @@ class csarrayTest(unittest.TestCase):
        
        nptst.assert_array_equal((A + B).toarray(), A.toarray()+B.toarray())
        
+       nptst.assert_array_equal((self.a + self.a).toarray(), self.a.toarray()*2)
+       nptst.assert_array_equal((self.b + self.b).toarray(), self.b.toarray()*2)
+       nptst.assert_array_equal((self.c + self.c).toarray(), self.c.toarray()*2)
+       
 
     def testSub(self): 
        nptst.assert_array_equal((self.A - self.A).toarray(), self.A.toarray()*0)
@@ -792,6 +796,10 @@ class csarrayTest(unittest.TestCase):
        
        nptst.assert_array_equal((A - B).toarray(), A.toarray()-B.toarray())
        
+       nptst.assert_array_equal((self.a - self.a).toarray(), self.a.toarray()*0)
+       nptst.assert_array_equal((self.b - self.b).toarray(), self.b.toarray()*0)
+       nptst.assert_array_equal((self.c - self.c).toarray(), self.c.toarray()*0)
+              
 
     def testHadamard(self): 
        nptst.assert_array_equal((self.A.hadamard(self.A)).toarray(), (self.A.toarray())**2)
@@ -817,7 +825,10 @@ class csarrayTest(unittest.TestCase):
        
        nptst.assert_array_equal((A.hadamard(B)).toarray(), A.toarray()*B.toarray())
        nptst.assert_array_equal((A.hadamard(C)).toarray(), C.toarray())
- 
+       
+       nptst.assert_array_equal((self.a.hadamard(self.a)).toarray(), (self.a.toarray())**2)
+       nptst.assert_array_equal((self.b.hadamard(self.b)).toarray(), (self.b.toarray())**2)
+       nptst.assert_array_equal((self.c.hadamard(self.c)).toarray(), (self.c.toarray())**2)
 
     def testReserve(self): 
        A = csarray((5, 5))
@@ -857,6 +868,9 @@ class csarrayTest(unittest.TestCase):
        B = A.dot(C)
        nptst.assert_array_equal(B.toarray(), A.toarray().dot(C.toarray()))        
        
+       self.assertEquals((self.a.dot(self.a)), (self.a.dot(self.a)))
+       self.assertEquals((self.b.dot(self.b)), (self.b.dot(self.b)))
+       self.assertEquals((self.c.dot(self.c)), (self.c.dot(self.c)))
 
     def testTranspose(self): 
         
@@ -875,6 +889,13 @@ class csarrayTest(unittest.TestCase):
        nptst.assert_array_equal(self.D.transpose().toarray(), self.D.toarray().T)
        nptst.assert_array_equal(self.E.transpose().toarray(), self.E.toarray().T)
        nptst.assert_array_equal(self.F.transpose().toarray(), self.F.toarray().T)
+
+    def testOnes(self): 
+        self.a.ones()
+        nptst.assert_array_equal(self.a.toarray(), numpy.ones(self.a.shape[0]))
+
+        self.A.ones()
+        nptst.assert_array_equal(self.A.toarray(), numpy.ones(self.A.shape))
 
 if __name__ == "__main__":
     unittest.main()

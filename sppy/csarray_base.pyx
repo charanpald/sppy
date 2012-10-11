@@ -1,5 +1,6 @@
 # cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
+from libcpp.vector cimport vector 
 import numpy 
 cimport numpy
 import cython 
@@ -33,6 +34,7 @@ cdef extern from "include/SparseMatrixExt.h":
       void reserve(int)
       void scalarMultiply(double)
       void slice(int*, int, int*, int, SparseMatrixExt[T]*) 
+      vector[long] getIndsRow(int)
       
       
 cdef template[DataType] class csarray:
@@ -107,6 +109,7 @@ cdef template[DataType] class csarray:
                     indList.append(indArr)
             
             return self.subArray(indList[0], indList[1])
+            #elif (type(i) == int or type(i) == slice) and (type(j) == slice or type(j) == int):    
         else:
             i = int(i) 
             j = int(j)
@@ -161,7 +164,7 @@ cdef template[DataType] class csarray:
         Return a tuple of arrays corresponding to nonzero elements. 
         """
         cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int64) 
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int64)  
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int64)
         
         if self.getnnz() != 0:
             self.thisPtr.nonZeroInds(&rowInds[0], &colInds[0])

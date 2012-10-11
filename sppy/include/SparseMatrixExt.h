@@ -3,6 +3,7 @@
 #define SparseMatrixEXT_H
 #include <iostream>
 #include <eigen3/Eigen/Sparse>
+#include <vector> 
 
 using Eigen::SparseMatrix;
 
@@ -64,6 +65,30 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
             i++; 
             }  
         }
+    }
+
+    std::vector<long> getIndsRow(int row) { 
+        std::vector<long> inds;
+
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
+            if (it.row() == row) { 
+                inds.insert(inds.end(), it.col()); 
+                }
+            }  
+        }
+
+        return inds; 
+    }
+
+    std::vector<long> getIndsCol(int col) { 
+        std::vector<long> inds;
+
+      for (typename SparseMatrixExt<T>::InnerIterator it(*this, col); it; ++it) {
+            inds.insert(inds.end(), it.row());
+        }
+
+        return inds; 
     }
 
     void slice(int* array1, int size1, int* array2, int size2, SparseMatrixExt<T, S> *mat) { 

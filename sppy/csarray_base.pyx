@@ -35,6 +35,8 @@ cdef extern from "include/SparseMatrixExt.h":
       void scalarMultiply(double)
       void slice(int*, int, int*, int, SparseMatrixExt[T]*) 
       vector[long] getIndsRow(int)
+      vector[long] getIndsCol(int)
+      void setZero()
       
       
 cdef template[DataType] class csarray:
@@ -89,14 +91,21 @@ cdef template[DataType] class csarray:
         
         i, j = inds 
         
+        if isinstance(i, list): 
+            i = numpy.array(i, numpy.int)
+        if isinstance(j, list): 
+            j = numpy.array(j, numpy.int)
+        
+        inds = i,j
+        
         if type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
             return self.__adArraySlice(numpy.ascontiguousarray(i, dtype=numpy.int) , numpy.ascontiguousarray(j, dtype=numpy.int) )
-        elif (type(i) == numpy.ndarray or type(i) == slice) and (type(j) == slice or type(j) == numpy.ndarray):
+        elif (type(i) == numpy.ndarray or isinstance(i, slice)) and (isinstance(j, slice) or type(j) == numpy.ndarray):
             indList = []            
             for k, index in enumerate(inds):  
-                if type(index) == numpy.ndarray: 
+                if isinstance(index, numpy.ndarray): 
                     indList.append(index) 
-                elif type(index) == slice: 
+                elif isinstance(index, slice): 
                     if index.start == None: 
                         start = 0
                     else: 
@@ -107,13 +116,44 @@ cdef template[DataType] class csarray:
                         stop = index.stop  
                     indArr = numpy.arange(start, stop)
                     indList.append(indArr)
-            
             return self.subArray(indList[0], indList[1])
-            #elif (type(i) == int or type(i) == slice) and (type(j) == slice or type(j) == int):    
-        else:
-            i = int(i) 
-            j = int(j)
-            
+        elif (isinstance(i, int) and isinstance(j, slice)) or (isinstance(i, slice) and isinstance(j, int)):                
+            if isinstance(i, int): 
+                inds = self.rowInds(i)
+                slc = j 
+                if slc.start == None: 
+                    start = 0
+                else: 
+                    start = slc.start 
+                if slc.stop == None: 
+                    stop = self.shape[1]
+                else: 
+                    stop = slc.stop 
+                    
+                result = csarray[DataType]((self.shape[1], 1))   
+                
+                for ind in inds: 
+                    if start <= ind < stop: 
+                        result[ind, 0] = self.thisPtr.coeff(i, ind)                 
+            elif isinstance(j, int): 
+                inds = self.colInds(j)
+                slc = i 
+                if slc.start == None: 
+                    start = 0
+                else: 
+                    start = slc.start 
+                if slc.stop == None: 
+                    stop = self.shape[1]
+                else: 
+                    stop = slc.stop 
+                    
+                result = csarray[DataType]((self.shape[0], 1))   
+                
+                for ind in inds: 
+                    if start <= ind < stop: 
+                        result[ind, 0] = self.thisPtr.coeff(ind, j)  
+            return result 
+        else:     
             #Deal with negative indices
             if i<0: 
                 i += self.thisPtr.rows()
@@ -124,7 +164,8 @@ cdef template[DataType] class csarray:
                 raise ValueError("Invalid row index " + str(i)) 
             if j < 0 or j>=self.thisPtr.cols(): 
                 raise ValueError("Invalid col index " + str(j))      
-            return self.thisPtr.coeff(i, j)            
+            return self.thisPtr.coeff(i, j) 
+
     
     def __adArraySlice(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
         """
@@ -486,7 +527,29 @@ cdef template[DataType] class csarray:
         Fill the array with ones. 
         """
         self.thisPtr.fill(1)
+    
+    def rowInds(self, long i):
+        cdef vector[long] vect = self.thisPtr.getIndsRow(i)
+        cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int)
         
+        #Must be a better way to do this 
+        for i in range(vect.size()): 
+            inds[i] = vect[i]
+
+        return inds    
+        
+    def colInds(self, long i): 
+        cdef vector[long] vect = self.thisPtr.getIndsCol(i)
+        cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int)
+        
+        #Must be a better way to do this 
+        for i in range(vect.size()): 
+            inds[i] = vect[i]
+
+        return inds  
+   
+    def setZero(self):
+        self.thisPtr.setZero()
    
     shape = property(__getShape)
     size = property(__getSize)

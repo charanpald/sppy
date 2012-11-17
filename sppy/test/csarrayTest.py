@@ -254,6 +254,9 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(a.getnnz(), 2)
         self.assertEquals(a[0], 1.2)
         self.assertEquals(a[2], 2.4)
+        
+        #Test picking a row or col 
+        print(self.B[0, :])
        
        
     def testStr(self): 
@@ -896,6 +899,20 @@ class csarrayTest(unittest.TestCase):
 
         self.A.ones()
         nptst.assert_array_equal(self.A.toarray(), numpy.ones(self.A.shape))
+        
+    def testRowInds(self): 
+        nptst.assert_array_equal(self.B.rowInds(0), numpy.array([1, 6]))
+        nptst.assert_array_equal(self.B.rowInds(1), numpy.array([3]))
+        
+        nptst.assert_array_equal(self.C.rowInds(0), numpy.array([1, 62]))
+        nptst.assert_array_equal(self.C.rowInds(1), numpy.array([]))
+        
+    def testColInds(self): 
+        nptst.assert_array_equal(self.B.colInds(3), numpy.array([1, 3]))
+        nptst.assert_array_equal(self.B.colInds(1), numpy.array([0]))
+        
+        nptst.assert_array_equal(self.D.colInds(0), numpy.array([0, 2, 3]))
+        nptst.assert_array_equal(self.D.colInds(2), numpy.array([]))
 
 if __name__ == "__main__":
     unittest.main()

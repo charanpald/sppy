@@ -3,6 +3,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 import numpy 
 cimport numpy
 import cython 
+from libcpp.vector cimport vector
 numpy.import_array()
 
 cdef extern from "include/SparseVectorExt.h":  
@@ -29,7 +30,6 @@ cdef extern from "include/SparseVectorExt.h":
       void reserve(int)
       void scalarMultiply(double)
       void slice(int*, int, SparseVectorExt[T]*) 
-      
       
 cdef template[DataType] class csarray1d:
     cdef SparseVectorExt[DataType] *thisPtr     
@@ -375,6 +375,8 @@ cdef template[DataType] class csarray1d:
             raise ValueError("Cannot compute dot product of matrices of shapes " + str(self.shape) + " and " + str(a.shape))
             
         return self.thisPtr.dot(deref(a.thisPtr))
+
+
 
     shape = property(__getShape)
     size = property(__getSize)

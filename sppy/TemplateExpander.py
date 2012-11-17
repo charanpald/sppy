@@ -67,4 +67,4 @@ expandTemplate(inFileName, outFileName, templateList)
 
 inFileName = "csarray1d_base.pyx"
 outFileName = "csarray1d_sub.pyx"
-expandTemplate(inFileName, outFileName, templateList)
+#expandTemplate(inFileName, outFileName, templateList)

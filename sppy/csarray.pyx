@@ -73,7 +73,14 @@ class csarray(object):
             return getattr(self._array, name)
 
     def __getitem__(self, inds):
-        return self._array.__getitem__(inds) 
+        result = self._array.__getitem__(inds) 
+        
+        if type(result) in self.baseTypes: 
+            newArray = csarray(result.shape, self.dtype)
+            newArray.convertBase(result, self.dtype)
+            result = newArray
+            
+        return result 
         
     def __setitem__(self, inds, val):
         self._array.__setitem__(inds, val) 
@@ -159,6 +166,15 @@ class csarray(object):
     
     def __getDType(self): 
         return self._dtype
-    
+        
+    def convertBase(self, array, dtype): 
+        """
+        Convert a base class to csarray. 
+        """
+        del self._array
+        self._array = array       
+        self._dtype = dtype 
+        
     dtype = property(__getDType)
     T = property(transpose)
+    baseTypes = [csarray_int, csarray_double, csarray_float, csarray_long, csarray_short, csarray_signed_char ]

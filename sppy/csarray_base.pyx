@@ -1,6 +1,7 @@
 # cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 from libcpp.vector cimport vector 
+from sppy.dtype import dataTypeDict
 import numpy 
 cimport numpy
 import cython 
@@ -30,6 +31,7 @@ cdef extern from "include/SparseMatrixExt.h":
       void fill(T)
       void makeCompressed()
       void nonZeroInds(long*, long*)
+      void nonZeroVals(T*)
       void printValues()
       void reserve(int)
       void scalarMultiply(double)
@@ -173,7 +175,7 @@ cdef template[DataType] class csarray:
         according to self[rowInds[i], colInds[i]). 
         """
         cdef int ix 
-        cdef numpy.ndarray[numpy.float_t, ndim=1, mode="c"] result = numpy.zeros(rowInds.shape[0])
+        cdef numpy.ndarray[DataType, ndim=1, mode="c"] result = numpy.zeros(rowInds.shape[0], self.dtype())
         
         if (rowInds >= self.shape[0]).any() or (colInds >= self.shape[1]).any(): 
             raise ValueError("Indices out of range")
@@ -550,6 +552,26 @@ cdef template[DataType] class csarray:
    
     def setZero(self):
         self.thisPtr.setZero()
+   
+   
+    def dtype(self): 
+        """
+        Return the dtype of the current object. 
+        """
+        return dataTypeDict["DataType"]
+   
+    def values(self): 
+        """
+        Return the values of this object according to the elements returned 
+        using nonzero. 
+        """
+
+        cdef numpy.ndarray[DataType, ndim=1, mode="c"] vals = numpy.zeros(self.getnnz(), self.dtype()) 
+        
+        if self.getnnz() != 0:
+            self.thisPtr.nonZeroVals(&vals[0])
+        
+        return vals     
    
     shape = property(__getShape)
     size = property(__getSize)

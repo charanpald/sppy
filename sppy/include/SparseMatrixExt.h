@@ -67,6 +67,17 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         }
     }
 
+    void nonZeroVals(T* array) { 
+        int i = 0; 
+
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
+            array[i] = it.value(); 
+            i++; 
+            }  
+        }
+    }
+
     std::vector<long> getIndsRow(int row) { 
         std::vector<long> inds;
 

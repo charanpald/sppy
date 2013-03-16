@@ -174,7 +174,29 @@ class csarray(object):
         del self._array
         self._array = array       
         self._dtype = dtype 
+       
+    def toScipyCsc(self): 
+        """
+        Convert this matrix to scipy. Returns a copy of the data in csr_matrix 
+        form. 
+        """  
+        try: 
+            import scipy.sparse
+        except ImportError: 
+            raise 
+    
+        rowInds, colInds = self.nonzero()  
+        indPtrTemp = numpy.cumsum(numpy.bincount(colInds, minlength=self.shape[0]))
+        indPtr = numpy.zeros(self.shape[1]+1, numpy.int32)
+        indPtr[1:self.shape[1]+1] = indPtrTemp         
+
+        A = scipy.sparse.csc_matrix(self.shape, dtype=self.dtype)
+        A.indices = numpy.array(rowInds, numpy.int32) 
+        A.data = self.values()  
+        A.indptr = indPtr
         
+        return A 
+     
     dtype = property(__getDType)
     T = property(transpose)
-    baseTypes = [csarray_int, csarray_double, csarray_float, csarray_long, csarray_short, csarray_signed_char ]
+    baseTypes = [csarray_int, csarray_double, csarray_float, csarray_long, csarray_short, csarray_signed_char]

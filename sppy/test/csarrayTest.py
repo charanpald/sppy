@@ -914,6 +914,49 @@ class csarrayTest(unittest.TestCase):
         nptst.assert_array_equal(self.D.colInds(0), numpy.array([0, 2, 3]))
         nptst.assert_array_equal(self.D.colInds(2), numpy.array([]))
 
+    def testValues(self): 
+        nptst.assert_array_equal(self.A.values(), self.A[self.A.nonzero()])
+        nptst.assert_array_equal(self.B.values(), self.B[self.B.nonzero()])
+        nptst.assert_array_equal(self.C.values(), self.C[self.C.nonzero()])
+        nptst.assert_array_equal(self.D.values(), self.D[self.D.nonzero()])
+        nptst.assert_array_equal(self.E.values(), self.E[self.E.nonzero()])
+        nptst.assert_array_equal(self.F.values(), self.F[self.F.nonzero()])
+
+    def testToScipyCsc(self): 
+        try: 
+            import scipy.sparse
+        except ImportError: 
+            raise        
+        
+        A = self.A.toScipyCsc()
+        B = self.B.toScipyCsc()
+        C = self.C.toScipyCsc()
+        D = self.D.toScipyCsc()
+        F = self.F.toScipyCsc()
+        
+        self.assertEquals(A.getnnz(), self.A.getnnz())
+        self.assertEquals(B.getnnz(), self.B.getnnz())
+        self.assertEquals(C.getnnz(), self.C.getnnz())
+        self.assertEquals(D.getnnz(), self.D.getnnz())
+        self.assertEquals(F.getnnz(), self.F.getnnz())
+        
+        #Now check elements are correct 
+        (rowInds, colInds) = self.B.nonzero()
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(B[rowInds[i], colInds[i]], self.B[rowInds[i], colInds[i]])
+            
+        (rowInds, colInds) = self.C.nonzero()
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(C[rowInds[i], colInds[i]], self.C[rowInds[i], colInds[i]])
+            
+        (rowInds, colInds) = self.D.nonzero()
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(D[rowInds[i], colInds[i]], self.D[rowInds[i], colInds[i]])
+            
+        (rowInds, colInds) = self.F.nonzero()
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(F[rowInds[i], colInds[i]], self.F[rowInds[i], colInds[i]])
+
 if __name__ == "__main__":
     unittest.main()
     

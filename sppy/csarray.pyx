@@ -1,6 +1,7 @@
 # cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
-from sppy.csarray_sub import csarray_int, csarray_double, csarray_float, csarray_long, csarray_short, csarray_signed_char  
+from sppy.csarray_sub import csarray_int_colMajor, csarray_double_colMajor, csarray_float_colMajor, csarray_long_colMajor, csarray_short_colMajor, csarray_signed_char_colMajor  
+from sppy.csarray_sub import csarray_int_rowMajor, csarray_double_rowMajor, csarray_float_rowMajor, csarray_long_rowMajor, csarray_short_rowMajor, csarray_signed_char_rowMajor
 from sppy.csarray1d_sub import csarray1d_int, csarray1d_double, csarray1d_float, csarray1d_long, csarray1d_short, csarray1d_signed_char  
 import struct
 import numpy 
@@ -10,7 +11,7 @@ numpy.import_array()
 
 
 class csarray(object): 
-    def __init__(self, S, dtype=numpy.float): 
+    def __init__(self, S, dtype=numpy.float, storageType="colMajor"): 
         """
         Create a new csarray using the given shape and dtype. If the dtype is 
         float or int we assume 64 bits. 
@@ -40,20 +41,38 @@ class csarray(object):
             else: 
                 raise ValueError("Unknown dtype: " + str(dtype))  
         elif len(shape) == 2: 
-            if dtype == numpy.float32: 
-                self._array = csarray_float(shape)        
-            elif dtype == numpy.float64 or dtype==numpy.float: 
-                self._array = csarray_double(shape)
-            elif dtype == numpy.int8: 
-                self._array = csarray_signed_char(shape)    
-            elif dtype == numpy.int16: 
-                self._array = csarray_short(shape)
-            elif dtype == numpy.dtype(int): 
-                self._array = csarray_int(shape)
-            elif dtype == numpy.dtype(long) or dtype == numpy.int: 
-                self._array = csarray_long(shape)
+            if storageType=="colMajor": 
+                if dtype == numpy.float32: 
+                    self._array = csarray_float_colMajor(shape)        
+                elif dtype == numpy.float64 or dtype==numpy.float: 
+                    self._array = csarray_double_colMajor(shape)
+                elif dtype == numpy.int8: 
+                    self._array = csarray_signed_char_colMajor(shape)    
+                elif dtype == numpy.int16: 
+                    self._array = csarray_short_colMajor(shape)
+                elif dtype == numpy.dtype(int): 
+                    self._array = csarray_int_colMajor(shape)
+                elif dtype == numpy.dtype(long) or dtype == numpy.int: 
+                    self._array = csarray_long_colMajor(shape)
+                else: 
+                    raise ValueError("Unknown dtype: " + str(dtype))
+            elif storageType == "rowMajor": 
+                if dtype == numpy.float32: 
+                    self._array = csarray_float_rowMajor(shape)        
+                elif dtype == numpy.float64 or dtype==numpy.float: 
+                    self._array = csarray_double_rowMajor(shape)
+                elif dtype == numpy.int8: 
+                    self._array = csarray_signed_char_rowMajor(shape)    
+                elif dtype == numpy.int16: 
+                    self._array = csarray_short_rowMajor(shape)
+                elif dtype == numpy.dtype(int): 
+                    self._array = csarray_int_rowMajor(shape)
+                elif dtype == numpy.dtype(long) or dtype == numpy.int: 
+                    self._array = csarray_long_rowMajor(shape)
+                else: 
+                    raise ValueError("Unknown dtype: " + str(dtype))
             else: 
-                raise ValueError("Unknown dtype: " + str(dtype))
+                raise ValueError("Unknown storage type: " + str(storageType))
         else:
             raise ValueError("Only 1 and 2d arrays supported")
             
@@ -199,4 +218,5 @@ class csarray(object):
      
     dtype = property(__getDType)
     T = property(transpose)
-    baseTypes = [csarray_int, csarray_double, csarray_float, csarray_long, csarray_short, csarray_signed_char]
+    baseTypes = [csarray_int_colMajor, csarray_double_colMajor, csarray_float_colMajor, csarray_long_colMajor, csarray_short_colMajor, csarray_signed_char_colMajor]
+    baseTypes.extend([csarray_int_rowMajor, csarray_double_rowMajor, csarray_float_rowMajor, csarray_long_rowMajor, csarray_short_rowMajor, csarray_signed_char_rowMajor])

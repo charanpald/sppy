@@ -7,23 +7,27 @@ cimport numpy
 import cython 
 numpy.import_array()
 
+cdef extern from *:
+    ctypedef int colMajor "0" 
+    ctypedef int rowMajor "1" 
+
 cdef extern from "include/SparseMatrixExt.h":  
-   cdef cppclass SparseMatrixExt[T]:  
+   cdef cppclass SparseMatrixExt[T, S]:  
       SparseMatrixExt() 
-      SparseMatrixExt(SparseMatrixExt[T]) 
+      SparseMatrixExt(SparseMatrixExt[T, S]) 
       SparseMatrixExt(int, int)
       double norm()
       int cols() 
       int nonZeros()
       int rows()
       int size() 
-      SparseMatrixExt[T] abs()
-      SparseMatrixExt[T] add(SparseMatrixExt[T]&)
-      SparseMatrixExt[T] dot(SparseMatrixExt[T]&)
-      SparseMatrixExt[T] hadamard(SparseMatrixExt[T]&)
-      SparseMatrixExt[T] negate()
-      SparseMatrixExt[T] subtract(SparseMatrixExt[T]&)
-      SparseMatrixExt[T] trans()
+      SparseMatrixExt[T, S] abs()
+      SparseMatrixExt[T, S] add(SparseMatrixExt[T, S]&)
+      SparseMatrixExt[T, S] dot(SparseMatrixExt[T, S]&)
+      SparseMatrixExt[T, S] hadamard(SparseMatrixExt[T, S]&)
+      SparseMatrixExt[T, S] negate()
+      SparseMatrixExt[T, S] subtract(SparseMatrixExt[T, S]&)
+      SparseMatrixExt[T, S] trans()
       T coeff(int, int)
       T sum()
       T sumValues()
@@ -35,20 +39,20 @@ cdef extern from "include/SparseMatrixExt.h":
       void printValues()
       void reserve(int)
       void scalarMultiply(double)
-      void slice(int*, int, int*, int, SparseMatrixExt[T]*) 
+      void slice(int*, int, int*, int, SparseMatrixExt[T, S]*) 
       vector[long] getIndsRow(int)
       vector[long] getIndsCol(int)
       void setZero()
       
       
-cdef template[DataType] class csarray:
-    cdef SparseMatrixExt[DataType] *thisPtr     
+cdef template[DataType, StorageType] class csarray:
+    cdef SparseMatrixExt[DataType, StorageType] *thisPtr     
     def __cinit__(self, shape):
         """
         Create a new column major dynamic array.
         """
 
-        self.thisPtr = new SparseMatrixExt[DataType](shape[0], shape[1]) 
+        self.thisPtr = new SparseMatrixExt[DataType, StorageType](shape[0], shape[1]) 
             
     def __dealloc__(self): 
         """
@@ -132,7 +136,7 @@ cdef template[DataType] class csarray:
                 else: 
                     stop = slc.stop 
                     
-                result = csarray[DataType]((self.shape[1], 1))   
+                result = csarray[DataType, StorageType]((self.shape[1], 1))   
                 
                 for ind in inds: 
                     if start <= ind < stop: 
@@ -149,7 +153,7 @@ cdef template[DataType] class csarray:
                 else: 
                     stop = slc.stop 
                     
-                result = csarray[DataType]((self.shape[0], 1))   
+                result = csarray[DataType, StorageType]((self.shape[0], 1))   
                 
                 for ind in inds: 
                     if start <= ind < stop: 
@@ -193,7 +197,7 @@ cdef template[DataType] class csarray:
         cdef numpy.ndarray[int, ndim=1, mode="c"] rowIndsC 
         cdef numpy.ndarray[int, ndim=1, mode="c"] colIndsC 
         
-        cdef csarray[DataType] result = csarray[DataType]((rowInds.shape[0], colInds.shape[0]))     
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((rowInds.shape[0], colInds.shape[0]))     
         
         rowIndsC = numpy.ascontiguousarray(rowInds, dtype=numpy.int32) 
         colIndsC = numpy.ascontiguousarray(colInds, dtype=numpy.int32) 
@@ -321,7 +325,7 @@ cdef template[DataType] class csarray:
         """
         Return a new array multiplied by a scalar value x. 
         """
-        cdef csarray[DataType] result = self.copy() 
+        cdef csarray[DataType, StorageType] result = self.copy() 
         result.thisPtr.scalarMultiply(x)
         return result 
         
@@ -329,9 +333,9 @@ cdef template[DataType] class csarray:
         """
         Return a copied version of this array. 
         """
-        cdef csarray[DataType] result = csarray[DataType](self.shape)
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType](self.shape)
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](deref(self.thisPtr))
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](deref(self.thisPtr))
         return result 
         
     def toarray(self): 
@@ -434,55 +438,55 @@ cdef template[DataType] class csarray:
         """
         Return a matrix whose elements are the absolute values of this array. 
         """
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], self.shape[1]))
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((self.shape[0], self.shape[1]))
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.abs())
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.abs())
         return result 
     
     def __neg__(self): 
         """
         Return the negation of this array. 
         """
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((self.shape[1], self.shape[0]))
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.negate())
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.negate())
         return result 
     
 
-    def __add__(csarray[DataType] self, csarray[DataType] A): 
+    def __add__(csarray[DataType, StorageType] self, csarray[DataType, StorageType] A): 
         """
         Add two matrices together. 
         """
         if self.shape != A.shape: 
             raise ValueError("Cannot add matrices of shapes " + str(self.shape) + " and " + str(A.shape))
         
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((self.shape[0], A.shape[1]))
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.add(deref(A.thisPtr)))
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.add(deref(A.thisPtr)))
         return result     
         
-    def __sub__(csarray[DataType] self, csarray[DataType] A): 
+    def __sub__(csarray[DataType, StorageType] self, csarray[DataType, StorageType] A): 
         """
         Subtract one matrix from another.  
         """
         if self.shape != A.shape: 
             raise ValueError("Cannot subtract matrices of shapes " + str(self.shape) + " and " + str(A.shape))
         
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((self.shape[0], A.shape[1]))
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.subtract(deref(A.thisPtr)))
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.subtract(deref(A.thisPtr)))
         return result    
      
-    def hadamard(self, csarray[DataType] A): 
+    def hadamard(self, csarray[DataType, StorageType] A): 
         """
         Find the element-wise matrix (hadamard) product. 
         """
         if self.shape != A.shape: 
             raise ValueError("Cannot elementwise multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape))
         
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((self.shape[0], A.shape[1]))
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.hadamard(deref(A.thisPtr)))
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.hadamard(deref(A.thisPtr)))
         return result 
 
     def compress(self): 
@@ -499,22 +503,22 @@ cdef template[DataType] class csarray:
         """
         self.thisPtr.reserve(n)
         
-    def dot(self, csarray[DataType] A): 
+    def dot(self, csarray[DataType, StorageType] A): 
         if self.shape[1] != A.shape[0]: 
             raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape))
         
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[0], A.shape[1]))
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((self.shape[0], A.shape[1]))
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.dot(deref(A.thisPtr)))
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.dot(deref(A.thisPtr)))
         return result 
         
     def transpose(self): 
         """
         Find the transpose of this matrix. 
         """
-        cdef csarray[DataType] result = csarray[DataType]((self.shape[1], self.shape[0]))
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType]((self.shape[1], self.shape[0]))
         del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType](self.thisPtr.trans())
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.trans())
         return result 
    
     #def norm(self, ord="fro"): 

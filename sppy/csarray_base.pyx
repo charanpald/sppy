@@ -535,6 +535,9 @@ cdef template[DataType, StorageType] class csarray:
         self.thisPtr.fill(1)
     
     def rowInds(self, long i):
+        """
+        Returns the non zero indices for the ith row. 
+        """
         cdef vector[long] vect = self.thisPtr.getIndsRow(i)
         cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int)
         
@@ -577,9 +580,13 @@ cdef template[DataType, StorageType] class csarray:
         
         return vals     
    
+    def __getStorage(self): 
+        return "StorageType" 
+   
     shape = property(__getShape)
     size = property(__getSize)
     ndim = property(__getNDim)
+    storage = property(__getStorage)
     
 
     

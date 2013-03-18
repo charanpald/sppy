@@ -5,6 +5,7 @@ from sppy import csarray
 Some utility function to create sparse arrays. 
 """
 
+
 def diag(x): 
     """
     From a 1D numpy array x create a diagonal sparse array. 
@@ -43,19 +44,25 @@ def rand(shape, density, dtype=numpy.float):
     return result 
     
 
-def zeros(shape, dtype=numpy.float): 
+def zeros(shape, dtype=numpy.float, storageType="colMajor"): 
     """
     Create a zeros matrix of the given shape and dtype. 
     """
-    result = csarray(shape, dtype)
+    result = csarray(shape, dtype, storageType)
     return result
     
-def ones(shape, dtype=numpy.float): 
+def ones(shape, dtype=numpy.float, storageType="colMajor"): 
     """
     Create a ones matrix of the given shape and dtype. Generally a bad idea 
     for large matrices. 
     """
-    result = csarray(shape, dtype)
+    result = csarray(shape, dtype, storageType)
     result.ones()
     return result
+
+#def solve(A, b): 
+    """
+    Solve a system of linear equations given by Ax = b.  
+    """
+    
     

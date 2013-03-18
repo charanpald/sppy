@@ -36,7 +36,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
     void printValues() { 
         for (int k=0; k<this->outerSize(); ++k) {
-          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
             std::cout << "(" << it.row() << ", " << it.col() << ") " << it.value() << std::endl;  
             }  
         }
@@ -45,7 +45,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
     T sumValues() { 
         T result = 0; 
         for (int k=0; k<this->outerSize(); ++k) {
-          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
             result += it.value();  
             }  
         }
@@ -59,7 +59,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         int i = 0; 
 
         for (int k=0; k<this->outerSize(); ++k) {
-          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
             array1[i] = it.row(); 
             array2[i] = it.col();
             i++; 
@@ -71,7 +71,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         int i = 0; 
 
         for (int k=0; k<this->outerSize(); ++k) {
-          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
             array[i] = it.value(); 
             i++; 
             }  
@@ -80,13 +80,19 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
     std::vector<long> getIndsRow(int row) { 
         std::vector<long> inds;
-
-        for (int k=0; k<this->outerSize(); ++k) {
-          for (typename SparseMatrixExt<T>::InnerIterator it(*this,k); it; ++it) {
-            if (it.row() == row) { 
+        
+        if (S==Eigen::ColMajor) { 
+            for (int k=0; k<this->outerSize(); ++k) {
+              for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
+                if (it.row() == row) { 
+                    inds.insert(inds.end(), it.col()); 
+                    }
+                }  
+            }
+        } else { 
+            for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, row); it; ++it) {
                 inds.insert(inds.end(), it.col()); 
                 }
-            }  
         }
 
         return inds; 
@@ -94,9 +100,18 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
     std::vector<long> getIndsCol(int col) { 
         std::vector<long> inds;
-
-      for (typename SparseMatrixExt<T>::InnerIterator it(*this, col); it; ++it) {
-            inds.insert(inds.end(), it.row());
+        if (S==Eigen::ColMajor) { 
+            for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, col); it; ++it) {
+                    inds.insert(inds.end(), it.row());
+                }
+        } else { 
+            for (int k=0; k<this->outerSize(); ++k) {
+              for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
+                if (it.col() == col) { 
+                    inds.insert(inds.end(), it.row()); 
+                    }
+                }  
+            }
         }
 
         return inds; 
@@ -106,20 +121,40 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         //Array indices must be sorted 
         //SparseMatrixExt *mat = new SparseMatrixExt<T, S>(size1, size2);
         int size1Ind = 0; 
+        int size2Ind = 0; 
 
-        //Assume column major class - j is col index 
-        for (int j=0; j<size2; ++j) { 
-            size1Ind = 0; 
-            for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, array2[j]); it; ++it) {
-                while (array1[size1Ind] < it.row() && size1Ind < size1) { 
-                    size1Ind++; 
+        
+
+        if (S == Eigen::ColMajor) { 
+            //Assume column major class - j is col index 
+            for (int j=0; j<size2; ++j) { 
+                size1Ind = 0; 
+                //For each col go through non-zero vals and copy to new array if indexed in array1
+                for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, array2[j]); it; ++it) {
+                    while (array1[size1Ind] < it.row() && size1Ind < size1) { 
+                        size1Ind++; 
+                        }
+    
+                    if(it.row() == array1[size1Ind]) { 
+                        mat->insert(size1Ind, j) = it.value();                    
+                        }
                     }
-
-                if(it.row() == array1[size1Ind]) { 
-                    mat->insert(size1Ind, j) = it.value();                    
+                }
+            } 
+        else {
+            for (int j=0; j<size1; ++j) { 
+                size2Ind = 0; 
+                //For each row go through non-zero vals and copy to new array if indexed in array1
+                for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, array1[j]); it; ++it) {
+                    while (array2[size2Ind] < it.col() && size2Ind < size2) { 
+                        size2Ind++; 
+                        }
+    
+                    if(it.col() == array2[size2Ind]) { 
+                        mat->insert(j, size2Ind) = it.value();                    
+                        }
                     }
-
-                }    
+                }
             }
 
         }

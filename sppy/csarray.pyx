@@ -165,8 +165,8 @@ class csarray(object):
         outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + "\n"
         
         if self.ndim == 2: 
-            (rowInds, colInds) = self.nonzero()
-            vals = self[rowInds, colInds]
+            (rowInds, colInds) = self.nonzero() 
+            vals = self.values()
             
             for i in range(self.getnnz()): 
                 outputStr += "(" + str(rowInds[i]) + ", " + str(colInds[i]) + ")" + " " + str(vals[i]) 
@@ -196,13 +196,16 @@ class csarray(object):
        
     def toScipyCsc(self): 
         """
-        Convert this matrix to scipy. Returns a copy of the data in csr_matrix 
+        Convert this matrix to scipy. Returns a copy of the data in csc_matrix 
         form. 
         """  
         try: 
             import scipy.sparse
         except ImportError: 
             raise 
+            
+        if self.storage != "colMajor": 
+            raise ValueError("Currently only supports ColMajor matrices")
     
         rowInds, colInds = self.nonzero()  
         indPtrTemp = numpy.cumsum(numpy.bincount(colInds, minlength=self.shape[0]))

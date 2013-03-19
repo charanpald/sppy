@@ -394,7 +394,7 @@ class csarrayTest(unittest.TestCase):
         self.assertRaises(ValueError, self.B.__getitem__, (1, -8))  
         self.assertRaises(TypeError, self.B.__getitem__, (1))
         self.assertRaises(ValueError, self.B.__getitem__, "a")
-        self.assertRaises(ValueError, self.B.__getitem__, ("a", "c"))
+        self.assertRaises(Exception, self.B.__getitem__, ("a", "c"))
         
         #Test array indexing using arrays  
         C = self.B[numpy.array([0, 1, 3]), numpy.array([1, 3, 3])]

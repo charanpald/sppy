@@ -20,7 +20,7 @@ First, read the installation guide in the reference documentation linked below. 
     >>> import numpy 
     >>> from sppy import csarray 
     >>> #Create a new column major dynamic array of float type
-    >>> B = csarray((5, 5)) 
+    >>> B = csarray((5, 5), storageType="colMajor") 
     >>> B[3, 3] = -0.2
     >>> B[0, 4] = -1.23
     >>> print(B.shape)

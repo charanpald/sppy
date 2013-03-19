@@ -6,7 +6,7 @@ The csarray class represents a 1 dimensional sparse vector or a 2-dimensional co
 Construction
 ------------
 
-As an example the follow code creates a new float array with 5 rows and 5 columns and then assigns -0.2 to the element at index (3, 3). 
+As an example the follow code creates a new float array in column major format with 5 rows and 5 columns and then assigns -0.2 to the element at index (3, 3). 
 
 :: 
 
@@ -21,9 +21,10 @@ One can also create arrays of int types for example, by using
     >>> import numpy
     >>> from sparray import csarray 
     >>> B = csarray((5, 5), dtype=numpy.int) 
+    >>> C = csarray((5, 5), dtype=numpy.int, storageType="rowMajor") 
     >>> b = csarray(5, dtype=numpy.int) 
 
-Notice that b is a 1-dimensional sparse vector.     
+Notice that b is a 1-dimensional sparse vector, B is an array in column major format, and C is in row major format.     
     
 The currently supported dtypes are: int8, int16, int32 int64, float32 and float64. An alternative way to construct a csarray is by using an existing numpy array or csarray,
 

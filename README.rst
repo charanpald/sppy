@@ -6,6 +6,12 @@ The aim of this project is to implement a fast sparse array library by wrapping 
 Changelog
 ---------
 
+Changes in version 0.5: 
+* Get nonzero indices for a particular row or col 
+* Method to return all values 
+* Convert to scipy csc_matrix 
+* Support for RowMajor matrices 
+
 Changes in version 0.4: 
 
 * Added support for 1d arrays

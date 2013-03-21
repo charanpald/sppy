@@ -1,7 +1,7 @@
 Sparse Matrices and Vectors
 ===========================
 
-The csarray class represents a 1 dimensional sparse vector or a 2-dimensional compressed sparse matrix in column major format (row major format is forthcoming). To see more details about the underlying storage mechanism, refer to the `Eigen SparseMatrix page <http://eigen.tuxfamily.org/dox/TutorialSparse.html>`_. 
+The csarray class represents a 1 dimensional sparse vector or a 2-dimensional compressed sparse matrix in row or column major format. To see more details about the underlying storage mechanism, refer to the `Eigen SparseMatrix page <http://eigen.tuxfamily.org/dox/TutorialSparse.html>`_. 
 
 Construction
 ------------

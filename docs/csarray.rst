@@ -10,7 +10,7 @@ As an example the follow code creates a new float array in column major format w
 
 :: 
 
-    >>> from sparray import csarray 
+    >>> from sppy import csarray 
     >>> B = csarray((5, 5)) 
     >>> B[3, 3] = -0.2
     
@@ -19,7 +19,7 @@ One can also create arrays of int types for example, by using
 :: 
 
     >>> import numpy
-    >>> from sparray import csarray 
+    >>> from sppy import csarray 
     >>> B = csarray((5, 5), dtype=numpy.int) 
     >>> C = csarray((5, 5), dtype=numpy.int, storageType="rowMajor") 
     >>> b = csarray(5, dtype=numpy.int) 
@@ -34,19 +34,19 @@ The currently supported dtypes are: int8, int16, int32 int64, float32 and float6
     >>> A = numpy.array([[3, 0, 0], [1.2, 2, 0], [0, 0, 0.4]])
     >>> B = csarray(A, dtype=numpy.float32) 
     >>>
-    >>> #Construct using existing sparray 
+    >>> #Construct using existing sppy 
     >>> D = csarray(B, dtype=numpy.int)
    
 Other ways of creating arrays include the functions zeros, ones, diag, eye: and rand: 
 
 :: 
 
-    >>> import sparray
-    >>> A = sparray.eye(10) 
-    >>> B = sparray.diag(numpy.array([1, 2, 3]) 
-    >>> C = sparray.rand((5, 7), 0.1)
-    >>> D = sparray.zeros((10, 10)) 
-    >>> E = sparray.ones((10, 10))  
+    >>> import sppy
+    >>> A = sppy.eye(10) 
+    >>> B = sppy.diag(numpy.array([1, 2, 3]) 
+    >>> C = sppy.rand((5, 7), 0.1)
+    >>> D = sppy.zeros((10, 10)) 
+    >>> E = sppy.ones((10, 10))  
 
 Here, A is a 10 by 10 identity matrix, B is a 3 by 3 matrix with [1, 2, 3] along its diagonal entries, C is a 5 by 7 matrix with uniformly random elements inserted in approximately a proportion of 0.1 of the matrix, D is an all zeros matrix, and E is all ones. 
 
@@ -79,9 +79,9 @@ Many of the same properties can be found in csarray as numpy arrays: B.shape giv
 
 :: 
 
-    >>> A = sparray.rand((5, 7), 0.1) 
-    >>> B = sparray.rand((7, 5), 0.1)
-    >>> C = sparray.rand((5, 7), 0.1)
+    >>> A = sppy.rand((5, 7), 0.1) 
+    >>> B = sppy.rand((7, 5), 0.1)
+    >>> C = sppy.rand((5, 7), 0.1)
     >>> D = csarray(numpy.random.randn(7, 7))
     >>> E = A + C 
     >>> F = A.dot(B) 
@@ -92,8 +92,8 @@ Many of the same properties can be found in csarray as numpy arrays: B.shape giv
     >>> K = D.toarray()
     >>> 
     >>> #Vectors 
-    >>> a = sparray.rand(5, 0.1) 
-    >>> b = sparray.rand(5, 0.1)
+    >>> a = sppy.rand(5, 0.1) 
+    >>> b = sppy.rand(5, 0.1)
     >>> c = a + b 
     >>> d = a * b 
     >>> e = a.dot(b)

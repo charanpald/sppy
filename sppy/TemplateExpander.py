@@ -10,11 +10,12 @@ import logging
 import sys 
 import numpy 
 import itertools 
+import os
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG) 
 numpy.set_printoptions(suppress=True)
 
-def expandTemplate(infileName, outFileName, templateList): 
+def expandTemplate(inFileName, outFileName, templateList): 
     inFile = open(inFileName, 'r')
     outFile = open(outFileName, 'w')
     
@@ -77,20 +78,20 @@ def expandTemplate(infileName, outFileName, templateList):
     outFile.close() 
     logging.debug("Wrote output file " + outFileName)
 
-def expand_base():
+def expand_base(workdir='.'):
     typeList = ["signed char", "short", "int", "long", "float", "double"]
     storageList = ["colMajor", "rowMajor"]
     templateList = list(itertools.product(typeList, storageList))
     #templateList = [["float", "colMajor"]]                                                                                                                                              
 
-    inFileName = "csarray_base.pyx"
-    outFileName = "csarray_sub.pyx"
+    inFileName = os.path.join(workdir, "csarray_base.pyx")
+    outFileName = os.path.join(workdir, "csarray_sub.pyx")
     expandTemplate(inFileName, outFileName, templateList)
 
 
     templateList = [["signed char"], ["short"], ["int"], ["long"], ["float"], ["double"]]
-    inFileName = "csarray1d_base.pyx"
-    outFileName = "csarray1d_sub.pyx"
+    inFileName = os.path.join(workdir, "csarray1d_base.pyx")
+    outFileName = os.path.join(workdir, "csarray1d_sub.pyx")
     expandTemplate(inFileName, outFileName, templateList)
 
 if __name__ == '__main__':

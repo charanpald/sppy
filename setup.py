@@ -18,6 +18,8 @@ execfile3('sppy/version.py')
 cmdclass = { }
 
 if use_cython:
+    import sppy.TemplateExpander
+    sppy.TemplateExpander.expand_base()
     ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++")] 
     ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++")) 
     ext_modules.append(Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++")) 

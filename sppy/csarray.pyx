@@ -205,7 +205,7 @@ class csarray(object):
             raise 
             
         if self.storage != "colMajor": 
-            raise ValueError("Currently only supports ColMajor matrices")
+            raise ValueError("Method only supports ColMajor matrices")
     
         rowInds, colInds = self.nonzero()  
         indPtrTemp = numpy.cumsum(numpy.bincount(colInds, minlength=self.shape[0]))
@@ -214,6 +214,31 @@ class csarray(object):
 
         A = scipy.sparse.csc_matrix(self.shape, dtype=self.dtype)
         A.indices = numpy.array(rowInds, numpy.int32) 
+        A.data = self.values()  
+        A.indptr = indPtr
+        
+        return A 
+        
+    def toScipyCsr(self): 
+        """
+        Convert this matrix to scipy. Returns a copy of the data in csr_matrix 
+        form. 
+        """  
+        try: 
+            import scipy.sparse
+        except ImportError: 
+            raise 
+            
+        if self.storage != "rowMajor": 
+            raise ValueError("Method only supports RowMajor matrices")
+    
+        rowInds, colInds = self.nonzero()  
+        indPtrTemp = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[0]))
+        indPtr = numpy.zeros(self.shape[0]+1, numpy.int32)
+        indPtr[1:self.shape[0]+1] = indPtrTemp         
+
+        A = scipy.sparse.csr_matrix(self.shape, dtype=self.dtype)
+        A.indices = numpy.array(colInds, numpy.int32) 
         A.data = self.values()  
         A.indptr = indPtr
         

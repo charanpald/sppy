@@ -60,6 +60,8 @@ class csarrayTest(unittest.TestCase):
         self.H[0, 6] = -1.23
         self.H[4, 4] = 12.2   
         
+        self.I = csarray((5, 5), storageType="rowMajor") 
+        
         self.a = csarray(10, dtype=numpy.float)
         self.a[0] = 23 
         self.a[3] = 1.2
@@ -1131,6 +1133,31 @@ class csarrayTest(unittest.TestCase):
         (rowInds, colInds) = self.F.nonzero()
         for i in range(rowInds.shape[0]): 
             self.assertEquals(F[rowInds[i], colInds[i]], self.F[rowInds[i], colInds[i]])
+
+    def testToScipyCsr(self): 
+        try: 
+            import scipy.sparse
+        except ImportError: 
+            raise        
+        
+        G = self.G.toScipyCsr()
+        H = self.H.toScipyCsr()
+        I = self.I.toScipyCsr()
+
+        self.assertEquals(G.getnnz(), self.G.getnnz())
+        self.assertEquals(H.getnnz(), self.H.getnnz())
+        self.assertEquals(I.getnnz(), self.I.getnnz())
+
+        #Now check elements are correct 
+        (rowInds, colInds) = self.G.nonzero()
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(G[rowInds[i], colInds[i]], self.G[rowInds[i], colInds[i]])
+            
+        (rowInds, colInds) = self.H.nonzero()
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(H[rowInds[i], colInds[i]], self.H[rowInds[i], colInds[i]])
+            
+
 
 if __name__ == "__main__":
     unittest.main()

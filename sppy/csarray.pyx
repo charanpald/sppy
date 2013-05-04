@@ -221,8 +221,8 @@ class csarray(object):
         
     def toScipyCsr(self): 
         """
-        Convert this matrix to scipy. Returns a copy of the data in csr_matrix 
-        form. 
+        Convert this matrix to a scipy sparse matrix. Returns a copy of the data in 
+        csr_matrix form. 
         """  
         try: 
             import scipy.sparse

@@ -35,7 +35,7 @@ cdef template[DataType] class csarray1d:
     cdef SparseVectorExt[DataType] *thisPtr     
     def __cinit__(self, shape):
         """
-        Create a new column major dynamic array.
+        Create a new dynamic array.
         """
         cdef int shapeVal         
         

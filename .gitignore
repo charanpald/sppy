@@ -14,3 +14,5 @@ docs/_build/
 /sppy/csarray1d_sub.pyx
 /sppy/csarray_sub.pyx
 /sppy/test/SparseVectorExtTest
+/sppy/csarray1d_sub.pxd
+/sppy/csarray_sub.pxd

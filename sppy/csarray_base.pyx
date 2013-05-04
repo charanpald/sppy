@@ -49,7 +49,7 @@ cdef template[DataType, StorageType] class csarray:
     cdef SparseMatrixExt[DataType, StorageType] *thisPtr     
     def __cinit__(self, shape):
         """
-        Create a new column major dynamic array.
+        Create a new column or row major dynamic array.
         """
 
         self.thisPtr = new SparseMatrixExt[DataType, StorageType](shape[0], shape[1]) 

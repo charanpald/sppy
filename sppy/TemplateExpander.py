@@ -16,6 +16,10 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 numpy.set_printoptions(suppress=True)
 
 def expandTemplate(inFileName, outFileName, templateList): 
+    if os.path.exists(outFileName) and os.path.getmtime(inFileName) < os.path.getmtime(outFileName): 
+        logging.debug("No new changes changes in " + inFileName)
+        return     
+    
     inFile = open(inFileName, 'r')
     outFile = open(outFileName, 'w')
     
@@ -86,6 +90,10 @@ def expand_base(workdir='.'):
 
     inFileName = os.path.join(workdir, "csarray_base.pyx")
     outFileName = os.path.join(workdir, "csarray_sub.pyx")
+    expandTemplate(inFileName, outFileName, templateList)
+
+    inFileName = os.path.join(workdir, "csarray_base.pxd")
+    outFileName = os.path.join(workdir, "csarray_sub.pxd")
     expandTemplate(inFileName, outFileName, templateList)
 
 

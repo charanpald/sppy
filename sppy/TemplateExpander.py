@@ -101,6 +101,10 @@ def expand_base(workdir='.'):
     inFileName = os.path.join(workdir, "csarray1d_base.pyx")
     outFileName = os.path.join(workdir, "csarray1d_sub.pyx")
     expandTemplate(inFileName, outFileName, templateList)
+    
+    inFileName = os.path.join(workdir, "csarray1d_base.pxd")
+    outFileName = os.path.join(workdir, "csarray1d_sub.pxd")
+    expandTemplate(inFileName, outFileName, templateList)
 
 if __name__ == '__main__':
     expand_base()

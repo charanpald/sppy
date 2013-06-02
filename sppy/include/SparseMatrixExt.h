@@ -89,13 +89,14 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
     void putSorted(long* array1, long* array2, T* vals, int numVals, long* vectorNnz) { 
         //Note we should reserve the correct amount of entries first
         int i = 0; 
-        Eigen::VectorXd v(this->outerSize());
+        Eigen::VectorXi v(this->outerSize());
         
         for(i=0;i<this->outerSize();i++) { 
             v[i] = vectorNnz[i];
-            }
+            }  
         
         this->reserve(v);
+        //this->reserve(this->outerSize());
 
         for(i=0;i<numVals;i++) {
             //std::cout << array1[i] << " " << array2[i] << " " << vals[i] << std::endl;

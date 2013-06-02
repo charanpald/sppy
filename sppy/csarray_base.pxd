@@ -1,4 +1,6 @@
 
+from libcpp.vector cimport vector
+
 cdef extern from *:
     ctypedef int colMajor "0" 
     ctypedef int rowMajor "1" 

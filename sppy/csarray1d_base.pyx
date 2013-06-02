@@ -6,33 +6,9 @@ import cython
 from libcpp.vector cimport vector
 numpy.import_array()
 
-cdef extern from "include/SparseVectorExt.h":  
-   cdef cppclass SparseVectorExt[T]:  
-      SparseVectorExt() 
-      SparseVectorExt(SparseVectorExt[T]) 
-      SparseVectorExt(int)
-#      double norm()
-      int nonZeros()
-      int rows()
-      int size() 
-      SparseVectorExt[T] abs()
-      SparseVectorExt[T] add(SparseVectorExt[T]&)
-      T dot(SparseVectorExt[T]&)
-      SparseVectorExt[T] hadamard(SparseVectorExt[T]&)
-      SparseVectorExt[T] negate()
-      SparseVectorExt[T] subtract(SparseVectorExt[T]&)
-      T coeff(int)
-#      T sum()
-      T sumValues()
-      void insertVal(int, T) 
-      void fill(T)
-      void nonZeroInds(long*)
-      void reserve(int)
-      void scalarMultiply(double)
-      void slice(int*, int, SparseVectorExt[T]*) 
+
       
-cdef template[DataType] class csarray1d:
-    cdef SparseVectorExt[DataType] *thisPtr     
+cdef template[DataType] class csarray1d:  
     def __cinit__(self, shape):
         """
         Create a new dynamic array.
@@ -74,7 +50,7 @@ cdef template[DataType] class csarray1d:
         
     def getnnz(self): 
         """
-        Return the number of non-zero elements in the array 
+        Return the number of non-zero elements in the array. 
         """
         return self.thisPtr.nonZeros()
 

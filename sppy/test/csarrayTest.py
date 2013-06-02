@@ -1036,6 +1036,24 @@ class csarrayTest(unittest.TestCase):
        self.assertEquals((self.a.dot(self.a)), (self.a.dot(self.a)))
        self.assertEquals((self.b.dot(self.b)), (self.b.dot(self.b)))
        self.assertEquals((self.c.dot(self.c)), (self.c.dot(self.c)))
+       
+       #Now test dot product with ndarray
+       D = self.D.toarray()
+       B = self.D.dot(D)
+       
+       nptst.assert_array_equal(B, D.dot(D))
+       
+       A = numpy.random.rand(10, 5)
+       B = numpy.random.rand(5, 6)
+       
+       C = A.dot(B)
+       
+       Ahat = csarray(A)
+       Chat = Ahat.dot(B)
+       
+       nptst.assert_array_equal(C, Chat)
+       
+       
 
     def testTranspose(self): 
         

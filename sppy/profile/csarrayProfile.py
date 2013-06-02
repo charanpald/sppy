@@ -1,6 +1,7 @@
 import logging
 import sys
 import numpy
+import scipy.sparse
 from apgl.util import *
 from sppy import csarray
 from pysparse import spmatrix
@@ -123,25 +124,28 @@ class csarrayProfile():
             
         ProfileUtils.profile('runNonZeros()', globals(), locals())
         
-    def profileCreateArray(self): 
+    def profilePutSorted(self): 
         #Test speed of array creation 
-        m = 10000 
-        n = 20000       
-        numInds = 1000000
+        numpy.random.seed(21)
+        m = 10000
+        n = 20000      
+        numInds = 100000
         
         inds = numpy.random.randint(0, m*n, numInds)
         inds = numpy.unique(inds)
         vals = numpy.random.randn(inds.shape[0])
         
-        rowInds, colInds = numpy.unravel_index(inds, (m, n))
-        
-        print(rowInds.shape)
+        rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
                 
         A = csarray((m, n), storageType="colMajor")
         
+        vectorNnz = numpy.bincount(colInds, minlength=A.shape[1])
+
         #ProfileUtils.profile('A.put(vals, rowInds, colInds)', globals(), locals())
-        ProfileUtils.profile('A.putSorted(vals, rowInds, colInds)', globals(), locals())
-        
+        #ProfileUtils.profile('A.putSorted(vals, rowInds, colInds)', globals(), locals())
+
+        ProfileUtils.profile("scipy.sparse.csc_matrix((vals, (rowInds, colInds)), A.shape )", globals(), locals())
+
 
 profiler = csarrayProfile()
 #profiler.profilePut()
@@ -151,4 +155,4 @@ profiler = csarrayProfile()
 #profiler.profileSumSpa()
 #profiler.profileGetNonZerosPys()
 #profiler.profileGetNonZerosSpa()
-profiler.profileCreateArray()
+profiler.profilePutSorted()

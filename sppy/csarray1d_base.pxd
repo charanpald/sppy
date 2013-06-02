@@ -26,4 +26,4 @@ cdef extern from "include/SparseVectorExt.h":
       void slice(int*, int, SparseVectorExt[T]*) 
       
 cdef template[DataType] class csarray1d:
-    cdef SparseVectorExt[DataType] *thisPtr     
+    cdef SparseVectorExt[DataType] *thisPtr   

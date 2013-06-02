@@ -2,7 +2,7 @@ import logging
 import sys
 import numpy
 from apgl.util import *
-from sparray import csarray
+from sppy import csarray
 from pysparse import spmatrix
 from apgl.util.PySparseUtils import PySparseUtils 
 
@@ -10,7 +10,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 numpy.random.seed(21)
 
 
-class arrayProfile():
+class csarrayProfile():
     def __init__(self):
         #take some random indices 
         self.N = 5000 
@@ -40,7 +40,7 @@ class arrayProfile():
         def runPut(): 
             
             for i in range(self.k):         
-                A = dyn_array((self.N, self.N))
+                A = csarray((self.N, self.N))
                 #A[(self.rowInds, self.colInds)] = self.val 
                 A.put(self.val, self.rowInds, self.colInds)
         
@@ -67,7 +67,7 @@ class arrayProfile():
         ProfileUtils.profile('runSlice()', globals(), locals())
         
     def profileSliceSpa(self): 
-        A = dyn_array((self.N, self.N))
+        A = csarray((self.N, self.N))
         A.put(self.val, self.rowInds, self.colInds)
         
         def runSlice():     
@@ -89,7 +89,7 @@ class arrayProfile():
         ProfileUtils.profile('runSum()', globals(), locals())
         
     def profileSumSpa(self): 
-        A = dyn_array((self.N, self.N))
+        A = csarray((self.N, self.N))
         A.put(self.val, self.rowInds, self.colInds)
         
         def runSum():     
@@ -112,7 +112,7 @@ class arrayProfile():
         ProfileUtils.profile('runNonZeros()', globals(), locals())
 
     def profileGetNonZerosSpa(self): 
-        A = dyn_array((self.N, self.N)) 
+        A = csarray((self.N, self.N)) 
         A.put(self.val, self.rowInds, self.colInds)
         
         def runNonZeros(): 
@@ -122,12 +122,33 @@ class arrayProfile():
             print(numpy.sum(vals))
             
         ProfileUtils.profile('runNonZeros()', globals(), locals())
+        
+    def profileCreateArray(self): 
+        #Test speed of array creation 
+        m = 10000 
+        n = 20000       
+        numInds = 1000000
+        
+        inds = numpy.random.randint(0, m*n, numInds)
+        inds = numpy.unique(inds)
+        vals = numpy.random.randn(inds.shape[0])
+        
+        rowInds, colInds = numpy.unravel_index(inds, (m, n))
+        
+        print(rowInds.shape)
+                
+        A = csarray((m, n), storageType="colMajor")
+        
+        #ProfileUtils.profile('A.put(vals, rowInds, colInds)', globals(), locals())
+        ProfileUtils.profile('A.putSorted(vals, rowInds, colInds)', globals(), locals())
+        
 
-profiler = arrayProfile()
-profiler.profilePut()
+profiler = csarrayProfile()
+#profiler.profilePut()
 #profiler.profileSlicePys()
 #profiler.profileSliceSpa()
 #profiler.profileSumPys()
 #profiler.profileSumSpa()
 #profiler.profileGetNonZerosPys()
 #profiler.profileGetNonZerosSpa()
+profiler.profileCreateArray()

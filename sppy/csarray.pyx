@@ -132,13 +132,19 @@ class csarray(object):
         return result
         
     def dot(self, A): 
-        resultArray = self._array.dot(A._array)
-        
-        try: 
-            result = csarray(resultArray.shape, A.dtype)
-            result._array = resultArray
-        except AttributeError:
-            result = resultArray
+        """
+        Compute the dot product between this and either a csarray or numpy array.
+        """
+        if isinstance(A, numpy.ndarray): 
+            result = self.numpyDot(A)
+        else: 
+            resultArray = self._array.dot(A._array)
+            
+            try: 
+                result = csarray(resultArray.shape, A.dtype)
+                result._array = resultArray
+            except AttributeError:
+                result = resultArray
             
         return result
         
@@ -193,7 +199,8 @@ class csarray(object):
         del self._array
         self._array = array       
         self._dtype = dtype 
-       
+    
+
     def toScipyCsc(self): 
         """
         Convert this matrix to scipy. Returns a copy of the data in csc_matrix 

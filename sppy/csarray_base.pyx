@@ -1,4 +1,5 @@
-# cython: profile=False
+# cython: profile=True
+# cython: boundscheck=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 from libcpp.vector cimport vector
 from sppy.dtype import dataTypeDict
@@ -11,8 +12,6 @@ cdef extern from *:
     ctypedef int colMajor "0" 
     ctypedef int rowMajor "1" 
 
-
-      
       
 cdef template[DataType, StorageType] class csarray:
     #cdef SparseMatrixExt[DataType, StorageType] *thisPtr     
@@ -20,8 +19,8 @@ cdef template[DataType, StorageType] class csarray:
         """
         Create a new column or row major dynamic array.
         """
-
         self.thisPtr = new SparseMatrixExt[DataType, StorageType](shape[0], shape[1]) 
+        
             
     def __dealloc__(self): 
         """
@@ -207,12 +206,13 @@ cdef template[DataType, StorageType] class csarray:
             self.thisPtr.insertVal(i, j, val) 
 
     
-    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] rowInds not None, numpy.ndarray[numpy.int_t, ndim=1] colInds not None): 
+    def put(self, val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
         """
-        Select rowInds and colInds
+        Put some values into this matrix. Notice, that this is faster if the indices are sorted. 
         """
         cdef unsigned int ix 
-        self.reserve(len(rowInds))
+        
+        self.reserve(int(len(rowInds)*1.2))
         
         if type(val) == numpy.ndarray: 
             for ix in range(len(rowInds)): 
@@ -220,7 +220,37 @@ cdef template[DataType, StorageType] class csarray:
         else:
             for ix in range(len(rowInds)): 
                 self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)
-            
+
+    def putSorted(self, numpy.ndarray[DataType, ndim=1, mode="c"] vals not None, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
+        """
+        The row indices must be sorted in descending order if in column major order. 
+        """
+        cdef int n = rowInds.shape[0]
+        cdef numpy.ndarray[long, ndim=1, mode="c"] vectorNnz
+        
+        if self.__getStorage() == "rowMajor": 
+            vectorNnz = numpy.bincount(rowInds, minlength=self.shape[0])
+        else: 
+            vectorNnz = numpy.bincount(colInds, minlength=self.shape[1])
+        
+        self.thisPtr.putSorted(&rowInds[0], &colInds[0], &vals[0], n, &vectorNnz[0]) 
+        self.compress()
+        
+    def putSorted2(self, DataType val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
+        """
+        The row indices must be sorted in ascending order if in column major order.  
+        """
+        cdef int n = rowInds.shape[0]
+        cdef numpy.ndarray[long, ndim=1, mode="c"] vectorNnz
+        
+        if self.__getStorage() == "rowMajor": 
+            vectorNnz = numpy.bincount(rowInds, minlength=self.shape[0])
+        else: 
+            vectorNnz = numpy.bincount(colInds, minlength=self.shape[1])        
+        
+        self.thisPtr.putSorted2(&rowInds[0], &colInds[0], val, n, &vectorNnz[0])   
+        self.compress()
+    
 
     def sum(self, axis=None): 
         """
@@ -577,6 +607,7 @@ cdef template[DataType, StorageType] class csarray:
     size = property(__getSize)
     ndim = property(__getNDim)
     storage = property(__getStorage)
+    nnz = property(getnnz)
     
 
     

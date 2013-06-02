@@ -37,6 +37,10 @@ cdef extern from "include/SparseMatrixExt.h":
       vector[long] getIndsRow(int)
       vector[long] getIndsCol(int)
       void setZero()
+      void unsafeInsertVal(int, int, T)
+      void unsafeInsertVal2(int, int, T)
+      void putSorted(long*, long*, T*, int, long*)
+      void putSorted2(long*, long*, T, int, long*) 
       
 cdef template[DataType, StorageType] class csarray:
     cdef SparseMatrixExt[DataType, StorageType] *thisPtr     

@@ -15,8 +15,8 @@ import os
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG) 
 numpy.set_printoptions(suppress=True)
 
-def expandTemplate(inFileName, outFileName, templateList): 
-    if os.path.exists(outFileName) and os.path.getmtime(inFileName) < os.path.getmtime(outFileName): 
+def expandTemplate(inFileName, outFileName, templateList, force=False): 
+    if os.path.exists(outFileName) and os.path.getmtime(inFileName) < os.path.getmtime(outFileName) and not force: 
         logging.debug("No new changes changes in " + inFileName)
         return     
     
@@ -82,29 +82,30 @@ def expandTemplate(inFileName, outFileName, templateList):
     outFile.close() 
     logging.debug("Wrote output file " + outFileName)
 
-def expand_base(workdir='.'):
+def expand_base(workdir='.', force=False):
     typeList = ["signed char", "short", "int", "long", "float", "double"]
+    #typeList = ["double"]
     storageList = ["colMajor", "rowMajor"]
     templateList = list(itertools.product(typeList, storageList))
     #templateList = [["float", "colMajor"]]                                                                                                                                              
 
     inFileName = os.path.join(workdir, "csarray_base.pyx")
     outFileName = os.path.join(workdir, "csarray_sub.pyx")
-    expandTemplate(inFileName, outFileName, templateList)
+    expandTemplate(inFileName, outFileName, templateList, force)
 
     inFileName = os.path.join(workdir, "csarray_base.pxd")
     outFileName = os.path.join(workdir, "csarray_sub.pxd")
-    expandTemplate(inFileName, outFileName, templateList)
+    expandTemplate(inFileName, outFileName, templateList, force)
 
 
     templateList = [["signed char"], ["short"], ["int"], ["long"], ["float"], ["double"]]
     inFileName = os.path.join(workdir, "csarray1d_base.pyx")
     outFileName = os.path.join(workdir, "csarray1d_sub.pyx")
-    expandTemplate(inFileName, outFileName, templateList)
+    expandTemplate(inFileName, outFileName, templateList, force)
     
     inFileName = os.path.join(workdir, "csarray1d_base.pxd")
     outFileName = os.path.join(workdir, "csarray1d_sub.pxd")
-    expandTemplate(inFileName, outFileName, templateList)
+    expandTemplate(inFileName, outFileName, templateList, force)
 
 if __name__ == '__main__':
-    expand_base()
+    expand_base(force=False)

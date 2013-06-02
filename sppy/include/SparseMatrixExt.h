@@ -34,6 +34,14 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
             this->coeffRef(row, col) = val;
         }
 
+    void unsafeInsertVal(int row, int col, T val) { 
+        this->coeffRef(row, col) = val;
+        }
+
+    void unsafeInsertVal2(int row, int col, T val) { 
+        this->insert(row, col) = val;
+        }
+
     void printValues() { 
         for (int k=0; k<this->outerSize(); ++k) {
           for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
@@ -77,6 +85,44 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
             }  
         }
     }
+
+    void putSorted(long* array1, long* array2, T* vals, int numVals, long* vectorNnz) { 
+        //Note we should reserve the correct amount of entries first
+        int i = 0; 
+        Eigen::VectorXd v(this->outerSize());
+        
+        for(i=0;i<this->outerSize();i++) { 
+            v[i] = vectorNnz[i];
+            }
+        
+        this->reserve(v);
+
+        for(i=0;i<numVals;i++) {
+            //std::cout << array1[i] << " " << array2[i] << " " << vals[i] << std::endl;
+            this->insert(array1[i], array2[i]) = vals[i]; 
+            }
+
+        //this->makeCompressed();
+        }
+
+    void putSorted2(long* array1, long* array2, T val, int numVals, long* vectorNnz) { 
+        //Note we should reserve the correct amount of entries first
+        int i = 0; 
+        Eigen::VectorXd v(this->outerSize());
+        
+        for(i=0;i<this->outerSize();i++) { 
+            v[i] = vectorNnz[i];
+            }
+        
+        this->reserve(v);
+
+        for(i=0;i<numVals;i++) {
+            this->insert(array1[i], array2[i]) = val; 
+            }
+
+        //this->makeCompressed();
+        }
+
 
     std::vector<long> getIndsRow(int row) { 
         std::vector<long> inds;

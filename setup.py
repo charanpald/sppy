@@ -1,4 +1,5 @@
 #from distutils.core import setup
+import numpy 
 from setuptools import setup
 from distutils.extension import Extension
 
@@ -23,12 +24,12 @@ if use_cython:
     sys.path.append('./sppy/') # Circumvents loading __init__.py before csarray module is built
     import TemplateExpander
     TemplateExpander.expand_base(workdir='./sppy')
-    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++")] 
-    ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++")) 
-    ext_modules.append(Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++")) 
+    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++", include_dirs=[numpy.get_include()])] 
+    ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++", include_dirs=[numpy.get_include()])) 
+    ext_modules.append(Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++", include_dirs=[numpy.get_include()])) 
     cmdclass.update({ 'build_ext': build_ext })
 else:
-    ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"]), Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.cpp"])] 
+    ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ], include_dirs=[numpy.get_include()]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"], include_dirs=[numpy.get_include()]), Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.cpp"], include_dirs=[numpy.get_include()])] 
 
 setup(name = 'sppy',
       version = __version__,

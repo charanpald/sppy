@@ -231,10 +231,10 @@ cdef template[DataType, StorageType] class csarray:
         if self.__getStorage() == "rowMajor": 
             vectorNnz = numpy.bincount(rowInds, minlength=self.shape[0])
         else: 
-            vectorNnz = numpy.bincount(colInds, minlength=self.shape[1])
+            vectorNnz = numpy.bincount(colInds, minlength=self.shape[1]) 
         
         self.thisPtr.putSorted(&rowInds[0], &colInds[0], &vals[0], n, &vectorNnz[0]) 
-        self.compress()
+        #self.compress()     
         
     def putSorted2(self, DataType val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
         """
@@ -249,7 +249,7 @@ cdef template[DataType, StorageType] class csarray:
             vectorNnz = numpy.bincount(colInds, minlength=self.shape[1])        
         
         self.thisPtr.putSorted2(&rowInds[0], &colInds[0], val, n, &vectorNnz[0])   
-        self.compress()
+        #self.compress() 
     
 
     def sum(self, axis=None): 

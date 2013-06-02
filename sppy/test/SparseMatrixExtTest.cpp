@@ -81,8 +81,26 @@ void testGetIndsCol() {
     
 }
 
+void testPutSorted() { 
+    int m = 7; 
+    int n = 7;
+    SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
+    int k = 5;    
+
+    long rowInds[5] = {0, 1, 3, 5, 4};
+    long colInds[5] = {1, 1, 2, 2, 6};
+    double vals[5] = {0.1, 0.5, -1, 12.2, 4}; 
+    long vecNnz[7] = {0, 2, 2, 0, 0, 0, 1};
+
+    A.putSorted(rowInds, colInds, vals, k, vecNnz); 
+
+    A.printValues();
+
+
+    }
+
 int main()
 {
-    testGetIndsCol();
+    testPutSorted();
 
 }

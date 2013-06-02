@@ -1175,7 +1175,46 @@ class csarrayTest(unittest.TestCase):
         for i in range(rowInds.shape[0]): 
             self.assertEquals(H[rowInds[i], colInds[i]], self.H[rowInds[i], colInds[i]])
             
+    def testPut(self): 
+        A = csarray((10, 10))
+        
+        rowInds = numpy.array([1, 2, 5, 7], numpy.int)
+        colInds = numpy.array([4, 1, 9, 0], numpy.int)
+        vals = numpy.random.randn(rowInds.shape[0])
+        
+        A.put(vals, rowInds, colInds)
+        
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(A[rowInds[i], colInds[i]], vals[i])
+            
+        self.assertEquals(A.nnz, rowInds.shape[0])
 
+    def testPutSorted(self): 
+        A = csarray((10, 10), storageType="colMajor")  
+        
+        rowInds = numpy.array([1, 2, 5, 7, 8, 1], numpy.int)
+        colInds = numpy.array([0, 0, 0, 1, 1, 2], numpy.int)
+        vals = numpy.random.randn(rowInds.shape[0])
+        
+        A.putSorted(vals, rowInds, colInds)
+        
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(A[rowInds[i], colInds[i]], vals[i])
+            
+        self.assertEquals(A.nnz, rowInds.shape[0])
+        
+        #Test rowMajor format 
+        A = csarray((10, 10), storageType="rowMajor") 
+        rowInds = numpy.array([1, 1, 2, 5, 7, 8], numpy.int)
+        colInds = numpy.array([0, 2, 0, 0, 1, 1], numpy.int)
+        
+        A.putSorted(vals, rowInds, colInds)
+        
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(A[rowInds[i], colInds[i]], vals[i])
+            
+        self.assertEquals(A.nnz, rowInds.shape[0])
+        
 
 if __name__ == "__main__":
     unittest.main()

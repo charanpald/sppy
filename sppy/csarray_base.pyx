@@ -1,6 +1,6 @@
 # cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
-from libcpp.vector cimport vector 
+from libcpp.vector cimport vector
 from sppy.dtype import dataTypeDict
 import numpy 
 cimport numpy
@@ -11,42 +11,11 @@ cdef extern from *:
     ctypedef int colMajor "0" 
     ctypedef int rowMajor "1" 
 
-cdef extern from "include/SparseMatrixExt.h":  
-   cdef cppclass SparseMatrixExt[T, S]:  
-      SparseMatrixExt() 
-      SparseMatrixExt(SparseMatrixExt[T, S]) 
-      SparseMatrixExt(int, int)
-      double norm()
-      int cols() 
-      int nonZeros()
-      int rows()
-      int size() 
-      SparseMatrixExt[T, S] abs()
-      SparseMatrixExt[T, S] add(SparseMatrixExt[T, S]&)
-      SparseMatrixExt[T, S] dot(SparseMatrixExt[T, S]&)
-      SparseMatrixExt[T, S] hadamard(SparseMatrixExt[T, S]&)
-      SparseMatrixExt[T, S] negate()
-      SparseMatrixExt[T, S] subtract(SparseMatrixExt[T, S]&)
-      SparseMatrixExt[T, S] trans()
-      T coeff(int, int)
-      T sum()
-      T sumValues()
-      void insertVal(int, int, T) 
-      void fill(T)
-      void makeCompressed()
-      void nonZeroInds(long*, long*)
-      void nonZeroVals(T*)
-      void printValues()
-      void reserve(int)
-      void scalarMultiply(double)
-      void slice(int*, int, int*, int, SparseMatrixExt[T, S]*) 
-      vector[long] getIndsRow(int)
-      vector[long] getIndsCol(int)
-      void setZero()
+
       
       
 cdef template[DataType, StorageType] class csarray:
-    cdef SparseMatrixExt[DataType, StorageType] *thisPtr     
+    #cdef SparseMatrixExt[DataType, StorageType] *thisPtr     
     def __cinit__(self, shape):
         """
         Create a new column or row major dynamic array.
@@ -511,7 +480,26 @@ cdef template[DataType, StorageType] class csarray:
         del result.thisPtr
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.dot(deref(A.thisPtr)))
         return result 
+    
+    def numpyDot(self, numpy.ndarray[double, ndim=2, mode="c"] A): 
+        """
+        Take this array and multiply it with a numpy array. 
+        """
+        if self.shape[1] != A.shape[0]: 
+            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape[0], A.shape[1]))
         
+        cdef unsigned int i 
+        cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros((self.shape[0], A.shape[1]))
+        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int64) 
+        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int64)
+        
+        rowInds, colInds = self.nonzero()
+        
+        for i in range(rowInds.shape[0]): 
+            result[rowInds[i], :] += self.thisPtr.coeff(rowInds[i], colInds[i])*A[colInds[i], :] 
+        
+        return result 
+    
     def transpose(self): 
         """
         Find the transpose of this matrix. 
@@ -538,22 +526,24 @@ cdef template[DataType, StorageType] class csarray:
         """
         Returns the non zero indices for the ith row. 
         """
+        cdef unsigned int j
         cdef vector[long] vect = self.thisPtr.getIndsRow(i)
         cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int)
         
         #Must be a better way to do this 
-        for i in range(vect.size()): 
-            inds[i] = vect[i]
+        for j in range(vect.size()): 
+            inds[j] = vect[j]
 
         return inds    
         
     def colInds(self, long i): 
+        cdef unsigned int j
         cdef vector[long] vect = self.thisPtr.getIndsCol(i)
         cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int)
         
         #Must be a better way to do this 
-        for i in range(vect.size()): 
-            inds[i] = vect[i]
+        for j in range(vect.size()): 
+            inds[j] = vect[j]
 
         return inds  
    

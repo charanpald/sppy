@@ -1002,7 +1002,7 @@ class csarrayTest(unittest.TestCase):
            A[3, 3] = 1
       
     def testCompress(self): 
-       for storageType in self.storageTypes: 
+        for storageType in self.storageTypes: 
            A = csarray((5, 5), storageType=storageType)
            A[0, 1] = 4
            A[2, 3] = -1.2
@@ -1050,10 +1050,25 @@ class csarrayTest(unittest.TestCase):
        
        Ahat = csarray(A)
        Chat = Ahat.dot(B)
-       
+
        nptst.assert_array_equal(C, Chat)
        
-       
+       #Try some random matrices 
+       numRuns = 10 
+       for i in range(numRuns): 
+           m = numpy.random.randint(1, 50) 
+           n = numpy.random.randint(1, 50) 
+           p = numpy.random.randint(1, 50) 
+           
+           A = numpy.random.rand(m, n)
+           B = numpy.random.rand(n, p)
+           
+           C = A.dot(B)
+           
+           Ahat = csarray(A)
+           Chat = Ahat.dot(B)
+           
+           nptst.assert_array_equal(C, Chat)
 
     def testTranspose(self): 
         

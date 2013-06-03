@@ -502,24 +502,17 @@ cdef template[DataType, StorageType] class csarray:
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.dot(deref(A.thisPtr)))
         return result 
     
-    def numpyDot(self, numpy.ndarray[double, ndim=2, mode="c"] A): 
+    def numpyDot(self, numpy.ndarray[double, ndim=2, mode="c"] A not None): 
         """
         Take this array and multiply it with a numpy array. 
         """
         if self.shape[1] != A.shape[0]: 
             raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape[0], A.shape[1]))
         
-        cdef unsigned int i 
         cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros((self.shape[0], A.shape[1]))
-        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int64) 
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int64)
-        
-        rowInds, colInds = self.nonzero()
-        
-        for i in range(rowInds.shape[0]): 
-            result[rowInds[i], :] += self.thisPtr.coeff(rowInds[i], colInds[i])*A[colInds[i], :] 
+        self.thisPtr.dot(&A[0, 0], A.shape[1], &result[0, 0])
             
-        return result 
+        return result
     
     def transpose(self): 
         """

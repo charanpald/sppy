@@ -1189,14 +1189,14 @@ class csarrayTest(unittest.TestCase):
             
         self.assertEquals(A.nnz, rowInds.shape[0])
 
-    def testPutSorted(self): 
+    def testPutInit(self): 
         A = csarray((10, 10), storageType="colMajor")  
         
         rowInds = numpy.array([1, 2, 5, 7, 8, 1], numpy.int)
         colInds = numpy.array([0, 0, 0, 1, 1, 2], numpy.int)
         vals = numpy.random.randn(rowInds.shape[0])
         
-        A.putSorted(vals, rowInds, colInds)
+        A.put(vals, rowInds, colInds, True)
         
         for i in range(rowInds.shape[0]): 
             self.assertEquals(A[rowInds[i], colInds[i]], vals[i])
@@ -1208,12 +1208,31 @@ class csarrayTest(unittest.TestCase):
         rowInds = numpy.array([1, 1, 2, 5, 7, 8], numpy.int)
         colInds = numpy.array([0, 2, 0, 0, 1, 1], numpy.int)
         
-        A.putSorted(vals, rowInds, colInds)
+        A.put(vals, rowInds, colInds, True)
         
         for i in range(rowInds.shape[0]): 
             self.assertEquals(A[rowInds[i], colInds[i]], vals[i])
             
         self.assertEquals(A.nnz, rowInds.shape[0])
+        
+        #Try a larger matrix 
+        numpy.random.seed(21)
+        m = 1000000
+        n = 1000000      
+        numInds = 1000
+        
+        inds = numpy.random.randint(0, m*n, numInds)
+        inds = numpy.unique(inds)
+        vals = numpy.random.randn(inds.shape[0])
+        
+        rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
+        A = csarray((m, n), storageType="colMajor")
+        A.put(vals, rowInds, colInds)
+        
+        for i in range(vals.shape[0]): 
+            self.assertEquals(A[rowInds[i], colInds[i]], vals[i])
+            
+        self.assertEquals(A.nnz, vals.shape[0])
         
 
 if __name__ == "__main__":

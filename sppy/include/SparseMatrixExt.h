@@ -125,6 +125,30 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         }
 
 
+    void putUsingTriplets(long* rowInds, long* colInds, T* vals, int numVals) { 
+        int i; 
+        typedef Eigen::Triplet<double> R;
+        std::vector<R> tripletList;
+        tripletList.reserve(numVals);
+        for(i=0;i<numVals;i++) {    
+            tripletList.push_back(R(rowInds[i], colInds[i], vals[i]));
+            }
+        
+        this->setFromTriplets(tripletList.begin(), tripletList.end());
+        }
+
+    void putUsingTriplets2(long* rowInds, long* colInds, T val, int numVals) { 
+        int i; 
+        typedef Eigen::Triplet<double> R;
+        std::vector<R> tripletList;
+        tripletList.reserve(numVals);
+        for(i=0;i<numVals;i++) {    
+            tripletList.push_back(R(rowInds[i], colInds[i], val));
+            }
+        
+        this->setFromTriplets(tripletList.begin(), tripletList.end());
+        }
+
     std::vector<long> getIndsRow(int row) { 
         std::vector<long> inds;
         

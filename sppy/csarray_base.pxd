@@ -41,6 +41,8 @@ cdef extern from "include/SparseMatrixExt.h":
       void unsafeInsertVal2(int, int, T)
       void putSorted(long*, long*, T*, int, long*)
       void putSorted2(long*, long*, T, int, long*) 
+      void putUsingTriplets(long*, long*, T*, int) 
+      void putUsingTriplets2(long*, long*, T, int)
       
 cdef template[DataType, StorageType] class csarray:
     cdef SparseMatrixExt[DataType, StorageType] *thisPtr     

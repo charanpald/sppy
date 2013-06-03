@@ -3,8 +3,10 @@
 #include <eigen3/Eigen/Sparse>
 #include "../include/SparseMatrixExt.h"
 #include <vector> 
+#include <stdlib.h>  
 
 using Eigen::SparseMatrix;
+using Eigen::Triplet;
 
 void testNonZeroInds() { 
     int n = 5; 
@@ -82,25 +84,40 @@ void testGetIndsCol() {
 }
 
 void testPutSorted() { 
-    int m = 7; 
-    int n = 7;
+    std::cout << "Got here 1" << std::endl;
+    int m = 1000000; 
+    int n = 1000000;
     SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
-    int k = 5;    
+    const static int numVals = 100000000;  
+    
+    int i;  
+    long *rowInds = new long[numVals]; 
+    long *colInds= new long[numVals]; 
+    double *vals= new double[numVals];
+    
+    std::cout << "Got here" << std::endl;
+    
+    for(i=0;i<numVals;i++) {
+        rowInds[i] =  (long)(rand() % m);
+        colInds[i] = (long)(rand() % n);
+        vals[i] = (double)((double)rand())/RAND_MAX;
+        //std::cout << rowInds[i] << " " << colInds[i] << " " << vals[i] << std::endl;
+        }
+    
+    std::cout << "Adding to matrix" << std::endl;
+    A.putTriplets(rowInds, colInds, vals, numVals);
 
-    long rowInds[5] = {0, 1, 3, 5, 4};
-    long colInds[5] = {1, 1, 2, 2, 6};
-    double vals[5] = {0.1, 0.5, -1, 12.2, 4}; 
-    long vecNnz[7] = {0, 2, 2, 0, 0, 0, 1};
+    //A.printValues();
 
-    A.putSorted(rowInds, colInds, vals, k, vecNnz); 
-
-    A.printValues();
+    std::cout << A.nonZeros() << std::endl;
 
 
     }
 
 int main()
 {
+
+    std::cout << "Got here 0" << std::endl;
     testPutSorted();
 
 }

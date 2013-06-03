@@ -206,51 +206,42 @@ cdef template[DataType, StorageType] class csarray:
             self.thisPtr.insertVal(i, j, val) 
 
     
-    def put(self, val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
+    def put(self, val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None, init=False): 
         """
-        Put some values into this matrix. Notice, that this is faster if the indices are sorted. 
-        """
-        cdef unsigned int ix 
+        Put some values into this matrix. Notice, that this is faster if init=True and 
+        the matrix has just been created. 
+        """  
+        cdef unsigned int ix         
         
-        self.reserve(int(len(rowInds)*1.2))
-        
-        if type(val) == numpy.ndarray: 
-            for ix in range(len(rowInds)): 
-                self.thisPtr.insertVal(rowInds[ix], colInds[ix], val[ix])
-        else:
-            for ix in range(len(rowInds)): 
-                self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)
+        if init: 
+            if type(val) == numpy.ndarray: 
+                self.__putUsingTriplets(val, rowInds, colInds)
+            else:
+                self.__putUsingTriplets2(val, rowInds, colInds)
+        else: 
+            self.reserve(int(len(rowInds)*1.2))
+            
+            if type(val) == numpy.ndarray:
+                for ix in range(len(rowInds)):
+                    self.thisPtr.insertVal(rowInds[ix], colInds[ix], val[ix])
+            else:
+                for ix in range(len(rowInds)):
+                    self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)   
 
-    def putSorted(self, numpy.ndarray[DataType, ndim=1, mode="c"] vals not None, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
+    def __putUsingTriplets(self, numpy.ndarray[DataType, ndim=1, mode="c"] vals not None, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
         """
         The row indices must be sorted in descending order if in column major order. 
         """
-        cdef int n = rowInds.shape[0]
-        cdef numpy.ndarray[long, ndim=1, mode="c"] vectorNnz
+        cdef int n = rowInds.shape[0]         
+        self.thisPtr.putUsingTriplets(&rowInds[0], &colInds[0], &vals[0], n) 
+    
         
-        if self.__getStorage() == "rowMajor": 
-            vectorNnz = numpy.bincount(rowInds, minlength=self.shape[0])
-        else: 
-            vectorNnz = numpy.bincount(colInds, minlength=self.shape[1]) 
-        
-        self.thisPtr.putSorted(&rowInds[0], &colInds[0], &vals[0], n, &vectorNnz[0]) 
-        #self.compress()     
-        
-    def putSorted2(self, DataType val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
+    def __putUsingTriplets2(self, DataType val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
         """
         The row indices must be sorted in ascending order if in column major order.  
         """
-        cdef int n = rowInds.shape[0]
-        cdef numpy.ndarray[long, ndim=1, mode="c"] vectorNnz
-        
-        if self.__getStorage() == "rowMajor": 
-            vectorNnz = numpy.bincount(rowInds, minlength=self.shape[0])
-        else: 
-            vectorNnz = numpy.bincount(colInds, minlength=self.shape[1])        
-        
-        self.thisPtr.putSorted2(&rowInds[0], &colInds[0], val, n, &vectorNnz[0])   
-        #self.compress() 
-    
+        cdef int n = rowInds.shape[0]        
+        self.thisPtr.putUsingTriplets2(&rowInds[0], &colInds[0], val, n)   
 
     def sum(self, axis=None): 
         """
@@ -527,7 +518,7 @@ cdef template[DataType, StorageType] class csarray:
         
         for i in range(rowInds.shape[0]): 
             result[rowInds[i], :] += self.thisPtr.coeff(rowInds[i], colInds[i])*A[colInds[i], :] 
-        
+            
         return result 
     
     def transpose(self): 

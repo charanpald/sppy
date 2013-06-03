@@ -9,7 +9,6 @@ using Eigen::SparseMatrix;
 using Eigen::Triplet;
 
 void testNonZeroInds() { 
-    int n = 5; 
     SparseMatrixExt<double, Eigen::RowMajor> A(7, 7); 
     A.reserve(10);
 
@@ -30,7 +29,6 @@ void testNonZeroInds() {
 }
 
 void testSlice() { 
-    int n = 5; 
     SparseMatrixExt<double, Eigen::ColMajor> A(7, 7); 
     A.reserve(10);
 
@@ -50,7 +48,6 @@ void testSlice() {
 }
 
 void testGetIndsRow() { 
-    int n = 5; 
     SparseMatrixExt<double, Eigen::RowMajor> A(7, 7); 
     A.reserve(10);
 
@@ -61,13 +58,12 @@ void testGetIndsRow() {
 
     std::vector<long> inds = A.getIndsRow(1);
     
-    for(int i = 0; i<inds.size();i++)
+    for(unsigned int i = 0; i<inds.size();i++)
         std::cout << inds[i] << std::endl; 
     
 }
 
 void testGetIndsCol() { 
-    int n = 5; 
     SparseMatrixExt<double, Eigen::ColMajor> A(7, 7); 
     A.reserve(10);
 
@@ -78,13 +74,12 @@ void testGetIndsCol() {
 
     std::vector<long> inds = A.getIndsCol(3);
     
-    for(int i = 0; i<inds.size();i++)
+    for(unsigned int i = 0; i<inds.size();i++)
         std::cout << inds[i] << std::endl; 
     
 }
 
 void testPutSorted() { 
-    std::cout << "Got here 1" << std::endl;
     int m = 1000000; 
     int n = 1000000;
     SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
@@ -94,8 +89,7 @@ void testPutSorted() {
     long *rowInds = new long[numVals]; 
     long *colInds= new long[numVals]; 
     double *vals= new double[numVals];
-    
-    std::cout << "Got here" << std::endl;
+
     
     for(i=0;i<numVals;i++) {
         rowInds[i] =  (long)(rand() % m);
@@ -104,20 +98,62 @@ void testPutSorted() {
         //std::cout << rowInds[i] << " " << colInds[i] << " " << vals[i] << std::endl;
         }
     
-    std::cout << "Adding to matrix" << std::endl;
-    A.putTriplets(rowInds, colInds, vals, numVals);
+    A.putUsingTriplets(rowInds, colInds, vals, numVals);
 
     //A.printValues();
 
     std::cout << A.nonZeros() << std::endl;
-
-
     }
+    
+void testDot() { 
+    const static int m = 10; 
+    const static int n = 10;
+    SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
+    const static int numVals = 10;  
+    
+    int i, j;  
+    long *rowInds = new long[numVals]; 
+    long *colInds= new long[numVals]; 
+    double *vals= new double[numVals];
+    const static int p = 5;
+    double *array = new double[n*p];
+    double *result = new double[m*p];
+    
+    for(i=0;i<n;i++) { 
+		for(j=0;j<p;j++) { 
+			array[i*p + j] = (double)((double)rand())/RAND_MAX;
+			std::cout << array[i*p + j] << " "; 
+			if (j==p-1) { 
+				std::cout << std::endl; 
+			} 
+		} 
+	} 
+
+    
+    for(i=0;i<numVals;i++) {
+        rowInds[i] =  (long)(rand() % m);
+        colInds[i] = (long)(rand() % n);
+        vals[i] = (double)((double)rand())/RAND_MAX;
+        std::cout << rowInds[i] << " " << colInds[i] << " " << vals[i] << std::endl;
+        }
+    
+    A.putUsingTriplets(rowInds, colInds, vals, numVals);	
+    
+    A.dot(array, p, result);
+    
+    for(i=0;i<m;i++) { 
+		for(j=0;j<p;j++) { 
+			std::cout << result[i*p + j] << " "; 
+			if (j==p-1) { 
+				std::cout << std::endl; 
+			} 
+		} 
+	} 
+} 
 
 int main()
 {
 
-    std::cout << "Got here 0" << std::endl;
-    testPutSorted();
+    testDot();
 
 }

@@ -159,6 +159,7 @@ class csarrayProfile():
                 
         A = csarray((m, n), storageType="colMajor")
         A.put(vals, rowInds, colInds, True)
+        A.compress()
         
         p = 100
         W = numpy.random.rand(n, p)

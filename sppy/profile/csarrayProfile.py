@@ -4,7 +4,6 @@ import numpy
 import scipy.sparse
 from apgl.util import *
 from sppy import csarray
-from pysparse import spmatrix
 from apgl.util.PySparseUtils import PySparseUtils 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -127,9 +126,9 @@ class csarrayProfile():
     def profilePutSorted(self): 
         #Test speed of array creation 
         numpy.random.seed(21)
-        m = 10000
-        n = 20000      
-        numInds = 100000
+        m = 1000000
+        n = 1000000      
+        numInds = 10000000
         
         inds = numpy.random.randint(0, m*n, numInds)
         inds = numpy.unique(inds)
@@ -139,12 +138,38 @@ class csarrayProfile():
                 
         A = csarray((m, n), storageType="colMajor")
         
-        vectorNnz = numpy.bincount(colInds, minlength=A.shape[1])
 
-        #ProfileUtils.profile('A.put(vals, rowInds, colInds)', globals(), locals())
-        #ProfileUtils.profile('A.putSorted(vals, rowInds, colInds)', globals(), locals())
+        ProfileUtils.profile('A.put(vals, rowInds, colInds, True)', globals(), locals())
 
-        ProfileUtils.profile("scipy.sparse.csc_matrix((vals, (rowInds, colInds)), A.shape )", globals(), locals())
+        #ProfileUtils.profile("scipy.sparse.csc_matrix((vals, (rowInds, colInds)), A.shape )", globals(), locals())
+
+    def profileDot(self): 
+        #Create random sparse matrix and numpy array 
+        #Test speed of array creation 
+        numpy.random.seed(21)
+        m = 1000000
+        n = 1000000      
+        numInds = 1000000
+        
+        inds = numpy.random.randint(0, m*n, numInds)
+        inds = numpy.unique(inds)
+        vals = numpy.random.randn(inds.shape[0])
+        
+        rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
+                
+        A = csarray((m, n), storageType="colMajor")
+        A.put(vals, rowInds, colInds, True)
+        
+        p = 100
+        W = numpy.random.rand(n, p)
+        
+        
+        ProfileUtils.profile('A.dot(W)', globals(), locals())
+        
+        #Compare versus scipy 
+        B = scipy.sparse.csc_matrix((vals, (rowInds, colInds)), (m, n))
+        
+        ProfileUtils.profile('B.dot(W)', globals(), locals())
 
 
 profiler = csarrayProfile()
@@ -155,4 +180,5 @@ profiler = csarrayProfile()
 #profiler.profileSumSpa()
 #profiler.profileGetNonZerosPys()
 #profiler.profileGetNonZerosSpa()
-profiler.profilePutSorted()
+#profiler.profilePutSorted()
+profiler.profileDot()

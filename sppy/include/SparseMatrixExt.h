@@ -272,6 +272,16 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                 this->coeffRef(i, j) = val;
         }
 
+    void dot(T* array, int numRows, int numCols, T* result) { 
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) { 
+            for(int j=0:j<this->cols();j++)
+                result[it.row(), j] += self.thisPtr.coeff(it.row(), it.col())*A[it.col(), j] 
+                }  
+            }
+        
+        }
+
   };
 
 #endif

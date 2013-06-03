@@ -1,4 +1,4 @@
-# cython: profile=True
+# cython: profile=False
 # cython: boundscheck=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 from libcpp.vector cimport vector
@@ -38,7 +38,7 @@ cdef template[DataType, StorageType] class csarray:
         """
         Return the shape of this array (rows, cols)
         """
-        return (self.thisPtr.rows(), self.thisPtr.cols())
+        return (self.thisPtr.rows(), self.thisPtr.cols()) 
         
     def __getSize(self): 
         """

@@ -277,6 +277,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         unsigned int col; 
         unsigned int p, q;
         int j; 
+        T val; 
     
         for (int i=0; i<this->outerSize(); ++i) {
           for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, i); it; ++it) { 
@@ -284,9 +285,10 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
             col = it.col();
             p = row*numCols; 
             q = col*numCols; 
+            val = this->coeff(row, col);
             for(j=0;j<numCols;j++)
                 //The array is C-contiguous so that A[i, j] -> A[i*numCols + j]
-                result[p + j] += this->coeff(row, col)*array[q + j]; 
+                result[p + j] += val*array[q + j]; 
                 }  
             }
         

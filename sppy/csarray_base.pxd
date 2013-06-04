@@ -43,7 +43,8 @@ cdef extern from "include/SparseMatrixExt.h":
       void putSorted2(long*, long*, T, int, long*) 
       void putUsingTriplets(long*, long*, T*, int) 
       void putUsingTriplets2(long*, long*, T, int)
-      void dot(double*, int, double*)
+      void dot(double*, int, double*) nogil 
+      void dotSub(double*, int,  int, int, double*) nogil 
       
 cdef template[DataType, StorageType] class csarray:
-    cdef SparseMatrixExt[DataType, StorageType] *thisPtr     
+    cdef SparseMatrixExt[DataType, StorageType] *thisPtr  

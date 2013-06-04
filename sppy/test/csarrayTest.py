@@ -1068,6 +1068,39 @@ class csarrayTest(unittest.TestCase):
            Ahat = csarray(A)
            Chat = Ahat.dot(B)
            
+           nptst.assert_array_almost_equal(C, Chat)
+
+    def testPdot(self): 
+       D = numpy.ascontiguousarray(self.D.toarray())
+       B = self.D.pdot(D)
+
+       nptst.assert_array_equal(B, D.dot(D))
+       
+       A = numpy.random.rand(10, 5)
+       B = numpy.random.rand(5, 6)
+       
+       C = A.dot(B)
+       
+       Ahat = csarray(A)
+       Chat = Ahat.pdot(B)
+
+       nptst.assert_array_equal(C, Chat)
+       
+       #Try some random matrices 
+       numRuns = 10 
+       for i in range(numRuns): 
+           m = numpy.random.randint(1, 50) 
+           n = numpy.random.randint(1, 50) 
+           p = numpy.random.randint(1, 50) 
+           
+           A = numpy.random.rand(m, n)
+           B = numpy.random.rand(n, p)
+           
+           C = A.dot(B)
+           
+           Ahat = csarray(A)
+           Chat = Ahat.pdot(B)
+           
            nptst.assert_array_equal(C, Chat)
 
     def testTranspose(self): 

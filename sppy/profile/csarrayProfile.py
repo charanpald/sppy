@@ -149,7 +149,7 @@ class csarrayProfile():
         numpy.random.seed(21)
         m = 1000000
         n = 1000000      
-        numInds = 1000000
+        numInds = 10000000
         
         inds = numpy.random.randint(0, m*n, numInds)
         inds = numpy.unique(inds)
@@ -157,20 +157,22 @@ class csarrayProfile():
         
         rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
                 
-        A = csarray((m, n), storageType="colMajor")
+        A = csarray((m, n), storageType="rowMajor")
         A.put(vals, rowInds, colInds, True)
         A.compress()
         
-        p = 100
+        p = 500
         W = numpy.random.rand(n, p)
         
         
         ProfileUtils.profile('A.dot(W)', globals(), locals())
         
         #Compare versus scipy 
-        B = scipy.sparse.csc_matrix((vals, (rowInds, colInds)), (m, n))
+        #B = scipy.sparse.csc_matrix((vals, (rowInds, colInds)), (m, n))        
+        #ProfileUtils.profile('B.dot(W)', globals(), locals())
         
-        ProfileUtils.profile('B.dot(W)', globals(), locals())
+        #Compare versus pdot       
+        ProfileUtils.profile('A.pdot(W)', globals(), locals())
 
 
 profiler = csarrayProfile()

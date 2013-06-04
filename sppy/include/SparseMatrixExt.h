@@ -11,7 +11,8 @@ template <class T, int S=Eigen::ColMajor>
 class SparseMatrixExt:public SparseMatrix<T, S> {
   public:
 	SparseMatrixExt<T, S>(): 
-		SparseMatrix<T, S>(){ 
+		SparseMatrix<T, S>(){
+        /* Create a new SparseMatrixExt object */  
 		} 
 
 	SparseMatrixExt<T, S>(int rows, int cols): 
@@ -38,7 +39,30 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         return (SparseMatrixExt<T, S>)((*this) * other); 
         }
 
-    void dot(double* array, int numCols, double* result) { 
+    void dot1d(double* v, double* result) { 
+        /* 
+         * Compute the dot product with this matrix and the 1d vector v.
+         * result is the output.  
+         */
+        unsigned int row; 
+        unsigned int col; 
+        T val; 
+    
+        for (int i=0; i<this->outerSize(); ++i) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, i); it; ++it) { 
+            row = it.row();
+            col = it.col();
+            val = this->coeff(row, col);
+            result[row] += val*v[col]; 
+            }
+        }
+    }
+
+    void dot2d(double* A, int numCols, double* result) { 
+        /* Compute the dot product with this matrix and the 2d matrix A.
+         * numCols is the number of columns in A, and result is the output.  
+         * 
+         */
         unsigned int row; 
         unsigned int col; 
         unsigned int p, q;
@@ -54,7 +78,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
             val = this->coeff(row, col);
             for(j=0;j<numCols;j++)
                 //The array is C-contiguous so that A[i, j] -> A[i*numCols + j]
-                result[p + j] += val*array[q + j]; 
+                result[p + j] += val*A[q + j]; 
                 }  
             }
         }    

@@ -1,8 +1,9 @@
 # cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 from sppy.csarray_sub import csarray_int_colMajor, csarray_double_colMajor, csarray_float_colMajor, csarray_long_colMajor, csarray_short_colMajor, csarray_signed_char_colMajor  
-from sppy.csarray_sub import csarray_int_rowMajor, csarray_double_rowMajor, csarray_float_rowMajor, csarray_long_rowMajor, csarray_short_rowMajor, csarray_signed_char_rowMajor
+from sppy.csarray_sub cimport csarray_int_rowMajor, csarray_double_rowMajor, csarray_float_rowMajor, csarray_long_rowMajor, csarray_short_rowMajor, csarray_signed_char_rowMajor
 from sppy.csarray1d_sub import csarray1d_int, csarray1d_double, csarray1d_float, csarray1d_long, csarray1d_short, csarray1d_signed_char  
+from sppy.csarray1d_sub cimport csarray1d_int, csarray1d_double, csarray1d_float, csarray1d_long, csarray1d_short, csarray1d_signed_char 
 import struct
 import numpy 
 cimport numpy
@@ -10,7 +11,7 @@ cimport numpy
 numpy.import_array()
 
 
-class csarray(object): 
+class csarray(object):  
     def __init__(self, S, dtype=numpy.float, storageType="colMajor"): 
         """
         Create a new csarray using the given shape and dtype. If the dtype is 
@@ -18,7 +19,7 @@ class csarray(object):
         """
         if type(S) == tuple: 
             shape = S
-        elif type(S) == int: 
+        elif type(S) == int:  
             shape = S, 
         elif type(S) == numpy.ndarray or type(S) == csarray:
             shape = S.shape
@@ -84,13 +85,27 @@ class csarray(object):
                 self._array[nonzeros[0]] = S[nonzeros[0]]
             
         self._dtype = dtype
-            
+    
+    def __abs__(self): 
+        resultArray = self._array.__abs__()
+        result = csarray(resultArray.shape, self.dtype)
+        result._array = resultArray
+        return result    
+
+    def __add__(self, A): 
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.__add__(A._array)
+        return result
+
     def __getattr__(self, name):
         try: 
             return getattr(self, name)
         except: 
             return getattr(self._array, name)
 
+    def __getDType(self): 
+        return self._dtype
+        
     def __getitem__(self, inds):
         result = self._array.__getitem__(inds) 
         
@@ -100,43 +115,65 @@ class csarray(object):
             result = newArray
             
         return result 
-        
-    def __setitem__(self, inds, val):
-        self._array.__setitem__(inds, val) 
-        
-    def __abs__(self): 
-        resultArray = self._array.__abs__()
-        result = csarray(resultArray.shape, self.dtype)
-        result._array = resultArray
-        return result
-        
+
+    def __mul__(self, x):
+        newArray = self.copy() 
+        newArray._array = newArray._array*x
+        return newArray
+
     def __neg__(self): 
         resultArray = self._array.__neg__()
         result = csarray(resultArray.shape, self.dtype)
         result._array = resultArray
         return result
-
-    def __add__(self, A): 
-        result = csarray(self.shape, self.dtype)
-        result._array = self._array.__add__(A._array)
-        return result
         
+    def __setitem__(self, inds, val):
+        self._array.__setitem__(inds, val) 
+        
+    def __str__(self): 
+        """
+        Return a string representation of the non-zero elements of the array. 
+        """
+        if self.ndim == 2: 
+            outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + " storage:" + str(self.storage) + "\n"
+            (rowInds, colInds) = self.nonzero() 
+            vals = self.values()
+            
+            for i in range(self.getnnz()): 
+                outputStr += "(" + str(rowInds[i]) + ", " + str(colInds[i]) + ")" + " " + str(vals[i]) 
+                if i != self.getnnz()-1: 
+                    outputStr += "\n"
+        else: 
+            outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + "\n"
+            inds = self.nonzero()[0]
+            vals = self[inds]
+            
+            for i in range(self.getnnz()): 
+                outputStr += "(" + str(inds[i]) + ")" + " " + str(vals[i]) 
+                if i != self.getnnz()-1: 
+                    outputStr += "\n"
+                    
+        return outputStr 
+
     def __sub__(self, A): 
         result = csarray(self.shape, self.dtype)
         result._array = self._array.__sub__(A._array)
         return result
-        
-    def hadamard(self, A): 
-        result = csarray(self.shape, self.dtype)
-        result._array = self._array.hadamard(A._array)
-        return result
-        
+
+    def copy(self): 
+        newArray = csarray(self.shape, self.dtype)
+        newArray._array = self._array.copy()
+        return newArray 
+    
     def dot(self, A): 
         """
         Compute the dot product between this and either a csarray or numpy array.
         """
-        if isinstance(A, numpy.ndarray): 
-            result = self.numpyDot(A)
+        if isinstance(A, numpy.ndarray):  
+            if A.ndim == 2: 
+                result = self._array.numpyDot2d(A)
+            else: 
+                result = self._array.numpyDot1d(A)
         else: 
             resultArray = self._array.dot(A._array)
             
@@ -147,51 +184,7 @@ class csarray(object):
                 result = resultArray
             
         return result
-        
-    def transpose(self): 
-        resultArray = self._array.transpose()
-        result = csarray(resultArray.shape, self.dtype)
-        result._array = resultArray
-        return result
-        
-    def __mul__(self, x):
-        newArray = self.copy() 
-        newArray._array = newArray._array*x
-        return newArray
-        
-    def copy(self): 
-        newArray = csarray(self.shape, self.dtype)
-        newArray._array = self._array.copy()
-        return newArray 
-     
-    def __str__(self): 
-        """
-        Return a string representation of the non-zero elements of the array. 
-        """
-        outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + "\n"
-        
-        if self.ndim == 2: 
-            (rowInds, colInds) = self.nonzero() 
-            vals = self.values()
-            
-            for i in range(self.getnnz()): 
-                outputStr += "(" + str(rowInds[i]) + ", " + str(colInds[i]) + ")" + " " + str(vals[i]) 
-                if i != self.getnnz()-1: 
-                    outputStr += "\n"
-        else: 
-            inds = self.nonzero()[0]
-            vals = self[inds]
-            
-            for i in range(self.getnnz()): 
-                outputStr += "(" + str(inds[i]) + ")" + " " + str(vals[i]) 
-                if i != self.getnnz()-1: 
-                    outputStr += "\n"
-                    
-        return outputStr 
-    
-    def __getDType(self): 
-        return self._dtype
-        
+
     def convertBase(self, array, dtype): 
         """
         Convert a base class to csarray. 
@@ -200,7 +193,11 @@ class csarray(object):
         self._array = array       
         self._dtype = dtype 
     
-
+    def hadamard(self, A): 
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.hadamard(A._array)
+        return result
+        
     def toScipyCsc(self): 
         """
         Convert this matrix to scipy. Returns a copy of the data in csc_matrix 
@@ -250,6 +247,12 @@ class csarray(object):
         A.indptr = indPtr
         
         return A 
+   
+    def transpose(self): 
+        resultArray = self._array.transpose()
+        result = csarray(resultArray.shape, self.dtype)
+        result._array = resultArray
+        return result
      
     dtype = property(__getDType)
     T = property(transpose)

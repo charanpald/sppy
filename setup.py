@@ -19,12 +19,12 @@ execfile3('sppy/version.py')
 cmdclass = { }
 
 if use_cython:
-    # Expande cdef template and generate _sub.pyx files:
+    # Expand cdef template and generate _sub.pyx files:
     import sys
     sys.path.append('./sppy/') # Circumvents loading __init__.py before csarray module is built
     import TemplateExpander
     TemplateExpander.expand_base(workdir='./sppy')
-    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++", include_dirs=[numpy.get_include()])] 
+    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++", include_dirs=[numpy.get_include()], extra_compile_args=['-fopenmp'], extra_link_args=['-fopenmp'])] 
     ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++", include_dirs=[numpy.get_include()], extra_compile_args=['-fopenmp'], extra_link_args=['-fopenmp'])) 
     ext_modules.append(Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++", include_dirs=[numpy.get_include()])) 
     cmdclass.update({ 'build_ext': build_ext })

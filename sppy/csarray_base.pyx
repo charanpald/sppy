@@ -524,16 +524,18 @@ cdef template[DataType, StorageType] class csarray:
         """
         if self.shape[1] != A.shape[0]: 
             raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape[0], A.shape[1]))
+        if self.storage != "rowMajor": 
+            raise ValueError("Only thread-safe on row major matrices")
             
         cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros((self.shape[0], A.shape[1]))  
         cdef int numCpus = multiprocessing.cpu_count()                          
         cdef int numJobs = numCpus
         cdef int i  
-        cdef numpy.ndarray[numpy.int_t, ndim=1] colInds = numpy.array(numpy.linspace(0, A.shape[1], numJobs+1), numpy.int)
+        cdef numpy.ndarray[numpy.int_t, ndim=1] rowInds = numpy.array(numpy.linspace(0, self.shape[0], numJobs+1), numpy.int)
         
         #for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
         for i in range(numJobs):
-            self.thisPtr.dotSub(&A[0, 0], result.shape[1],  colInds[i], colInds[i+1], &result[0, 0])
+            self.thisPtr.dotSub(&A[0, 0], result.shape[1],  rowInds[i], rowInds[i+1], &result[0, 0])
             
         return result     
     

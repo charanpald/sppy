@@ -1,4 +1,4 @@
-# cython: profile=False
+# cython: profile=True
 # cython: boundscheck=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 from libcpp.vector cimport vector
@@ -518,45 +518,23 @@ cdef template[DataType, StorageType] class csarray:
         return result
      
 
-    def pDot(self, numpy.ndarray[double, ndim=2, mode="c"] A not None): 
+    def pdot(self, numpy.ndarray[double, ndim=2, mode="c"] A not None): 
         """
         Take this array and multiply it with a numpy array using multithreading. 
         """
         if self.shape[1] != A.shape[0]: 
             raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape[0], A.shape[1]))
             
-        cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros((self.shape[0], A.shape[1]))         
-        cdef numpy.ndarray[double, ndim=2, mode="c"] ASub          
-                   
-        cdef int numJobs = multiprocessing.cpu_count()
-        cdef int i 
-        cdef int m = self.shape[0]
-        cdef int n = self.shape[1]
-        cdef int p = A.shape[1]
-        #cdef double* Aref = 
-        colInds = numpy.array(numpy.linspace(0, A.shape[1], numJobs+1), numpy.int)
-        AList = []
+        cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros((self.shape[0], A.shape[1]))  
+        cdef int numCpus = multiprocessing.cpu_count()                          
+        cdef int numJobs = numCpus
+        cdef int i  
+        cdef numpy.ndarray[numpy.int_t, ndim=1] colInds = numpy.array(numpy.linspace(0, A.shape[1], numJobs+1), numpy.int)
         
-        for i in range(numJobs): 
-            AList.append(numpy.ascontiguousarray(A[:, colInds[i]:colInds[i+1]])) 
-        
-        resultsList = []  
-        for i in range(numJobs): 
-            result = numpy.zeros((self.shape[0], colInds[i+1]-colInds[i]))
-            resultsList.append(result)
-        
-        for i in range(numJobs): 
-
-            ASub = AList[i]
-            result = resultsList[i]
-
-            self.thisPtr.dot(&ASub[0, 0], result.shape[1], &result[0, 0])
+        #for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
+        for i in range(numJobs):
+            self.thisPtr.dotSub(&A[0, 0], result.shape[1],  colInds[i], colInds[i+1], &result[0, 0])
             
-        result = numpy.zeros((self.shape[0], A.shape[1]))
-        
-        for i in range(numJobs): 
-            result[:, colInds[i]:colInds[i+1]] = resultsList[i]
-
         return result     
     
     def transpose(self): 

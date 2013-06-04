@@ -17,7 +17,6 @@ cdef extern from *:
 
       
 cdef template[DataType, StorageType] class csarray:
-    #cdef SparseMatrixExt[DataType, StorageType] *thisPtr     
     def __cinit__(self, shape):
         """
         Create a new column or row major dynamic array.
@@ -43,7 +42,7 @@ cdef template[DataType, StorageType] class csarray:
         """
         return (self.thisPtr.rows(), self.thisPtr.cols()) 
         
-    def __getSize(self): 
+    def __getSize(self):  
         """
         Return the size of this array, that is rows*cols 
         """
@@ -505,7 +504,7 @@ cdef template[DataType, StorageType] class csarray:
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.dot(deref(A.thisPtr)))
         return result 
     
-    def numpyDot(self, numpy.ndarray[double, ndim=2, mode="c"] A): 
+    def numpyDot2d(self, numpy.ndarray[double, ndim=2, mode="c"] A): 
         """
         Take this array and multiply it with a numpy array. 
         """
@@ -513,10 +512,21 @@ cdef template[DataType, StorageType] class csarray:
             raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape[0], A.shape[1]))
         
         cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros((self.shape[0], A.shape[1]))
-        self.thisPtr.dot(&A[0, 0], A.shape[1], &result[0, 0])
+        self.thisPtr.dot2d(&A[0, 0], A.shape[1], &result[0, 0])
+            
+        return result 
+    
+    def numpyDot1d(self, numpy.ndarray[double, ndim=1, mode="c"] v): 
+        """
+        Take this array and multiply it with a numpy array. 
+        """
+        if self.shape[1] != v.shape[0]: 
+            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(v.shape[0], v.shape[1]))
+        
+        cdef numpy.ndarray[double, ndim=1, mode="c"] result = numpy.zeros(self.shape[0])
+        self.thisPtr.dot1d(&v[0], &result[0])
             
         return result
-     
 
     def pdot(self, numpy.ndarray[double, ndim=2, mode="c"] A not None): 
         """
@@ -599,7 +609,7 @@ cdef template[DataType, StorageType] class csarray:
     def values(self): 
         """
         Return the values of this object according to the elements returned 
-        using nonzero. 
+        using nonzero.  
         """
 
         cdef numpy.ndarray[DataType, ndim=1, mode="c"] vals = numpy.zeros(self.getnnz(), self.dtype()) 

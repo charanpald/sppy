@@ -3,7 +3,7 @@
 
 class GeneralLinearOperator(object): 
     """
-    A slightly more general form of LinearOperator which inherits LinearOperator. 
+    A slightly more general form of LinearOperator 
     
     The new operation is rmatmat which is X.T V. 
     """

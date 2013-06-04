@@ -24,42 +24,128 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 		}
 
 
-    SparseMatrixExt& operator=(const SparseMatrixExt& other)  { 
-        SparseMatrix<T, S>::operator=(other); 
-        return *this;
+    SparseMatrixExt<T, S> abs() { 
+        SparseMatrix<T, S> A = this-> cwiseAbs();
+        return (SparseMatrixExt<T, S>)A; 
+        } 
+     
+  
+    SparseMatrixExt<T, S> add(const SparseMatrixExt& other) { 
+        return (SparseMatrixExt<T, S>)((*this) + other); 
+        } 
+        
+    SparseMatrixExt<T, S> dot(const SparseMatrixExt& other) { 
+        return (SparseMatrixExt<T, S>)((*this) * other); 
         }
+
+    void dot(double* array, int numCols, double* result) { 
+        unsigned int row; 
+        unsigned int col; 
+        unsigned int p, q;
+        int j; 
+        T val; 
+    
+        for (int i=0; i<this->outerSize(); ++i) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, i); it; ++it) { 
+            row = it.row();
+            col = it.col();
+            p = row*numCols; 
+            q = col*numCols; 
+            val = this->coeff(row, col);
+            for(j=0;j<numCols;j++)
+                //The array is C-contiguous so that A[i, j] -> A[i*numCols + j]
+                result[p + j] += val*array[q + j]; 
+                }  
+            }
+        }    
+    
+    void dotSub(double* A, int numCols, int startRow, int endRow, double* result) { 
+        /*
+        Perform a dot product on a subset of the rows of X, i.e. find X[startRow:endRow, :].dot(A). 
+        numCols is the number of columns in A. Only works on row major matrices. 
+        */
+        unsigned int row; 
+        unsigned int col; 
+        unsigned int p, q;
+        int j; 
+        T val; 
+    
+        for (int i=startRow; i<endRow; ++i) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, i); it; ++it) { 
+            row = it.row();
+            col = it.col();
+            p = row*numCols; 
+            q = col*numCols; 
+            val = this->coeff(row, col);
+            for(j=0;j<numCols;j++)
+                //The array is C-contiguous so that A[i, j] -> A[i*numCols + j]
+                result[p + j] += val*A[q + j]; 
+                }  
+            }
+        }    
+    
+	void fill(T val) { 
+        this->reserve(this->rows()*this->cols());
+        for (int i=0; i<this->rows(); i++) 
+            for (int j=0; j<this->cols(); j++) 
+                this->coeffRef(i, j) = val;
+        }
+
+ 
+    std::vector<long> getIndsCol(int col) { 
+        std::vector<long> inds;
+        if (S==Eigen::ColMajor) { 
+            for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, col); it; ++it) {
+                    inds.insert(inds.end(), it.row());
+                }
+        } else { 
+            for (int k=0; k<this->outerSize(); ++k) {
+              for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
+                if (it.col() == col) { 
+                    inds.insert(inds.end(), it.row()); 
+                    }
+                }  
+            }
+        }
+
+        return inds; 
+		}
+
+    std::vector<long> getIndsRow(int row) { 
+        std::vector<long> inds;
+        
+        if (S==Eigen::ColMajor) { 
+            for (int k=0; k<this->outerSize(); ++k) {
+              for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
+                if (it.row() == row) { 
+                    inds.insert(inds.end(), it.col()); 
+                    }
+                }  
+            }
+        } else { 
+            for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, row); it; ++it) {
+                inds.insert(inds.end(), it.col()); 
+                }
+        }
+
+        return inds; 
+		}
+
     
     void insertVal(int row, int col, T val) { 
         if (this->coeff(row, col) != val)
             this->coeffRef(row, col) = val;
         }
 
-    void unsafeInsertVal(int row, int col, T val) { 
-        this->coeffRef(row, col) = val;
+    SparseMatrixExt<T, S> hadamard(SparseMatrixExt const& other) { 
+        return (SparseMatrixExt<T, S>)this->cwiseProduct(other); 
         }
 
-    void unsafeInsertVal2(int row, int col, T val) { 
-        this->insert(row, col) = val;
-        }
 
-    void printValues() { 
-        for (int k=0; k<this->outerSize(); ++k) {
-          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
-            std::cout << "(" << it.row() << ", " << it.col() << ") " << it.value() << std::endl;  
-            }  
+    SparseMatrixExt<T, S> negate() { 
+        SparseMatrix<T, S> A = -(*this);
+        return (SparseMatrixExt<T, S>)A; 
         }
-    } 
-
-    T sumValues() { 
-        T result = 0; 
-        for (int k=0; k<this->outerSize(); ++k) {
-          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
-            result += it.value();  
-            }  
-        }
-
-        return result; 
-    } 
 
     //Have function to give nonzero elements by passing in points to arrays 
     //Input array points must have the same size as the number of nonzeros in this matrix
@@ -75,6 +161,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         }
     }
 
+
     void nonZeroVals(T* array) { 
         int i = 0; 
 
@@ -85,6 +172,20 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
             }  
         }
     }
+
+    SparseMatrixExt& operator=(const SparseMatrixExt& other)  { 
+        SparseMatrix<T, S>::operator=(other); 
+        return *this;
+        }
+
+
+    void printValues() { 
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
+            std::cout << "(" << it.row() << ", " << it.col() << ") " << it.value() << std::endl;  
+            }  
+        }
+    } 
 
     void putSorted(long* array1, long* array2, T* vals, int numVals, long* vectorNnz) { 
         //Note we should reserve the correct amount of entries first
@@ -149,52 +250,11 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         this->setFromTriplets(tripletList.begin(), tripletList.end());
         }
 
-    std::vector<long> getIndsRow(int row) { 
-        std::vector<long> inds;
-        
-        if (S==Eigen::ColMajor) { 
-            for (int k=0; k<this->outerSize(); ++k) {
-              for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
-                if (it.row() == row) { 
-                    inds.insert(inds.end(), it.col()); 
-                    }
-                }  
-            }
-        } else { 
-            for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, row); it; ++it) {
-                inds.insert(inds.end(), it.col()); 
-                }
-        }
-
-        return inds; 
-    }
-
-    std::vector<long> getIndsCol(int col) { 
-        std::vector<long> inds;
-        if (S==Eigen::ColMajor) { 
-            for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, col); it; ++it) {
-                    inds.insert(inds.end(), it.row());
-                }
-        } else { 
-            for (int k=0; k<this->outerSize(); ++k) {
-              for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
-                if (it.col() == col) { 
-                    inds.insert(inds.end(), it.row()); 
-                    }
-                }  
-            }
-        }
-
-        return inds; 
-    }
-
     void slice(int* array1, int size1, int* array2, int size2, SparseMatrixExt<T, S> *mat) { 
         //Array indices must be sorted 
         //SparseMatrixExt *mat = new SparseMatrixExt<T, S>(size1, size2);
         int size1Ind = 0; 
         int size2Ind = 0; 
-
-        
 
         if (S == Eigen::ColMajor) { 
             //Assume column major class - j is col index 
@@ -227,73 +287,39 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                     }
                 }
             }
-
         }
 
     void scalarMultiply(double d) { 
         (*this)*=d; 
         }
 
-    SparseMatrixExt<T, S> dot(const SparseMatrixExt& other) { 
-        return (SparseMatrixExt<T, S>)((*this) * other); 
-        }
-
-    SparseMatrixExt<T, S> add(const SparseMatrixExt& other) { 
-        return (SparseMatrixExt<T, S>)((*this) + other); 
-        }
-    
     SparseMatrixExt<T, S> subtract(SparseMatrixExt const& other) { 
         return ((SparseMatrixExt<T, S>)((*this) - other)); 
         }
+
+    T sumValues() { 
+        T result = 0; 
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
+            result += it.value();  
+            }  
+        }
+
+        return result; 
+        } 
 
     SparseMatrixExt<T, S> trans() { 
         SparseMatrix<T, S> A = this->transpose();
         return (SparseMatrixExt<T, S>)A; 
         }
 
-    SparseMatrixExt<T, S> negate() { 
-        SparseMatrix<T, S> A = -(*this);
-        return (SparseMatrixExt<T, S>)A; 
+    void unsafeInsertVal(int row, int col, T val) { 
+        this->coeffRef(row, col) = val;
         }
 
-    SparseMatrixExt<T, S> abs() { 
-        SparseMatrix<T, S> A = this-> cwiseAbs();
-        return (SparseMatrixExt<T, S>)A; 
+    void unsafeInsertVal2(int row, int col, T val) { 
+        this->insert(row, col) = val;
         }
-    
-    SparseMatrixExt<T, S> hadamard(SparseMatrixExt const& other) { 
-        return (SparseMatrixExt<T, S>)this->cwiseProduct(other); 
-        }
-
-    void fill(T val) { 
-        this->reserve(this->rows()*this->cols());
-        for (int i=0; i<this->rows(); i++) 
-            for (int j=0; j<this->cols(); j++) 
-                this->coeffRef(i, j) = val;
-        }
-
-    void dot(double* array, int numCols, double* result) { 
-        unsigned int row; 
-        unsigned int col; 
-        unsigned int p, q;
-        int j; 
-        T val; 
-    
-        for (int i=0; i<this->outerSize(); ++i) {
-          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, i); it; ++it) { 
-            row = it.row();
-            col = it.col();
-            p = row*numCols; 
-            q = col*numCols; 
-            val = this->coeff(row, col);
-            for(j=0;j<numCols;j++)
-                //The array is C-contiguous so that A[i, j] -> A[i*numCols + j]
-                result[p + j] += val*array[q + j]; 
-                }  
-            }
-        
-        }
-
   };
 
 #endif

@@ -151,9 +151,56 @@ void testDot() {
 	} 
 } 
 
+void testDotSub() { 
+    const static int m = 10; 
+    const static int n = 10;
+    SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
+    const static int numVals = 10;  
+    
+    int i, j;  
+    long *rowInds = new long[numVals]; 
+    long *colInds= new long[numVals]; 
+    double *vals= new double[numVals];
+    const static int p = 5;
+    double *array = new double[n*p];
+    double *result = new double[m*p];
+    
+    for(i=0;i<n;i++) { 
+		for(j=0;j<p;j++) { 
+			array[i*p + j] = (double)((double)rand())/RAND_MAX;
+			std::cout << array[i*p + j] << " "; 
+			if (j==p-1) { 
+				std::cout << std::endl; 
+			} 
+		} 
+	} 
+
+    
+    for(i=0;i<numVals;i++) {
+        rowInds[i] =  (long)(rand() % m);
+        colInds[i] = (long)(rand() % n);
+        vals[i] = (double)((double)rand())/RAND_MAX;
+        std::cout << rowInds[i] << " " << colInds[i] << " " << vals[i] << std::endl;
+        }
+    
+    A.putUsingTriplets(rowInds, colInds, vals, numVals);	
+    
+    A.dotSub(array, p, 0, 3, result);
+    
+    for(i=0;i<m;i++) { 
+		for(j=0;j<p;j++) { 
+			std::cout << result[i*p + j] << " "; 
+			if (j==p-1) { 
+				std::cout << std::endl; 
+			} 
+		} 
+	} 
+
+}
+
 int main()
 {
 
-    testDot();
+    testDotSub();
 
 }

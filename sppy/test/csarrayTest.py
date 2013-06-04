@@ -304,14 +304,14 @@ class csarrayTest(unittest.TestCase):
             A[1, 3] = 5.2
             A[3, 3] = -0.2
             
-            outputStr = "csarray dtype:float64 shape:(5, 7) non-zeros:3\n" 
+            outputStr = "csarray dtype:float64 shape:(5, 7) non-zeros:3 storage:" + A.storage + "\n" 
             outputStr += "(0, 1) 1.0\n"
             outputStr += "(1, 3) 5.2\n"
             outputStr += "(3, 3) -0.2"
             self.assertEquals(str(A), outputStr) 
             
             B = csarray((5, 5), storageType=storageType)
-            outputStr = "csarray dtype:float64 shape:(5, 5) non-zeros:0\n" 
+            outputStr = "csarray dtype:float64 shape:(5, 5) non-zeros:0 storage:" + B.storage+ "\n" 
             self.assertEquals(str(B), outputStr) 
             
             outputStr = "csarray dtype:float64 shape:(10,) non-zeros:3\n"
@@ -1062,6 +1062,7 @@ class csarrayTest(unittest.TestCase):
            
            A = numpy.random.rand(m, n)
            B = numpy.random.rand(n, p)
+           v = numpy.random.rand(n, p)
            
            C = A.dot(B)
            
@@ -1069,6 +1070,11 @@ class csarrayTest(unittest.TestCase):
            Chat = Ahat.dot(B)
            
            nptst.assert_array_almost_equal(C, Chat)
+           
+           u = A.dot(v)
+           uHat = Ahat.dot(v)
+           nptst.assert_array_almost_equal(u, uHat)
+           
 
     def testPdot(self): 
        """

@@ -1,4 +1,5 @@
-
+import numpy 
+cimport numpy 
 from libcpp.vector cimport vector
 
 cdef extern from *:
@@ -7,14 +8,14 @@ cdef extern from *:
 
 cdef extern from "include/SparseMatrixExt.h":  
    cdef cppclass SparseMatrixExt[T, S]:  
-      SparseMatrixExt() 
-      SparseMatrixExt(SparseMatrixExt[T, S]) 
-      SparseMatrixExt(int, int)
       double norm()
       int cols() 
       int nonZeros()
       int rows()
       int size() 
+      SparseMatrixExt() 
+      SparseMatrixExt(int, int)
+      SparseMatrixExt(SparseMatrixExt[T, S]) 
       SparseMatrixExt[T, S] abs()
       SparseMatrixExt[T, S] add(SparseMatrixExt[T, S]&)
       SparseMatrixExt[T, S] dot(SparseMatrixExt[T, S]&)
@@ -25,26 +26,29 @@ cdef extern from "include/SparseMatrixExt.h":
       T coeff(int, int)
       T sum()
       T sumValues()
-      void insertVal(int, int, T) 
+      vector[long] getIndsCol(int)
+      vector[long] getIndsRow(int)
+      void dot1d(double*, double*) nogil 
+      void dot2d(double*, int, double*) nogil 
+      void dotSub(double*, int,  int, int, double*) nogil 
       void fill(T)
+      void insertVal(int, int, T) 
       void makeCompressed()
       void nonZeroInds(long*, long*)
       void nonZeroVals(T*)
       void printValues()
+      void putSorted2(long*, long*, T, int, long*) 
+      void putSorted(long*, long*, T*, int, long*)
+      void putUsingTriplets2(long*, long*, T, int)
+      void putUsingTriplets(long*, long*, T*, int) 
       void reserve(int)
       void scalarMultiply(double)
-      void slice(int*, int, int*, int, SparseMatrixExt[T, S]*) 
-      vector[long] getIndsRow(int)
-      vector[long] getIndsCol(int)
       void setZero()
-      void unsafeInsertVal(int, int, T)
+      void slice(int*, int, int*, int, SparseMatrixExt[T, S]*) 
       void unsafeInsertVal2(int, int, T)
-      void putSorted(long*, long*, T*, int, long*)
-      void putSorted2(long*, long*, T, int, long*) 
-      void putUsingTriplets(long*, long*, T*, int) 
-      void putUsingTriplets2(long*, long*, T, int)
-      void dot(double*, int, double*) nogil 
-      void dotSub(double*, int,  int, int, double*) nogil 
+      void unsafeInsertVal(int, int, T)
       
 cdef template[DataType, StorageType] class csarray:
     cdef SparseMatrixExt[DataType, StorageType] *thisPtr  
+
+

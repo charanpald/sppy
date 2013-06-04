@@ -25,7 +25,7 @@ if use_cython:
     import TemplateExpander
     TemplateExpander.expand_base(workdir='./sppy')
     ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++", include_dirs=[numpy.get_include()])] 
-    ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++", include_dirs=[numpy.get_include()])) 
+    ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++", include_dirs=[numpy.get_include()], extra_compile_args=['-fopenmp'], extra_link_args=['-fopenmp'])) 
     ext_modules.append(Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++", include_dirs=[numpy.get_include()])) 
     cmdclass.update({ 'build_ext': build_ext })
 else:

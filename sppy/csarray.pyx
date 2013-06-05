@@ -104,7 +104,7 @@ class csarray(object):
             return getattr(self._array, name)
 
     def __getDType(self): 
-        return self._dtype
+        return numpy.dtype(self._dtype)
         
     def __getitem__(self, inds):
         result = self._array.__getitem__(inds) 
@@ -198,6 +198,27 @@ class csarray(object):
         result._array = self._array.hadamard(A._array)
         return result
         
+    @staticmethod 
+    def fromScipySparse(A): 
+        """
+        Take a scipy sparse matrix A and return a csarray, copying the data. 
+        """
+        try: 
+            import scipy.sparse
+        except ImportError: 
+            raise         
+        
+        rowInds, colInds = A.nonzero() 
+        
+        if scipy.sparse.isspmatrix_csc(A): 
+            B = csarray(A.shape, dtype=A.dtype, storageType="colMajor")
+        else: 
+            B = csarray(A.shape, dtype=A.dtype, storageType="rowMajor")
+            
+        B.put(A.data, rowInds, colInds, init=True)
+        
+        return B 
+                     
     def toScipyCsc(self): 
         """
         Convert this matrix to scipy. Returns a copy of the data in csc_matrix 

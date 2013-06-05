@@ -156,6 +156,8 @@ class csarrayProfile():
         vals = numpy.random.randn(inds.shape[0])
         
         rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
+        rowInds = numpy.array(rowInds, numpy.int32)
+        colInds = numpy.array(colInds, numpy.int32)
                 
         A = csarray((m, n), storageType="rowMajor")
         A.put(vals, rowInds, colInds, True)

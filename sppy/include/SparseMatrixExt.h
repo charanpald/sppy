@@ -116,8 +116,8 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         }
 
  
-    std::vector<long> getIndsCol(int col) { 
-        std::vector<long> inds;
+    std::vector<int> getIndsCol(int col) { 
+        std::vector<int> inds;
         if (S==Eigen::ColMajor) { 
             for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, col); it; ++it) {
                     inds.insert(inds.end(), it.row());
@@ -135,8 +135,8 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         return inds; 
 		}
 
-    std::vector<long> getIndsRow(int row) { 
-        std::vector<long> inds;
+    std::vector<int> getIndsRow(int row) { 
+        std::vector<int> inds;
         
         if (S==Eigen::ColMajor) { 
             for (int k=0; k<this->outerSize(); ++k) {
@@ -173,7 +173,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
     //Have function to give nonzero elements by passing in points to arrays 
     //Input array points must have the same size as the number of nonzeros in this matrix
-    void nonZeroInds(long* array1, long* array2) { 
+    void nonZeroInds(int* array1, int* array2) { 
         int i = 0; 
 
         for (int k=0; k<this->outerSize(); ++k) {
@@ -250,7 +250,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         }
 
 
-    void putUsingTriplets(long* rowInds, long* colInds, T* vals, int numVals) { 
+    void putUsingTriplets(int* rowInds, int* colInds, T* vals, int numVals) { 
         int i; 
         typedef Eigen::Triplet<double> R;
         std::vector<R> tripletList;
@@ -262,7 +262,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         this->setFromTriplets(tripletList.begin(), tripletList.end());
         }
 
-    void putUsingTriplets2(long* rowInds, long* colInds, T val, int numVals) { 
+    void putUsingTriplets2(int* rowInds, int* colInds, T val, int numVals) { 
         int i; 
         typedef Eigen::Triplet<double> R;
         std::vector<R> tripletList;

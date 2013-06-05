@@ -180,8 +180,8 @@ cdef template[DataType, StorageType] class csarray:
         """
         Return a tuple of arrays corresponding to nonzero elements. 
         """
-        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int64) 
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int64)
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds = numpy.zeros(self.getnnz(), dtype=numpy.int32) 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds = numpy.zeros(self.getnnz(), dtype=numpy.int32)
         
         if self.getnnz() != 0:
             self.thisPtr.nonZeroInds(&rowInds[0], &colInds[0])
@@ -196,6 +196,11 @@ cdef template[DataType, StorageType] class csarray:
         i, j = inds 
         
         if type(i) == numpy.ndarray and type(j) == numpy.ndarray: 
+            if i.dtype != numpy.dtype("i"): 
+                i = numpy.array(i, numpy.int32)
+            if j.dtype != numpy.dtype("i"): 
+                j = numpy.array(j, numpy.int32)            
+            
             self.put(val, i, j)
         else:
             i = int(i) 
@@ -208,7 +213,7 @@ cdef template[DataType, StorageType] class csarray:
             self.thisPtr.insertVal(i, j, val) 
 
     
-    def put(self, val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None, init=False): 
+    def put(self, val, numpy.ndarray[int, ndim=1] rowInds not None, numpy.ndarray[int, ndim=1] colInds not None, init=False): 
         """
         Put some values into this matrix. Notice, that this is faster if init=True and 
         the matrix has just been created. 
@@ -230,7 +235,7 @@ cdef template[DataType, StorageType] class csarray:
                 for ix in range(len(rowInds)):
                     self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)   
 
-    def __putUsingTriplets(self, numpy.ndarray[DataType, ndim=1, mode="c"] vals not None, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
+    def __putUsingTriplets(self, numpy.ndarray[DataType, ndim=1, mode="c"] vals not None, numpy.ndarray[int, ndim=1] rowInds not None, numpy.ndarray[int, ndim=1] colInds not None): 
         """
         The row indices must be sorted in descending order if in column major order. 
         """
@@ -238,7 +243,7 @@ cdef template[DataType, StorageType] class csarray:
         self.thisPtr.putUsingTriplets(&rowInds[0], &colInds[0], &vals[0], n) 
     
         
-    def __putUsingTriplets2(self, DataType val, numpy.ndarray[long, ndim=1] rowInds not None, numpy.ndarray[long, ndim=1] colInds not None): 
+    def __putUsingTriplets2(self, DataType val, numpy.ndarray[int, ndim=1] rowInds not None, numpy.ndarray[int, ndim=1] colInds not None): 
         """
         The row indices must be sorted in ascending order if in column major order.  
         """
@@ -251,8 +256,8 @@ cdef template[DataType, StorageType] class csarray:
         then we sum along the axis. 
         """
         cdef numpy.ndarray[double, ndim=1, mode="c"] result    
-        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
         cdef unsigned int i
         
         if axis==None: 
@@ -335,8 +340,8 @@ cdef template[DataType, StorageType] class csarray:
         Convert this sparse matrix into a numpy array. 
         """
         cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros(self.shape, numpy.float)
-        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
         cdef unsigned int i
         
         (rowInds, colInds) = self.nonzero()
@@ -351,8 +356,8 @@ cdef template[DataType, StorageType] class csarray:
         """
         Find the minimum element of this array. 
         """
-        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
         cdef unsigned int i
         cdef DataType minVal 
         
@@ -376,8 +381,8 @@ cdef template[DataType, StorageType] class csarray:
         """
         Find the maximum element of this array. 
         """
-        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
         cdef unsigned int i
         cdef DataType maxVal
         
@@ -402,8 +407,8 @@ cdef template[DataType, StorageType] class csarray:
         Return the variance of the elements of this array. 
         """
         cdef double mean = self.mean() 
-        cdef numpy.ndarray[long, ndim=1, mode="c"] rowInds
-        cdef numpy.ndarray[long, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
         cdef unsigned int i
         cdef double result = 0
         
@@ -571,13 +576,13 @@ cdef template[DataType, StorageType] class csarray:
         """
         self.thisPtr.fill(1)
     
-    def rowInds(self, long i):
+    def rowInds(self, int i):
         """
         Returns the non zero indices for the ith row. 
         """
         cdef unsigned int j
-        cdef vector[long] vect = self.thisPtr.getIndsRow(i)
-        cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int)
+        cdef vector[int] vect = self.thisPtr.getIndsRow(i)
+        cdef numpy.ndarray[int, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int32)
         
         #Must be a better way to do this 
         for j in range(vect.size()): 
@@ -585,10 +590,10 @@ cdef template[DataType, StorageType] class csarray:
 
         return inds    
         
-    def colInds(self, long i): 
+    def colInds(self, int i): 
         cdef unsigned int j
-        cdef vector[long] vect = self.thisPtr.getIndsCol(i)
-        cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int)
+        cdef vector[int] vect = self.thisPtr.getIndsCol(i)
+        cdef numpy.ndarray[int, ndim=1, mode="c"] inds = numpy.zeros(vect.size(), numpy.int32)
         
         #Must be a better way to do this 
         for j in range(vect.size()): 

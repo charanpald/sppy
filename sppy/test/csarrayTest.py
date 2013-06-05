@@ -1234,8 +1234,8 @@ class csarrayTest(unittest.TestCase):
     def testPut(self): 
         A = csarray((10, 10))
         
-        rowInds = numpy.array([1, 2, 5, 7], numpy.int)
-        colInds = numpy.array([4, 1, 9, 0], numpy.int)
+        rowInds = numpy.array([1, 2, 5, 7], numpy.int32)
+        colInds = numpy.array([4, 1, 9, 0], numpy.int32)
         vals = numpy.random.randn(rowInds.shape[0])
         
         A.put(vals, rowInds, colInds)
@@ -1248,8 +1248,8 @@ class csarrayTest(unittest.TestCase):
     def testPutInit(self): 
         A = csarray((10, 10), storageType="colMajor")  
         
-        rowInds = numpy.array([1, 2, 5, 7, 8, 1], numpy.int)
-        colInds = numpy.array([0, 0, 0, 1, 1, 2], numpy.int)
+        rowInds = numpy.array([1, 2, 5, 7, 8, 1], numpy.int32)
+        colInds = numpy.array([0, 0, 0, 1, 1, 2], numpy.int32)
         vals = numpy.random.randn(rowInds.shape[0])
         
         A.put(vals, rowInds, colInds, True)
@@ -1261,8 +1261,8 @@ class csarrayTest(unittest.TestCase):
         
         #Test rowMajor format 
         A = csarray((10, 10), storageType="rowMajor") 
-        rowInds = numpy.array([1, 1, 2, 5, 7, 8], numpy.int)
-        colInds = numpy.array([0, 2, 0, 0, 1, 1], numpy.int)
+        rowInds = numpy.array([1, 1, 2, 5, 7, 8], numpy.int32)
+        colInds = numpy.array([0, 2, 0, 0, 1, 1], numpy.int32)
         
         A.put(vals, rowInds, colInds, True)
         
@@ -1282,6 +1282,8 @@ class csarrayTest(unittest.TestCase):
         vals = numpy.random.randn(inds.shape[0])
         
         rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
+        rowInds = numpy.array(rowInds, numpy.int32)
+        colInds = numpy.array(colInds, numpy.int32)
         A = csarray((m, n), storageType="colMajor")
         A.put(vals, rowInds, colInds)
         

@@ -1,1 +1,2 @@
-#
+
+from sppy.linalg.GeneralLinearOperator import GeneralLinearOperator 

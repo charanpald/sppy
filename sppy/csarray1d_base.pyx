@@ -346,7 +346,7 @@ cdef template[DataType] class csarray1d:
         result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.hadamard(deref(a.thisPtr)))
         return result 
 
-    def dot(self, csarray1d[DataType] a): 
+    def dotCsarray1d(self, csarray1d[DataType] a): 
         if self.shape != a.shape: 
             raise ValueError("Cannot compute dot product of matrices of shapes " + str(self.shape) + " and " + str(a.shape))
             

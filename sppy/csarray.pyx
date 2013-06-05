@@ -171,11 +171,14 @@ class csarray(object):
         """
         if isinstance(A, numpy.ndarray):  
             if A.ndim == 2: 
-                result = self._array.numpyDot2d(A)
+                result = self._array.dotNumpy2d(A)
             else: 
-                result = self._array.numpyDot1d(A)
+                result = self._array.dotNumpy1d(A)
         else: 
-            resultArray = self._array.dot(A._array)
+            if A.ndim == 2: 
+                resultArray = self._array.dotCsarray2d(A._array)
+            else: 
+                resultArray = self._array.dotCsarray1d(A._array)
             
             try: 
                 result = csarray(resultArray.shape, A.dtype)

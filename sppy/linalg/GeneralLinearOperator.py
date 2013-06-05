@@ -1,9 +1,10 @@
-
+ 
 
 
 class GeneralLinearOperator(object): 
     """
-    A slightly more general form of LinearOperator 
+    A slightly more general form of LinearOperator in scipy.linalg. Can be used 
+    with many of the scipy functions. 
     
     The new operation is rmatmat which is X.T V. 
     """

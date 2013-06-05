@@ -30,12 +30,6 @@ cdef template[DataType, StorageType] class csarray:
         del result.thisPtr
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.abs())
         return result 
-        
-  
-
-  
-        
-
       
     def __adArraySlice(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
         """
@@ -440,8 +434,7 @@ cdef template[DataType, StorageType] class csarray:
         cdef int i  
         cdef numpy.ndarray[numpy.int_t, ndim=1] rowInds = numpy.array(numpy.linspace(0, self.shape[0], numJobs+1), numpy.int)
         
-        #for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
-        for i in range(numJobs):
+        for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
             self.thisPtr.dotSub1d(&v[0], rowInds[i], rowInds[i+1], &result[0])
             
         return result          
@@ -461,8 +454,7 @@ cdef template[DataType, StorageType] class csarray:
         cdef int i  
         cdef numpy.ndarray[numpy.int_t, ndim=1] rowInds = numpy.array(numpy.linspace(0, self.shape[0], numJobs+1), numpy.int)
         
-        #for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
-        for i in range(numJobs):
+        for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
             self.thisPtr.dotSub2d(&A[0, 0], result.shape[1],  rowInds[i], rowInds[i+1], &result[0, 0])
             
         return result     

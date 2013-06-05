@@ -217,7 +217,7 @@ class csarray(object):
         return result
         
     @staticmethod 
-    def fromScipySparse(A): 
+    def fromScipySparse(A, storageType="colMajor"): 
         """
         Take a scipy sparse matrix A and return a csarray, copying the data. 
         """
@@ -227,12 +227,7 @@ class csarray(object):
             raise         
         
         rowInds, colInds = A.nonzero() 
-        
-        if scipy.sparse.isspmatrix_csc(A): 
-            B = csarray(A.shape, dtype=A.dtype, storageType="colMajor")
-        else: 
-            B = csarray(A.shape, dtype=A.dtype, storageType="rowMajor")
-            
+        B = csarray(A.shape, dtype=A.dtype, storageType=storageType)
         B.put(A.data, rowInds, colInds, init=True)
         
         return B 

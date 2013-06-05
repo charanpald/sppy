@@ -197,6 +197,21 @@ class csarray(object):
         result = csarray(self.shape, self.dtype)
         result._array = self._array.hadamard(A._array)
         return result
+
+    def pdot(self, A): 
+        """
+        Compute the dot product between this and either a csarray or numpy array
+        using multithreading. 
+        """
+        if isinstance(A, numpy.ndarray):  
+            if A.ndim == 2: 
+                result = self._array.pdot2d(A)
+            else: 
+                result = self._array.pdot1d(A)
+        else: 
+            raise ValueError("Cannot pdot with A of type " + str(type(A)))
+            
+        return result
         
     @staticmethod 
     def fromScipySparse(A): 

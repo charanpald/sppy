@@ -1103,6 +1103,7 @@ class csarrayTest(unittest.TestCase):
            
            A = numpy.random.rand(m, n)
            B = numpy.random.rand(n, p)
+           v = numpy.random.rand(n, p)
            
            C = A.dot(B)
            
@@ -1110,6 +1111,10 @@ class csarrayTest(unittest.TestCase):
            Chat = Ahat.pdot(B)
            
            nptst.assert_array_almost_equal(C, Chat, 3)
+           
+           u = A.dot(v)
+           uHat = Ahat.pdot(v)
+           nptst.assert_array_almost_equal(u, uHat)
 
     def testTranspose(self): 
         

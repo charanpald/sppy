@@ -533,7 +533,7 @@ cdef template[DataType, StorageType] class csarray:
             
         return result
 
-    def pdot(self, numpy.ndarray[double, ndim=2, mode="c"] A not None): 
+    def pdot2d(self, numpy.ndarray[double, ndim=2, mode="c"] A not None): 
         """
         Take this array and multiply it with a numpy array using multithreading. 
         """
@@ -550,10 +550,30 @@ cdef template[DataType, StorageType] class csarray:
         
         #for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
         for i in range(numJobs):
-            self.thisPtr.dotSub(&A[0, 0], result.shape[1],  rowInds[i], rowInds[i+1], &result[0, 0])
+            self.thisPtr.dotSub2d(&A[0, 0], result.shape[1],  rowInds[i], rowInds[i+1], &result[0, 0])
             
         return result     
-    
+
+    def pdot1d(self, numpy.ndarray[double, ndim=1, mode="c"] v not None): 
+        """
+        Take this array and multiply it with a numpy array using multithreading. 
+        """
+        if self.shape[1] != v.shape[0]: 
+            raise ValueError("Cannot multiply using shapes " + str(self.shape) + " and " + str(v.shape[0]))
+            
+        cdef numpy.ndarray[double, ndim=1, mode="c"] result = numpy.zeros(self.shape[0])  
+        cdef int numCpus = multiprocessing.cpu_count()                          
+        cdef int numJobs = numCpus
+        cdef int i  
+        cdef numpy.ndarray[numpy.int_t, ndim=1] rowInds = numpy.array(numpy.linspace(0, self.shape[0], numJobs+1), numpy.int)
+        
+        #for i in prange(numJobs, nogil=True, num_threads=numCpus, schedule="static"):
+        for i in range(numJobs):
+            self.thisPtr.dotSub1d(&v[0], rowInds[i], rowInds[i+1], &result[0])
+            
+        return result  
+ 
+   
     def transpose(self): 
         """
         Find the transpose of this matrix. 

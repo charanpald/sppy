@@ -30,7 +30,8 @@ cdef extern from "include/SparseMatrixExt.h":
       vector[int] getIndsRow(int)
       void dot1d(double*, double*) nogil 
       void dot2d(double*, int, double*) nogil 
-      void dotSub(double*, int,  int, int, double*) nogil 
+      void dotSub1d(double*, int,  int, double*) nogil 
+      void dotSub2d(double*, int,  int, int, double*) nogil 
       void fill(T)
       void insertVal(int, int, T) 
       void makeCompressed()

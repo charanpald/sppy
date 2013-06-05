@@ -82,8 +82,26 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                 }  
             }
         }    
+
+    void dotSub1d(double* v, int startRow, int endRow, double* result) { 
+        /*
+        Perform a dot product on a subset of the rows of X, i.e. find X[startRow:endRow, :].dot(v). 
+        */
+        unsigned int row; 
+        unsigned int col;  
+        T val; 
     
-    void dotSub(double* A, int numCols, int startRow, int endRow, double* result) { 
+        for (int i=startRow; i<endRow; ++i) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, i); it; ++it) { 
+            row = it.row();
+            col = it.col();
+            val = this->coeff(row, col);
+            result[row] += val*v[col]; 
+            }  
+        }
+    }       
+
+    void dotSub2d(double* A, int numCols, int startRow, int endRow, double* result) { 
         /*
         Perform a dot product on a subset of the rows of X, i.e. find X[startRow:endRow, :].dot(A). 
         numCols is the number of columns in A. Only works on row major matrices. 

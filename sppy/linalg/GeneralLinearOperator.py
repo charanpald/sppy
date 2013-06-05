@@ -18,21 +18,33 @@ class GeneralLinearOperator(object):
         self.dtype = dtype 
         
     @staticmethod 
-    def asLinearOperator(X): 
+    def asLinearOperator(X, parallel=False): 
         """
-        Make a general linear operator from matrix X. 
+        Make a general linear operator from csarray X. 
         """
-        
-        def matvec(v): 
-            return X.dot(v)
-            
-        def rmatvec(v): 
-            return X.T.dot(v)
-            
-        def matmat(V): 
-            return X.dot(V)
-            
-        def rmatmat(V): 
-            return X.T.dot(V)
+        if not parallel: 
+            def matvec(v): 
+                return X.dot(v)
+                
+            def rmatvec(v): 
+                return X.T.dot(v)
+                
+            def matmat(V): 
+                return X.dot(V)
+                
+            def rmatmat(V): 
+                return X.T.dot(V)
+        else:
+            def matvec(v): 
+                return X.pdot(v)
+                
+            def rmatvec(v): 
+                return X.T.pdot(v)
+                
+            def matmat(V): 
+                return X.pdot(V)
+                
+            def rmatmat(V): 
+                return X.T.pdot(V)
             
         return GeneralLinearOperator(X.shape, matvec, rmatvec, matmat, rmatmat, X.dtype)

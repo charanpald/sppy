@@ -1,4 +1,6 @@
 include README.rst 
-recursive-include sparray *.py
+recursive-include sppy *.py
+global-include *.pyx
+global-include *.pxd 
 global-include *.cpp 
 global-include *.h

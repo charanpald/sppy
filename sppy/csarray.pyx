@@ -12,10 +12,16 @@ numpy.import_array()
 
 
 class csarray(object):  
-    def __init__(self, S, dtype=numpy.float, storageType="colMajor"): 
+    def __init__(self, S, dtype=numpy.float, storagetype="col"): 
         """
-        Create a new csarray using the given shape and dtype. If the dtype is 
-        float or int we assume 64 bits. 
+        Create a new empty 2d or 1d csarray with the given shape. 
+        
+        :param shape: A tuple representing the shape of the matrix
+        :type :`tuple`
+        
+        :param dtype: A numpy dtype for the elements
+        
+        :param storagetype: One of "row" or "col". 
         """
         if type(S) == tuple: 
             shape = S
@@ -42,7 +48,7 @@ class csarray(object):
             else: 
                 raise ValueError("Unknown dtype: " + str(dtype))  
         elif len(shape) == 2: 
-            if storageType=="colMajor": 
+            if storagetype=="col": 
                 if dtype == numpy.float32: 
                     self._array = csarray_float_colMajor(shape)        
                 elif dtype == numpy.float64 or dtype==numpy.float: 
@@ -57,7 +63,7 @@ class csarray(object):
                     self._array = csarray_long_colMajor(shape)
                 else: 
                     raise ValueError("Unknown dtype: " + str(dtype))
-            elif storageType == "rowMajor": 
+            elif storagetype == "row": 
                 if dtype == numpy.float32: 
                     self._array = csarray_float_rowMajor(shape)        
                 elif dtype == numpy.float64 or dtype==numpy.float: 
@@ -73,7 +79,7 @@ class csarray(object):
                 else: 
                     raise ValueError("Unknown dtype: " + str(dtype))
             else: 
-                raise ValueError("Unknown storage type: " + str(storageType))
+                raise ValueError("Unknown storage type: " + str(storagetype))
         else:
             raise ValueError("Only 1 and 2d arrays supported")
             
@@ -85,17 +91,34 @@ class csarray(object):
                 self._array[nonzeros[0]] = S[nonzeros[0]]
             
         self._dtype = dtype
+        self.storagetype = storagetype
     
     def __abs__(self): 
+        """
+        Compute the absolute value of the elements of this matrix. 
+        """
         resultArray = self._array.__abs__()
         result = csarray(resultArray.shape, self.dtype)
         result._array = resultArray
         return result    
 
     def __add__(self, A): 
+        """
+        Add this matrix to another one with identical dimentions. 
+        
+        :param A: The matrix to add. 
+        """
         result = csarray(self.shape, self.dtype)
         result._array = self._array.__add__(A._array)
         return result
+
+    def __convertBase(self, array, dtype): 
+        """
+        Convert a base class to csarray. 
+        """
+        del self._array
+        self._array = array       
+        self._dtype = dtype 
 
     def __getattr__(self, name):
         try: 
@@ -111,23 +134,34 @@ class csarray(object):
         
         if type(result) in self.baseTypes: 
             newArray = csarray(result.shape, self.dtype)
-            newArray.convertBase(result, self.dtype)
+            newArray.__convertBase(result, self.dtype)
             result = newArray
             
         return result 
 
     def __mul__(self, x):
+        """
+        Multiply this matrix with another one with identical dimentions.
+        
+        :param A: The matrix to multiply. 
+        """
         newArray = self.copy() 
         newArray._array = newArray._array*x
         return newArray
 
     def __neg__(self): 
+        """
+        Negate all the elements of this matrix. 
+        """
         resultArray = self._array.__neg__()
         result = csarray(resultArray.shape, self.dtype)
         result._array = resultArray
         return result
         
     def __setitem__(self, inds, val):
+        """
+        Set some elements of this matrix using given indices and values. 
+        """
         self._array.__setitem__(inds, val) 
         
     def __str__(self): 
@@ -135,7 +169,7 @@ class csarray(object):
         Return a string representation of the non-zero elements of the array. 
         """
         if self.ndim == 2: 
-            outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + " storage:" + str(self.storage) + "\n"
+            outputStr = "csarray dtype:" + str(numpy.dtype(self.dtype)) + " shape:" + str(self.shape) + " non-zeros:" + str(self.getnnz()) + " storage:" + str(self.storagetype) + "\n"
             (rowInds, colInds) = self.nonzero() 
             vals = self.values()
             
@@ -161,13 +195,18 @@ class csarray(object):
         return result
 
     def copy(self): 
-        newArray = csarray(self.shape, self.dtype)
+        """
+        Return a copy of this array. 
+        """
+        newArray = csarray(self.shape, self.dtype, self.storagetype)
         newArray._array = self._array.copy()
         return newArray 
     
     def dot(self, A): 
         """
-        Compute the dot product between this and either a csarray or numpy array.
+        Compute the dot product between this and either a csarray or numpy array A.
+        
+        :param A: The input numpy array or csarray. 
         """
         if isinstance(A, numpy.ndarray):  
             if A.ndim == 2: 
@@ -189,13 +228,7 @@ class csarray(object):
             
         return result
 
-    def convertBase(self, array, dtype): 
-        """
-        Convert a base class to csarray. 
-        """
-        del self._array
-        self._array = array       
-        self._dtype = dtype 
+
     
     def hadamard(self, A): 
         result = csarray(self.shape, self.dtype)
@@ -205,7 +238,9 @@ class csarray(object):
     def pdot(self, A): 
         """
         Compute the dot product between this and either a csarray or numpy array
-        using multithreading. 
+        using multithreading.
+        
+        :param A: The input numpy array or csarray.  
         """
         if isinstance(A, numpy.ndarray):  
             if A.ndim == 2: 
@@ -218,9 +253,13 @@ class csarray(object):
         return result
         
     @staticmethod 
-    def fromScipySparse(A, storageType="colMajor"): 
+    def fromScipySparse(A, storagetype="col"): 
         """
         Take a scipy sparse matrix A and return a csarray, copying the data. 
+        
+        :param A: A scipy.sparse matrix 
+        
+        :param storagetype: The storage order of the elements of the output csarray. 
         """
         try: 
             import scipy.sparse
@@ -228,23 +267,23 @@ class csarray(object):
             raise         
         
         rowInds, colInds = A.nonzero() 
-        B = csarray(A.shape, dtype=A.dtype, storageType=storageType)
+        B = csarray(A.shape, dtype=A.dtype, storagetype=storagetype)
         B.put(A.data, rowInds, colInds, init=True)
         
         return B 
                      
     def toScipyCsc(self): 
         """
-        Convert this matrix to scipy. Returns a copy of the data in csc_matrix 
-        form. 
+        Convert this matrix to a scipy sparse matrix. Returns a copy of the data in 
+        csc_matrix form.  
         """  
         try: 
             import scipy.sparse
         except ImportError: 
             raise 
             
-        if self.storage != "colMajor": 
-            raise ValueError("Method only supports ColMajor matrices")
+        if self.storagetype != "col": 
+            raise ValueError("Method only supports col matrices")
     
         rowInds, colInds = self.nonzero()  
         indPtrTemp = numpy.cumsum(numpy.bincount(colInds, minlength=self.shape[0]))
@@ -268,8 +307,8 @@ class csarray(object):
         except ImportError: 
             raise 
             
-        if self.storage != "rowMajor": 
-            raise ValueError("Method only supports RowMajor matrices")
+        if self.storagetype != "row": 
+            raise ValueError("Method only supports row matrices")
     
         rowInds, colInds = self.nonzero()  
         indPtrTemp = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[0]))
@@ -284,6 +323,9 @@ class csarray(object):
         return A 
    
     def transpose(self): 
+        """
+        Swap the rows and columns of this matrix. 
+        """
         resultArray = self._array.transpose()
         result = csarray(resultArray.shape, self.dtype)
         result._array = resultArray

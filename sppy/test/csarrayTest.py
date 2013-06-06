@@ -46,21 +46,21 @@ class csarrayTest(unittest.TestCase):
         self.F[2, 1] = -5 
         self.F[3, 1] = 5
         
-        self.G = csarray((6, 6), storageType="rowMajor")
+        self.G = csarray((6, 6), storagetype="row")
         self.G[0, 0] = 23
         self.G[2, 0] = -3
         self.G[3, 0] = -10 
         self.G[2, 1] = -5 
         self.G[3, 1] = 5
         
-        self.H = csarray((5, 7), storageType="rowMajor")
+        self.H = csarray((5, 7), storagetype="row")
         self.H[0, 1] = 1
         self.H[1, 3] = 5.2
         self.H[3, 3] = -0.2
         self.H[0, 6] = -1.23
         self.H[4, 4] = 12.2   
         
-        self.I = csarray((5, 5), storageType="rowMajor") 
+        self.I = csarray((5, 5), storagetype="row") 
         
         self.a = csarray(10, dtype=numpy.float)
         self.a[0] = 23 
@@ -76,7 +76,7 @@ class csarrayTest(unittest.TestCase):
         
         self.d = csarray((0, ), dtype=numpy.float)
         
-        self.storageTypes = ["rowMajor", "colMajor"]
+        self.storagetypes = ["row", "col"]
         
     def testInit(self): 
         A = csarray((5, 7))
@@ -124,7 +124,7 @@ class csarrayTest(unittest.TestCase):
         B = csarray(A, dtype=numpy.int8)
         nptst.assert_array_equal(B.toarray(), numpy.array(A, numpy.int8))
         
-        B = csarray(A, dtype=numpy.int8, storageType="rowMajor")
+        B = csarray(A, dtype=numpy.int8, storagetype="row")
         nptst.assert_array_equal(B.toarray(), numpy.array(A, numpy.int8))
         
         #Assignment to other csarray 
@@ -134,7 +134,7 @@ class csarrayTest(unittest.TestCase):
             for j in range(B.shape[1]): 
                 self.assertEquals(B[i, j], int(self.B[i, j]))
          
-        B = csarray(self.B, numpy.int, storageType="rowMajor")
+        B = csarray(self.B, numpy.int, storagetype="row")
         
         for i in range(B.shape[0]): 
             for j in range(B.shape[1]): 
@@ -155,7 +155,7 @@ class csarrayTest(unittest.TestCase):
         A = csarray((5, 7))
         self.assertEquals(A.ndim, 2)
         
-        A = csarray((5, 7), storageType="rowMajor")
+        A = csarray((5, 7), storagetype="row")
         self.assertEquals(A.ndim, 2)        
         
         A = csarray((0, 0))
@@ -221,10 +221,10 @@ class csarrayTest(unittest.TestCase):
         nrow = 5 
         ncol = 7
     
-        storageTypes = ["colMajor", "rowMajor"]        
+        storagetypes = ["col", "row"]        
         
-        for storageType in storageTypes: 
-            A = csarray((nrow, ncol), storageType=storageType)
+        for storagetype in storagetypes: 
+            A = csarray((nrow, ncol), storagetype=storagetype)
             A[0, 1] = 1
             A[1, 3] = 5.2
             A[3, 3] = -0.2
@@ -274,7 +274,7 @@ class csarrayTest(unittest.TestCase):
             self.assertEquals(a[0], 10)
                         
             #Try setting items with arrays 
-            A = csarray((nrow, ncol), storageType=storageType)
+            A = csarray((nrow, ncol), storagetype=storagetype)
             A[numpy.array([0, 1]), numpy.array([2, 3])] = numpy.array([1.2, 2.4])
             
             self.assertEquals(A.getnnz(), 2)
@@ -286,7 +286,7 @@ class csarrayTest(unittest.TestCase):
             self.assertEquals(A[2, 2], 5)
             self.assertEquals(A[4, 3], 5)
             
-            a = csarray(nrow, storageType=storageType)
+            a = csarray(nrow, storagetype=storagetype)
             a[numpy.array([0, 2])] = numpy.array([1.2, 2.4])
             self.assertEquals(a.getnnz(), 2)
             self.assertEquals(a[0], 1.2)
@@ -296,22 +296,22 @@ class csarrayTest(unittest.TestCase):
         nrow = 5 
         ncol = 7
         
-        storageTypes = ["colMajor", "rowMajor"]        
+        storagetypes = ["col", "row"]        
         
-        for storageType in storageTypes:         
-            A = csarray((nrow, ncol), storageType=storageType)
+        for storagetype in storagetypes:         
+            A = csarray((nrow, ncol), storagetype=storagetype)
             A[0, 1] = 1
             A[1, 3] = 5.2
             A[3, 3] = -0.2
             
-            outputStr = "csarray dtype:float64 shape:(5, 7) non-zeros:3 storage:" + A.storage + "\n" 
+            outputStr = "csarray dtype:float64 shape:(5, 7) non-zeros:3 storage:" + A.storagetype + "\n" 
             outputStr += "(0, 1) 1.0\n"
             outputStr += "(1, 3) 5.2\n"
             outputStr += "(3, 3) -0.2"
             self.assertEquals(str(A), outputStr) 
             
-            B = csarray((5, 5), storageType=storageType)
-            outputStr = "csarray dtype:float64 shape:(5, 5) non-zeros:0 storage:" + B.storage+ "\n" 
+            B = csarray((5, 5), storagetype=storagetype)
+            outputStr = "csarray dtype:float64 shape:(5, 5) non-zeros:0 storage:" + B.storagetype + "\n" 
             self.assertEquals(str(B), outputStr) 
             
             outputStr = "csarray dtype:float64 shape:(10,) non-zeros:3\n"
@@ -327,10 +327,10 @@ class csarrayTest(unittest.TestCase):
         nrow = 5 
         ncol = 7
 
-        storageTypes = ["colMajor", "rowMajor"]         
+        storagetypes = ["col", "row"]         
         
-        for storageType in storageTypes:   
-            A = csarray((nrow, ncol), storageType=storageType)
+        for storagetype in storagetypes:   
+            A = csarray((nrow, ncol), storagetype=storagetype)
             A[0, 1] = 1
             A[1, 3] = 5.2
             A[3, 3] = -0.2
@@ -584,9 +584,9 @@ class csarrayTest(unittest.TestCase):
         #Try an array with no non zeros 
         nrow = 5 
         ncol = 7
-        storageTypes = ["colMajor", "rowMajor"] 
-        for storageType in storageTypes: 
-            A = csarray((nrow, ncol), storageType=storageType)
+        storagetypes = ["col", "row"] 
+        for storagetype in storagetypes: 
+            A = csarray((nrow, ncol), storagetype=storagetype)
             (rowInds, colInds) = A.nonzero()
             
             self.assertEquals(A.getnnz(), rowInds.shape[0])
@@ -970,20 +970,20 @@ class csarrayTest(unittest.TestCase):
        nptst.assert_array_equal((self.G.hadamard(self.G)).toarray(), self.G.toarray()**2)
        nptst.assert_array_equal((self.H.hadamard(self.H)).toarray(), self.H.toarray()**2)
        
-       for storageType in self.storageTypes: 
-           A = csarray((5, 5), storageType=storageType)
+       for storagetype in self.storagetypes: 
+           A = csarray((5, 5), storagetype=storagetype)
            A[0, 1] = 4
            A[2, 3] = -1.2
            A[1, 3] = 2
            A[3, 3] = 1
            
-           B = csarray((5, 5), storageType=storageType)
+           B = csarray((5, 5), storagetype=storagetype)
            B[0, 2] = 9.2
            B[2, 3] = -5
            B[3, 4] = 12
            B[3, 3] = 12
            
-           C = csarray((5, 5), storageType=storageType)
+           C = csarray((5, 5), storagetype=storagetype)
            
            nptst.assert_array_equal((A.hadamard(B)).toarray(), A.toarray()*B.toarray())
            nptst.assert_array_equal((A.hadamard(C)).toarray(), C.toarray())
@@ -993,8 +993,8 @@ class csarrayTest(unittest.TestCase):
        nptst.assert_array_equal((self.c.hadamard(self.c)).toarray(), (self.c.toarray())**2)
 
     def testReserve(self): 
-       for storageType in self.storageTypes: 
-           A = csarray((5, 5), storageType=storageType)
+       for storagetype in self.storagetypes: 
+           A = csarray((5, 5), storagetype=storagetype)
            A.reserve(5)
            A[0, 1] = 4
            A[2, 3] = -1.2
@@ -1002,8 +1002,8 @@ class csarrayTest(unittest.TestCase):
            A[3, 3] = 1
       
     def testCompress(self): 
-        for storageType in self.storageTypes: 
-           A = csarray((5, 5), storageType=storageType)
+        for storagetype in self.storagetypes: 
+           A = csarray((5, 5), storagetype=storagetype)
            A[0, 1] = 4
            A[2, 3] = -1.2
            A[1, 3] = 2
@@ -1011,8 +1011,8 @@ class csarrayTest(unittest.TestCase):
            A.compress()
        
     def testDot(self): 
-       for storageType in self.storageTypes: 
-           A = csarray((5, 5), storageType=storageType)
+       for storagetype in self.storagetypes: 
+           A = csarray((5, 5), storagetype=storagetype)
            A[0, 1] = 4
            A[2, 3] = -1.2
            A[1, 3] = 2
@@ -1107,7 +1107,7 @@ class csarrayTest(unittest.TestCase):
            
            C = A.dot(B)
            
-           Ahat = csarray(A, storageType="rowMajor")
+           Ahat = csarray(A, storagetype="row")
            Chat = Ahat.pdot(B)
            
            nptst.assert_array_almost_equal(C, Chat, 3)
@@ -1118,8 +1118,8 @@ class csarrayTest(unittest.TestCase):
 
     def testTranspose(self): 
         
-       for storageType in self.storageTypes: 
-           A = csarray((5, 5), storageType=storageType)
+       for storagetype in self.storagetypes: 
+           A = csarray((5, 5), storagetype=storagetype)
            A[0, 1] = 4
            A[2, 3] = -1.2
            A[1, 3] = 2
@@ -1251,7 +1251,7 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(A.nnz, rowInds.shape[0])
 
     def testPutInit(self): 
-        A = csarray((10, 10), storageType="colMajor")  
+        A = csarray((10, 10), storagetype="col")  
         
         rowInds = numpy.array([1, 2, 5, 7, 8, 1], numpy.int32)
         colInds = numpy.array([0, 0, 0, 1, 1, 2], numpy.int32)
@@ -1264,8 +1264,8 @@ class csarrayTest(unittest.TestCase):
             
         self.assertEquals(A.nnz, rowInds.shape[0])
         
-        #Test rowMajor format 
-        A = csarray((10, 10), storageType="rowMajor") 
+        #Test row format 
+        A = csarray((10, 10), storagetype="row") 
         rowInds = numpy.array([1, 1, 2, 5, 7, 8], numpy.int32)
         colInds = numpy.array([0, 2, 0, 0, 1, 1], numpy.int32)
         
@@ -1289,7 +1289,7 @@ class csarrayTest(unittest.TestCase):
         rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
         rowInds = numpy.array(rowInds, numpy.int32)
         colInds = numpy.array(colInds, numpy.int32)
-        A = csarray((m, n), storageType="colMajor")
+        A = csarray((m, n), storagetype="col")
         A.put(vals, rowInds, colInds)
         
         for i in range(vals.shape[0]): 

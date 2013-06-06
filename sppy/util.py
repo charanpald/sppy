@@ -44,14 +44,14 @@ def rand(shape, density, dtype=numpy.float):
     return result 
     
 
-def zeros(shape, dtype=numpy.float, storageType="colMajor"): 
+def zeros(shape, dtype=numpy.float, storageType="col"): 
     """
     Create a zeros matrix of the given shape and dtype. 
     """
     result = csarray(shape, dtype, storageType)
     return result
     
-def ones(shape, dtype=numpy.float, storageType="colMajor"): 
+def ones(shape, dtype=numpy.float, storageType="col"): 
     """
     Create a ones matrix of the given shape and dtype. Generally a bad idea 
     for large matrices. 

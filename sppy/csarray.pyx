@@ -171,6 +171,7 @@ class csarray(object):
         """
         if isinstance(A, numpy.ndarray):  
             if A.ndim == 2: 
+                A = numpy.ascontiguousarray(A)
                 result = self._array.dotNumpy2d(A)
             else: 
                 result = self._array.dotNumpy1d(A)

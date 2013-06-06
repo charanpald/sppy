@@ -11,10 +11,6 @@ import cython
 numpy.import_array()
 from libc.math cimport sqrt 
 
-cdef extern from *:
-    ctypedef int colMajor "0" 
-    ctypedef int rowMajor "1" 
-
 cdef template[DataType, StorageType] class csarray:
     def __cinit__(self, shape):
         """

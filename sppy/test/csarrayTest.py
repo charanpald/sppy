@@ -1181,61 +1181,62 @@ class csarrayTest(unittest.TestCase):
     def testToScipyCsc(self): 
         try: 
             import scipy.sparse
-        except ImportError: 
-            raise        
-        
-        A = self.A.toScipyCsc()
-        B = self.B.toScipyCsc()
-        C = self.C.toScipyCsc()
-        D = self.D.toScipyCsc()
-        F = self.F.toScipyCsc()
-        
-        self.assertEquals(A.getnnz(), self.A.getnnz())
-        self.assertEquals(B.getnnz(), self.B.getnnz())
-        self.assertEquals(C.getnnz(), self.C.getnnz())
-        self.assertEquals(D.getnnz(), self.D.getnnz())
-        self.assertEquals(F.getnnz(), self.F.getnnz())
-        
-        #Now check elements are correct 
-        (rowInds, colInds) = self.B.nonzero()
-        for i in range(rowInds.shape[0]): 
-            self.assertEquals(B[rowInds[i], colInds[i]], self.B[rowInds[i], colInds[i]])
+            A = self.A.toScipyCsc()
+            B = self.B.toScipyCsc()
+            C = self.C.toScipyCsc()
+            D = self.D.toScipyCsc()
+            F = self.F.toScipyCsc()
             
-        (rowInds, colInds) = self.C.nonzero()
-        for i in range(rowInds.shape[0]): 
-            self.assertEquals(C[rowInds[i], colInds[i]], self.C[rowInds[i], colInds[i]])
+            self.assertEquals(A.getnnz(), self.A.getnnz())
+            self.assertEquals(B.getnnz(), self.B.getnnz())
+            self.assertEquals(C.getnnz(), self.C.getnnz())
+            self.assertEquals(D.getnnz(), self.D.getnnz())
+            self.assertEquals(F.getnnz(), self.F.getnnz())
             
-        (rowInds, colInds) = self.D.nonzero()
-        for i in range(rowInds.shape[0]): 
-            self.assertEquals(D[rowInds[i], colInds[i]], self.D[rowInds[i], colInds[i]])
-            
-        (rowInds, colInds) = self.F.nonzero()
-        for i in range(rowInds.shape[0]): 
-            self.assertEquals(F[rowInds[i], colInds[i]], self.F[rowInds[i], colInds[i]])
+            #Now check elements are correct 
+            (rowInds, colInds) = self.B.nonzero()
+            for i in range(rowInds.shape[0]): 
+                self.assertEquals(B[rowInds[i], colInds[i]], self.B[rowInds[i], colInds[i]])
+                
+            (rowInds, colInds) = self.C.nonzero()
+            for i in range(rowInds.shape[0]): 
+                self.assertEquals(C[rowInds[i], colInds[i]], self.C[rowInds[i], colInds[i]])
+                
+            (rowInds, colInds) = self.D.nonzero()
+            for i in range(rowInds.shape[0]): 
+                self.assertEquals(D[rowInds[i], colInds[i]], self.D[rowInds[i], colInds[i]])
+                
+            (rowInds, colInds) = self.F.nonzero()
+            for i in range(rowInds.shape[0]): 
+                self.assertEquals(F[rowInds[i], colInds[i]], self.F[rowInds[i], colInds[i]])
+
+        except ImportError as err: 
+            print(err)        
+        
 
     def testToScipyCsr(self): 
         try: 
             import scipy.sparse
-        except ImportError: 
-            raise        
+            
+            G = self.G.toScipyCsr()
+            H = self.H.toScipyCsr()
+            I = self.I.toScipyCsr()
+
+            self.assertEquals(G.getnnz(), self.G.getnnz())
+            self.assertEquals(H.getnnz(), self.H.getnnz())
+            self.assertEquals(I.getnnz(), self.I.getnnz())
+
+            #Now check elements are correct 
+            (rowInds, colInds) = self.G.nonzero()
+            for i in range(rowInds.shape[0]): 
+                self.assertEquals(G[rowInds[i], colInds[i]], self.G[rowInds[i], colInds[i]])
+                
+            (rowInds, colInds) = self.H.nonzero()
+            for i in range(rowInds.shape[0]): 
+                self.assertEquals(H[rowInds[i], colInds[i]], self.H[rowInds[i], colInds[i]])
+        except ImportError as err: 
+            print(err)        
         
-        G = self.G.toScipyCsr()
-        H = self.H.toScipyCsr()
-        I = self.I.toScipyCsr()
-
-        self.assertEquals(G.getnnz(), self.G.getnnz())
-        self.assertEquals(H.getnnz(), self.H.getnnz())
-        self.assertEquals(I.getnnz(), self.I.getnnz())
-
-        #Now check elements are correct 
-        (rowInds, colInds) = self.G.nonzero()
-        for i in range(rowInds.shape[0]): 
-            self.assertEquals(G[rowInds[i], colInds[i]], self.G[rowInds[i], colInds[i]])
-            
-        (rowInds, colInds) = self.H.nonzero()
-        for i in range(rowInds.shape[0]): 
-            self.assertEquals(H[rowInds[i], colInds[i]], self.H[rowInds[i], colInds[i]])
-            
     def testPut(self): 
         A = csarray((10, 10))
         

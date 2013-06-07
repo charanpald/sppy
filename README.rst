@@ -9,10 +9,12 @@ Changelog
 ---------
 
 Changes in version 0.6: 
+
 * Dot product with numpy arrays, and parallel version (pdot)
 * sppy.linalg.GeneralLinearOperator to work with some scipy.sparse.linalg functions 
 * Optimisations to put method
 * Convert from scipy.sparse matrices (csarray.fromScipySparse)
+* Automatic generation of specialised templates in setup.py (credit: Björn Dahlgren)
 
 Changes in version 0.5: 
 

@@ -20,7 +20,7 @@ First, read the installation guide in the reference documentation linked below. 
     >>> import numpy 
     >>> from sppy import csarray 
     >>> #Create a new column major dynamic array of float type
-    >>> B = csarray((5, 5), storageType="colMajor") 
+    >>> B = csarray((5, 5), storagetype="col") 
     >>> B[3, 3] = -0.2
     >>> B[0, 4] = -1.23
     >>> print(B.shape)
@@ -30,12 +30,12 @@ First, read the installation guide in the reference documentation linked below. 
     >>> print(B.getnnz())
     2
     >>> print(B)
-    csarray dtype:float64 shape:(5, 5) non-zeros:2
+    csarray dtype:float64 shape:(5, 5) non-zeros:2 storage:col
     (3, 3) -0.2
     (0, 4) -1.23
     >>> B[numpy.array([0, 1]), numpy.array([0,1])] = 27
     >>> print(B)
-    csarray dtype:float64 shape:(5, 5) non-zeros:4
+    csarray dtype:float64 shape:(5, 5) non-zeros:4 storage:col
     (0, 0) 27.0
     (1, 1) 27.0
     (3, 3) -0.2

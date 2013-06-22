@@ -49,6 +49,7 @@ User guide:
    :maxdepth: 2
    
    install
+   sparseops 
    csarray
 
 Support

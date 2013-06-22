@@ -363,6 +363,8 @@ cdef template[DataType, StorageType] class csarray:
     def mean(self, axis=None): 
         """
         Find the mean value of this array. 
+        
+        :param axis: The axis of the array to compute the mean. 
         """
         if self.thisPtr.size() != 0:
             if axis ==None: 

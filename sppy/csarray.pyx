@@ -194,6 +194,13 @@ class csarray(object):
         result._array = self._array.__sub__(A._array)
         return result
 
+    def compress(self): 
+        """
+        Turn this matrix into compressed sparse format by freeing extra memory 
+        space in the buffer. 
+        """
+        self._array.compress()
+
     def copy(self): 
         """
         Return a copy of this array. 
@@ -201,6 +208,14 @@ class csarray(object):
         newArray = csarray(self.shape, self.dtype, self.storagetype)
         newArray._array = self._array.copy()
         return newArray 
+        
+    def diag(self): 
+        """
+        Return a numpy array containing the diagonal entries of this matrix. If 
+        the matrix is non-square then the diagonal array is the same size as the 
+        smallest dimension. 
+        """
+        return self._array.diag()       
     
     def dot(self, A): 
         """
@@ -228,30 +243,6 @@ class csarray(object):
             
         return result
 
-
-    
-    def hadamard(self, A): 
-        result = csarray(self.shape, self.dtype)
-        result._array = self._array.hadamard(A._array)
-        return result
-
-    def pdot(self, A): 
-        """
-        Compute the dot product between this and either a csarray or numpy array
-        using multithreading.
-        
-        :param A: The input numpy array or csarray.  
-        """
-        if isinstance(A, numpy.ndarray):  
-            if A.ndim == 2: 
-                result = self._array.pdot2d(A)
-            else: 
-                result = self._array.pdot1d(A)
-        else: 
-            raise ValueError("Cannot pdot with A of type " + str(type(A)))
-            
-        return result
-        
     @staticmethod 
     def fromScipySparse(A, storagetype="col"): 
         """
@@ -271,6 +262,105 @@ class csarray(object):
         B.put(A.data, rowInds, colInds, init=True)
         
         return B 
+
+    def getnnz(self): 
+        """
+        Return the number of non-zero elements in the array 
+        """
+        return self._array.getnnz()
+
+    def hadamard(self, A): 
+        """
+        Compute the hadamard (element-wise) product between this array and A. 
+        """
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.hadamard(A._array)
+        return result
+
+    def max(self): 
+        """
+        Find the maximum element of this array. 
+        """
+        return self._array.max()
+
+    def mean(self, axis=None): 
+        """
+        Find the mean value of this array. 
+        
+        :param axis: The axis of the array to compute the mean. 
+        """
+        if self.ndim == 2: 
+            return self._array.mean(axis)
+        else: 
+            return self._array.mean()
+
+    def min(self): 
+        """
+        Find the minimum element of this array. 
+        """
+        return self._array.min()
+
+    def nonzero(self): 
+        """
+        Return a tuple of arrays corresponding to nonzero elements. 
+        """
+        return self._array.nonzero()
+
+
+    def pdot(self, A): 
+        """
+        Compute the dot product between this and either a csarray or numpy array
+        using multithreading.
+        
+        :param A: The input numpy array or csarray.  
+        """
+        if isinstance(A, numpy.ndarray):  
+            if A.ndim == 2: 
+                result = self._array.pdot2d(A)
+            else: 
+                result = self._array.pdot1d(A)
+        else: 
+            raise ValueError("Cannot pdot with A of type " + str(type(A)))
+            
+        return result
+
+    def reserve(self, int n): 
+        """
+        Reserve n nonzero entries and turns the matrix into uncompressed mode. 
+        """
+        self._array.reserve(n)
+  
+    def rowInds(self, int i):
+        """
+        Returns the non zero indices for the ith row. 
+        
+        :param i: The index of the row of the array. 
+        """
+        return self._array.rowInds(i)
+      
+    def std(self): 
+        """
+        Return the standard deviation of the array elements. 
+        """
+        return self._array.std()
+
+    def sum(self, axis=None): 
+        """
+        Sum all of the elements in this array. If one specifies an axis 
+        then we sum along the axis. 
+        
+        :param axis: The axis to sum along. 
+        """
+        if self.ndim == 2: 
+            return self._array.sum(axis)
+        else: 
+            return self._array.sum()
+
+    def toarray(self): 
+        """
+        Convert this sparse array into a numpy array. 
+        """
+        return self._array.toarray()
                      
     def toScipyCsc(self): 
         """
@@ -321,16 +411,36 @@ class csarray(object):
         A.indptr = indPtr
         
         return A 
+
+    def trace(self): 
+        """
+        Returns the trace of the array which is simply the sum of the diagonal 
+        entries. 
+        """
+        return self._array.trace()
    
     def transpose(self): 
         """
-        Swap the rows and columns of this matrix. 
+        Swap the rows and columns of this matrix, i.e. perform a transpose operation. 
         """
         resultArray = self._array.transpose()
         result = csarray(resultArray.shape, self.dtype)
         result._array = resultArray
         return result
-     
+
+    def values(self): 
+        """
+        Return the values of this object according to the elements returned 
+        using nonzero.  
+        """
+        return self._array.values()
+    
+    def var(self): 
+        """
+        Return the variance of the elements of this array. 
+        """
+        return self._array.var()
+    
     dtype = property(__getDType)
     T = property(transpose)
     baseTypes = [csarray_int_colMajor, csarray_double_colMajor, csarray_float_colMajor, csarray_long_colMajor, csarray_short_colMajor, csarray_signed_char_colMajor]

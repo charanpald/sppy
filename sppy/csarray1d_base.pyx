@@ -175,23 +175,18 @@ cdef template[DataType] class csarray1d:
             self.thisPtr.slice(&indsC[0], indsC.shape[0], result.thisPtr) 
         return result 
 
-    def sum(self, axis=0): 
+    def sum(self): 
         """
         Sum all of the elements in this array. 
         """      
-        if axis==0: 
-            return self.thisPtr.sumValues()
-        else:
-            raise ValueError("Invalid axis: " + str(axis))
-            
+        return self.thisPtr.sumValues()
 
-    def mean(self, axis=0): 
+    def mean(self,): 
         """
         Find the mean value of this array. 
         """
         if self.thisPtr.size() != 0:
-            if axis ==0: 
-                return self.sum()/float(self.thisPtr.size())
+            return self.sum()/float(self.thisPtr.size())
         else: 
             return float("nan")
 

@@ -9,6 +9,7 @@ Changelog
 ---------
 
 Changes in version 0.6.1: 
+
 * Better documentation 
 * Added sppy.linalg.rsvd (randomised Singular Value Decomposition) and sppy.linalg.norm 
 

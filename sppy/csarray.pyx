@@ -104,10 +104,14 @@ class csarray(object):
 
     def __add__(self, A): 
         """
-        Add this matrix to another one with identical dimentions. 
+        Add this matrix to another one with identical dimentions. If A is a numpy 
+        array it will be converted to a csarray. 
         
         :param A: The matrix to add. 
         """
+        if isinstance(A, numpy.ndarray):
+            A = csarray(A)        
+        
         result = csarray(self.shape, self.dtype)
         result._array = self._array.__add__(A._array)
         return result
@@ -189,7 +193,14 @@ class csarray(object):
                     
         return outputStr 
 
-    def __sub__(self, A): 
+    def __sub__(self, A):
+        """
+        Subtract this matrix from another one with identical dimentions.
+        If A is a numpy array it will be converted to a csarray. 
+        """
+        if isinstance(A, numpy.ndarray):
+            A = csarray(A)
+            
         result = csarray(self.shape, self.dtype)
         result._array = self._array.__sub__(A._array)
         return result

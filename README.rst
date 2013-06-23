@@ -8,6 +8,10 @@ Note: this code has been tested with Python 2.7/3.2, numpy 1.7.1 and scipy 0.12.
 Changelog
 ---------
 
+Changes in version 0.6.1: 
+* Better documentation 
+* Added sppy.linalg.rsvd (randomised Singular Value Decomposition) and sppy.linalg.norm 
+
 Changes in version 0.6: 
 
 * Dot product with numpy arrays, and parallel version (pdot)
@@ -16,13 +20,3 @@ Changes in version 0.6:
 * Convert from scipy.sparse matrices (csarray.fromScipySparse)
 * Automatic generation of specialised templates in setup.py (credit: Björn Dahlgren)
 
-Changes in version 0.5: 
-
-* Get nonzero indices for a particular row or col 
-* Method to return all values 
-* Convert to scipy csc_matrix 
-* Support for RowMajor matrices 
-
-Changes in version 0.4: 
-
-* Added support for 1d arrays

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <eigen3/Eigen/Sparse>
 #include <vector> 
+#include <math.h> 
 
 using Eigen::SparseMatrix;
 
@@ -188,6 +189,20 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         SparseMatrix<T, S> A = -(*this);
         return (SparseMatrixExt<T, S>)A; 
         }
+
+    double norm() { 
+        int i = 0; 
+        double result = 0;
+
+        for (int k=0; k<this->outerSize(); ++k) {
+          for (typename SparseMatrixExt<T, S>::InnerIterator it(*this,k); it; ++it) {
+            result += pow(it.value(), 2); 
+            i++; 
+            }  
+        }
+
+        return sqrt(result);  
+    }
 
     //Have function to give nonzero elements by passing in points to arrays 
     //Input array points must have the same size as the number of nonzeros in this matrix

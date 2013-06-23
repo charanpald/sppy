@@ -413,6 +413,13 @@ cdef template[DataType, StorageType] class csarray:
         
         return (rowInds, colInds)
 
+    def norm(self): 
+        """
+        Return the Frobenius norm of this matrix. 
+        """
+        
+        return self.thisPtr.norm()
+
     def ones(self): 
         """
         Fill the array with ones. 

@@ -31,6 +31,11 @@ if use_cython:
 else:
     ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ], include_dirs=[numpy.get_include()]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"], include_dirs=[numpy.get_include()]), Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.cpp"], include_dirs=[numpy.get_include()])] 
 
+descriptionFile = open("Description.rst")
+description = descriptionFile.readlines()
+descriptionFile.close()
+
+
 setup(name = 'sppy',
       version = __version__,
       author = 'Charanpal Dhanjal',
@@ -42,7 +47,7 @@ setup(name = 'sppy',
       license = 'GNU Library or Lesser General Public License (LGPL)',
       platforms=["OS Independent"],
       keywords=['numpy', 'sparse matrix'],
-      long_description= 'A sparse matrix library based on Eigen.',
+      long_description= description,
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

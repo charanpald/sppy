@@ -18,4 +18,8 @@ SpPy is a sparse matrix library based on the C++ library Eigen with a similar in
     >>> print(B.sum())
     52.57
 
-For more information see the documentation at http://pythonhosted.org/sppy/. 
+More Information 
+----------------
+
+* See the user guide at http://pythonhosted.org/sppy/
+* The source code is available at https://github.com/charanpald/sppy

@@ -8,6 +8,9 @@ Note: this code has been tested with Python 2.7/3.2, numpy 1.7.1 and scipy 0.12.
 Changelog
 ---------
 
+Changes in version 0.6.2: 
+* Added sppy.linalg.biCGSTAB which solves linear equations of the form Ax = b with x unknown. 
+
 Changes in version 0.6.1: 
 
 * Better documentation 

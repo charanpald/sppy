@@ -9,6 +9,7 @@ Changelog
 ---------
 
 Changes in version 0.6.2: 
+
 * Added sppy.linalg.biCGSTAB which solves linear equations of the form Ax = b with x unknown. 
 
 Changes in version 0.6.1: 

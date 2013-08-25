@@ -19,7 +19,7 @@ def biCGSTAB(A, b, maxIter=1000, tol=10**-6):
     
     :return x: A numpy array corresponding to the solution vector. 
     
-    :return i: The output code: 0 = success, 1 = Numerical Issue, 2 = No convergence, 3 = Invalid Input
+    :return i: The output code: 0 = success, 1 = numerical Issue, 2 = no convergence, 3 = invalid input
     """
     return A._array.biCGSTAB(b, maxIter, tol)
 
@@ -31,6 +31,8 @@ def norm(A, ord=None):
     :param A: A csarray object.   
     
     :param ord: The type of norm required, currently ignored. 
+    
+    :return: The Frobenius norm of A. 
     """
     return A._array.norm()
 
@@ -55,6 +57,12 @@ def rsvd(A, k, p=10, q=2, omega=None):
     :param q: The exponent for the projections.
     
     :param omega: An initial matrix to perform random projections onto with at least k columns 
+    
+    :return U: The left singular vectors 
+    
+    :return s: The singular values 
+    
+    :return V: The right singular vectors
     """
     Parameter.checkInt(k, 1, float("inf"))
     Parameter.checkInt(p, 0, float("inf"))

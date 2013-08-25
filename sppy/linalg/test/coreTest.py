@@ -78,6 +78,39 @@ class coreTest(unittest.TestCase):
             A = sppy.rand((m, n), 0.5)
             
             self.assertAlmostEquals(numpy.linalg.norm(A.toarray()), sppy.linalg.norm(A))
+            
+    def testBiCGSTAB(self): 
+        #This doesn't always converge 
+        numRuns = 10 
+        
+        for i in range(numRuns): 
+            n = numpy.random.randint(5, 20)
+            A = numpy.random.rand(n, n)
+            x = numpy.random.rand(n)
+            
+            b = A.dot(x)
+            
+            A = sppy.csarray(A)
+            
+            x2, output = sppy.linalg.biCGSTAB(A, b, tol=10**-6, maxIter=n)
+            
+            if output == 0: 
+                nptst.assert_array_almost_equal(x, x2, 3)
+                
+        #Try with bad input 
+        m = 3
+        n = 5
+        A = numpy.random.rand(n, m)
+        A = sppy.csarray(A)
+        x = numpy.random.rand(m)
+        b = A.dot(x)
+        
+        self.assertRaises(ValueError, sppy.linalg.biCGSTAB, A, b)
+        
+        A = numpy.random.rand(n, n)
+        A = sppy.csarray(A)
+        b = numpy.array(n+1)
+        self.assertRaises(ValueError, sppy.linalg.biCGSTAB, A, b)
 
 if __name__ == '__main__':
     unittest.main()

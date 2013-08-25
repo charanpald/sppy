@@ -3,10 +3,14 @@
 #define SparseMatrixEXT_H
 #include <iostream>
 #include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/IterativeLinearSolvers>
 #include <vector> 
 #include <math.h> 
 
-using Eigen::SparseMatrix;
+using namespace Eigen; 
+
+
 
 template <class T, int S=Eigen::ColMajor>
 class SparseMatrixExt:public SparseMatrix<T, S> {
@@ -38,6 +42,49 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         
     SparseMatrixExt<T, S> dot(const SparseMatrixExt& other) { 
         return (SparseMatrixExt<T, S>)((*this) * other); 
+        }
+
+    int biCGSTAB(const T* v, const int size, T* x, int maxIterations, double tolerance) {
+        /*
+        * A bi conjugate gradient stabilized solver for sparse square problems.  The system solved 
+        * is Ax = v where A is this (square) matrix and x is the result. One can specify the max number of 
+        * iterations (less than the size of A) and tolerance is an error threshold. 
+        */ 
+        typedef Matrix< T , Dynamic , 1> VectorXT;
+        VectorXT result(size);
+        VectorXT x0(size);
+        Map<const Matrix<T, Dynamic, 1 > > vec(v, size);
+        int outputCode; 
+
+        x0.setRandom(size);
+
+        BiCGSTAB<SparseMatrixExt<T, S> > solver;
+        solver.setMaxIterations(maxIterations); 
+        solver.setTolerance(tolerance);
+        solver.compute(*this);
+        result = solver.solveWithGuess(vec, x0);
+    
+        //Copy output vector - probably not the best idea 
+        for(int i=0;i<size;i++) { 
+            x[i] = result(i);
+        }
+
+        ComputationInfo info = solver.info();
+
+        //std::cout << "Info: " << info << std::endl;
+
+        if(info == Success)
+            outputCode = 0; 
+        else if(info==NumericalIssue)
+            outputCode = 1; 
+        else if(info==NoConvergence)
+            outputCode = 2;
+        else if(info==InvalidInput)
+            outputCode = 3;  
+        else
+            outputCode = 4;
+
+        return outputCode; 
         }
 
     void dot1d(double* v, double* result) { 

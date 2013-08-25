@@ -9,6 +9,7 @@ cdef extern from *:
 cdef extern from "include/SparseMatrixExt.h":  
    cdef cppclass SparseMatrixExt[T, S]:  
       double norm()
+      int biCGSTAB(T*, int, T*, int, double) 
       int cols() 
       int nonZeros()
       int rows()

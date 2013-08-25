@@ -7,6 +7,7 @@
 
 using Eigen::SparseMatrix;
 using Eigen::Triplet;
+using Eigen::VectorXd;
 
 void testNonZeroInds() { 
     SparseMatrixExt<double, Eigen::RowMajor> A(7, 7); 
@@ -212,9 +213,33 @@ void testPow() {
     std::cout << A.norm() << std::endl;
 }
 
+void testBiCGSTAB() { 
+    const static int m = 4; 
+    const static int n = 4;
+    SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
+    VectorXd result(n);
+    int info = 3; 
+
+    A.coeffRef(0, 0) = 1;
+    A.coeffRef(1, 1) = 2;
+    A.coeffRef(2, 2) = 3;
+    A.coeffRef(3, 3) = 4;
+
+    double data[] = {1,1,1,1};
+    double resultArr[4];
+
+    info = A.biCGSTAB(data, 4, resultArr, 4, 0.0001);
+
+    for(int i=0;i<n;i++) { 
+        std::cout << resultArr[i] << std::endl; 
+        }
+    
+    std::cout << std::endl << info << std::endl; 
+}
+
 int main()
 {
 
-    testPow();
+    testBiCGSTAB();
 
 }

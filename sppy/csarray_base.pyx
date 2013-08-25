@@ -236,6 +236,21 @@ cdef template[DataType, StorageType] class csarray:
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.subtract(deref(A.thisPtr)))
         return result    
 
+    def biCGSTAB(self, numpy.ndarray[DataType, ndim=1, mode="c"] v, int maxIter=1000, double tol=10**-6):         
+        cdef int outputCode = 0  
+        cdef numpy.ndarray[DataType, ndim=1, mode="c"] result = numpy.zeros(v.shape[0])
+
+        if self.shape[0] != self.shape[1]: 
+            raise ValueError("Can only operate on square matrices")
+        if v.shape[0] != self.shape[0]: 
+            raise ValueError("Length of v must match columns of A")
+        
+        maxIterations = min(maxIter, v.shape[0])
+        
+        outputCode = self.thisPtr.biCGSTAB(&v[0], v.shape[0], &result[0], maxIterations, tol)
+        return result, outputCode 
+
+
     def colInds(self, int i): 
         cdef unsigned int j
         cdef vector[int] vect = self.thisPtr.getIndsCol(i)

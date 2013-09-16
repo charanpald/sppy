@@ -39,6 +39,7 @@ cdef extern from "include/SparseMatrixExt.h":
       void nonZeroInds(int*, int*)
       void nonZeroVals(T*)
       void printValues()
+      void prune(double)
       void putSorted2(long*, long*, T, int, long*) 
       void putSorted(long*, long*, T*, int, long*)
       void putUsingTriplets2(int*, int*, T, int)

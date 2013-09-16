@@ -1332,6 +1332,20 @@ class csarrayTest(unittest.TestCase):
         b = numpy.array(n+1)
         self.assertRaises(ValueError, A.biCGSTAB, b)
 
+    def testPrune(self): 
+        A = csarray((10, 10), storagetype="row")
+        A[0, 1] = 10 
+        A[2, 3] = -0.4
+        A[3, 3] = 0 
+        A[4, 8] = 0
+        A.prune(10**-6)
+        
+        self.assertEquals(A.nnz, 2)
+        A[0, 1] = 0 
+        self.assertEquals(A.nnz, 2)
+        A.prune()
+        self.assertEquals(A.nnz, 1)        
+        
 if __name__ == "__main__":
     unittest.main()
     

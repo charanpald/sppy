@@ -5,9 +5,7 @@
 #include <vector> 
 #include <stdlib.h>  
 
-using Eigen::SparseMatrix;
-using Eigen::Triplet;
-using Eigen::VectorXd;
+using namespace Eigen;
 
 void testNonZeroInds() { 
     SparseMatrixExt<double, Eigen::RowMajor> A(7, 7); 
@@ -237,9 +235,27 @@ void testBiCGSTAB() {
     std::cout << std::endl << info << std::endl; 
 }
 
+void testPrune() { 
+    const static int m = 4; 
+    const static int n = 4;
+    SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
+    double eps = 0.0001;
+
+    A.coeffRef(0, 0) = 1;
+    A.coeffRef(1, 1) = 2;
+    A.coeffRef(2, 2) = -3;
+    A.coeffRef(3, 3) = 0;
+
+    std::cout << "Number of nonzeros " << A.nonZeros() << std::endl; 
+    A.prune(eps); 
+    std::cout << "Number of nonzeros " << A.nonZeros() << std::endl;
+    A.printValues();
+	
+} 
+
 int main()
 {
 
-    testBiCGSTAB();
+    testPrune();
 
 }

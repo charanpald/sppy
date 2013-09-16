@@ -119,8 +119,8 @@ cdef template[DataType, StorageType] class csarray:
                     indArr = numpy.arange(start, stop)
                     indList.append(indArr)
             return self.subArray(indList[0], indList[1])
-        elif (isinstance(i, int) and isinstance(j, slice)) or (isinstance(i, slice) and isinstance(j, int)):                
-            if isinstance(i, int): 
+        elif ((isinstance(i, int) or isinstance(i, numpy.integer))  and isinstance(j, slice)) or (isinstance(i, slice) and (isinstance(j, int) or isinstance(j, numpy.integer))):                
+            if isinstance(i, int) or isinstance(i, numpy.integer): 
                 inds = self.rowInds(i)
                 slc = j 
                 if slc.start == None: 
@@ -137,7 +137,7 @@ cdef template[DataType, StorageType] class csarray:
                 for ind in inds: 
                     if start <= ind < stop: 
                         result[ind, 0] = self.thisPtr.coeff(i, ind)                 
-            elif isinstance(j, int): 
+            elif isinstance(j, int) or isinstance(j, numpy.integer): 
                 inds = self.colInds(j)
                 slc = i 
                 if slc.start == None: 
@@ -478,6 +478,12 @@ cdef template[DataType, StorageType] class csarray:
             self.thisPtr.dotSub2d(&A[0, 0], result.shape[1],  rowInds[i], rowInds[i+1], &result[0, 0])
             
         return result     
+
+    def prune(self, double eps=10**-10, double precision=10**-20): 
+        """
+        Suppresses all nonzeros which are much smaller in magnitude than eps under the tolerence precision. 
+        """
+        self.thisPtr.prune(eps, precision) 
 
     def put(self, val, numpy.ndarray[int, ndim=1] rowInds not None, numpy.ndarray[int, ndim=1] colInds not None, init=False): 
         """

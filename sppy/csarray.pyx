@@ -335,6 +335,13 @@ class csarray(object):
             
         return result
 
+    def prune(self, double eps=10**-10, double precision=10**-20): 
+        """
+        Suppresses all nonzeros which are much smaller in magnitude than eps under 
+        the tolerence precision. 
+        """
+        self._array.prune(eps, precision) 
+        
     def reserve(self, int n): 
         """
         Reserve n nonzero entries and turns the matrix into uncompressed mode. 

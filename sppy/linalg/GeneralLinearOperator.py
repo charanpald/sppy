@@ -8,13 +8,14 @@ class GeneralLinearOperator(object):
     
     The new operation is rmatmat which is X.T V. 
     """
-    def __init__(self, shape, matvec, rmatvec=None, matmat=None, rmatmat=None, dtype=None): 
+    def __init__(self, shape, matvec, rmatvec=None, matmat=None, rmatmat=None, add=None, dtype=None): 
         
         self.shape = shape 
         self.matvec = matvec 
         self.rmatvec = rmatvec 
         self.matmat = matmat 
         self.rmatmat = rmatmat
+        self.add = add
         self.dtype = dtype 
         
     @staticmethod 
@@ -34,6 +35,9 @@ class GeneralLinearOperator(object):
                 
             def rmatmat(V): 
                 return X.T.dot(V)
+                
+            def add(V): 
+                return X + V 
         else:
             def matvec(v): 
                 return X.pdot(v)
@@ -47,4 +51,7 @@ class GeneralLinearOperator(object):
             def rmatmat(V): 
                 return X.T.pdot(V)
             
-        return GeneralLinearOperator(X.shape, matvec, rmatvec, matmat, rmatmat, X.dtype)
+            def add(V): 
+                return X + V 
+            
+        return GeneralLinearOperator(X.shape, matvec, rmatvec, matmat, rmatmat, add, X.dtype)

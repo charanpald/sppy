@@ -12,7 +12,7 @@ The csarray class represents a Compressed Sparse Array object which is essential
     >>> B[3, 3] = -0.2
     >>> B[0, 4] = -1.23
     
-which creates a 2d array with 5 rows and 5 columns. Alternatively, one can create a csarray using a numpy array, or another csrray: 
+which creates a 2d array with 5 rows and 5 columns. Alternatively, one can create a csarray using a numpy array, or another csarray: 
 
 :: 
 

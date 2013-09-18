@@ -80,15 +80,17 @@ def rsvd(A, k, p=10, q=2, omega=None):
         omega = numpy.c_[omega, numpy.random.randn(n, p+k - omega.shape[1])]
     
     Y = L.matmat(omega)
+    Q, R = numpy.linalg.qr(Y)
     del omega 
 
     for i in range(q):
-        Y = L.rmatmat(Y)
+        Y = L.rmatmat(Q)
+        Q, R = numpy.linalg.qr(Y)
         gc.collect() 
-        Y = L.matmat(Y)
+        
+        Y = L.matmat(Q)
+        Q, R = numpy.linalg.qr(Y)
         gc.collect() 
-    
-    Q, R = numpy.linalg.qr(Y)
     
     del Y 
     del R 

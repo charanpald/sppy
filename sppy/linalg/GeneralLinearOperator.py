@@ -55,3 +55,29 @@ class GeneralLinearOperator(object):
                 return X + V 
             
         return GeneralLinearOperator(X.shape, matvec, rmatvec, matmat, rmatmat, add, X.dtype)
+        
+    @staticmethod
+    def asLinearOperatorSum(X, Y): 
+        """
+        Take two linear operators X and Y, and operate on their sum, using lazy 
+        evaluation. 
+        """
+        if X.shape != Y.shape: 
+            raise ValueError("Shapes of X and Y do not match: " + str(X.shape) + " " + str(Y.shape))
+        
+        def matvec(v): 
+            return X.matvec(v) + Y.matvec(v)
+            
+        def rmatvec(v): 
+            return X.rmatvec(v) + Y.rmatvec(v)
+            
+        def matmat(V): 
+            return X.matmat(V) + Y.matmat(V)
+            
+        def rmatmat(V): 
+            return X.rmatmat(V) + Y.rmatmat(V)
+            
+        def add(V): 
+            return Y.add(X.add(V)) 
+            
+        return GeneralLinearOperator(X.shape, matvec, rmatvec, matmat, rmatmat, add, X.dtype)

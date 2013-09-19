@@ -42,7 +42,48 @@ class GeneralLinearOperatorTest(unittest.TestCase):
             
             nptst.assert_array_almost_equal((V*s).dot(V.T), (V2*s2).dot(V2.T)) 
         except:
-            print("Couldn't test testAsLinearOperator") 
+            print("Couldn't test asLinearOperator") 
+        
+    def testAsLinearOperatorSum(self): 
+        
+        n = 10 
+        m = 5 
+        density = 0.3
+        A = rand((n, m), density)    
+        B = rand((n, m), density)
+        
+        L = GeneralLinearOperator.asLinearOperator(A)
+        M = GeneralLinearOperator.asLinearOperator(B)
+
+        N = GeneralLinearOperator.asLinearOperatorSum(L, M)
+        
+        k = 3
+        V = numpy.random.rand(m, k)
+        W = numpy.random.rand(n, k)
+        
+        U = N.matmat(V)
+        U2 = A.dot(V) + B.dot(V)
+        nptst.assert_array_almost_equal(U, U2)
+       
+        U = N.rmatmat(W)
+        U2 = A.T.dot(W) + B.T.dot(W)
+        nptst.assert_array_almost_equal(U, U2)     
+        
+        v = numpy.random.rand(m)
+        w = numpy.random.rand(n)        
+        
+        u = N.matvec(v)
+        u2 = A.dot(v) + B.dot(v)
+        nptst.assert_array_almost_equal(u, u2)
+        
+        u = N.rmatvec(w)
+        u2 = A.T.dot(w) + B.T.dot(w)
+        nptst.assert_array_almost_equal(u, u2)
+        
+        #See if we get an error if A, B are different shapes 
+        B = rand((m, n), 0.1)
+        M = GeneralLinearOperator.asLinearOperator(B)
+        self.assertRaises(ValueError, GeneralLinearOperator.asLinearOperatorSum, L, M)
         
 if __name__ == "__main__":
     unittest.main()

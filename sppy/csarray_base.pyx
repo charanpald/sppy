@@ -307,7 +307,7 @@ cdef template[DataType, StorageType] class csarray:
         Take this array and multiply it with a numpy array. 
         """
         if self.shape[1] != v.shape[0]: 
-            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(v.shape[0], v.shape[1]))
+            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(v.shape[0]))
         
         cdef numpy.ndarray[double, ndim=1, mode="c"] result = numpy.zeros(self.shape[0])
         self.thisPtr.dot1d(&v[0], &result[0])
@@ -319,7 +319,7 @@ cdef template[DataType, StorageType] class csarray:
         Take this array and multiply it with a numpy array. 
         """
         if self.shape[1] != A.shape[0]: 
-            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str(A.shape[0], A.shape[1]))
+            raise ValueError("Cannot multiply matrices of shapes " + str(self.shape) + " and " + str((A.shape[0], A.shape[1])))
         
         cdef numpy.ndarray[double, ndim=2, mode="c"] result = numpy.zeros((self.shape[0], A.shape[1]))
         self.thisPtr.dot2d(&A[0, 0], A.shape[1], &result[0, 0])

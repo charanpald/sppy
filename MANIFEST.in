@@ -1,5 +1,6 @@
 include README.rst 
 include Description.rst 
+include LICENSE
 recursive-include sppy *.py
 global-include *.pyx
 global-include *.pxd 

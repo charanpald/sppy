@@ -16,8 +16,7 @@ class csarray(object):
         """
         Create a new empty 2d or 1d csarray with the given shape. 
         
-        :param shape: A tuple representing the shape of the matrix
-        :type :`tuple`
+        :param S: A tuple representing the shape of the matrix or a numpy array or scipy matrix 
         
         :param dtype: A numpy dtype for the elements
         
@@ -27,10 +26,11 @@ class csarray(object):
             shape = S
         elif type(S) == int:  
             shape = S, 
-        elif type(S) == numpy.ndarray or type(S) == csarray:
-            shape = S.shape
         else: 
-            raise ValueError("Invalid parameter: " + str(S))
+            try: 
+                shape = S.shape
+            except AttributeError:
+                raise ValueError("Invalid parameter: " + str(S))
             
         if len(shape) == 1: 
             if dtype == numpy.float32: 
@@ -83,12 +83,14 @@ class csarray(object):
         else:
             raise ValueError("Only 1 and 2d arrays supported")
             
-        if type(S) == numpy.ndarray or type(S) == csarray:
+        try: 
             nonzeros = S.nonzero()
             if len(shape) == 2: 
-                self._array[nonzeros] = S[nonzeros]
+                self._array[nonzeros] = numpy.array(S[S.nonzero()]).flatten()
             elif len(shape) == 1: 
                 self._array[nonzeros[0]] = S[nonzeros[0]]
+        except AttributeError: 
+            pass
             
         self._dtype = dtype
         self.storagetype = storagetype

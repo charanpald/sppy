@@ -151,6 +151,24 @@ class csarrayTest(unittest.TestCase):
         #for i in range(b.shape[0]): 
         #    self.assertEquals(b[i], int(self.b[i]))
         
+        #Test creating a matrix using a scipy.sparse 
+        try:
+            import scipy.sparse
+            A = scipy.sparse.csr_matrix((10, 5))
+            A[0,1] = 3 
+            A[5,4] = -0.1
+            
+            B = csarray(A)
+            
+            self.assertEquals(A.shape, B.shape)
+            self.assertEquals(A.nnz, B.nnz)
+            self.assertEquals(A[0, 1], B[0, 1])
+            self.assertEquals(A[5, 4], B[5, 4])
+            
+            
+        except ImportError :
+            pass
+        
     def testNDim(self): 
         A = csarray((5, 7))
         self.assertEquals(A.ndim, 2)

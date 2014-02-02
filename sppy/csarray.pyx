@@ -57,7 +57,7 @@ class csarray(object):
                     self._array = csarray_signed_char_colMajor(shape)    
                 elif dtype == numpy.int16: 
                     self._array = csarray_short_colMajor(shape)
-                elif dtype == numpy.dtype(int): 
+                elif dtype == numpy.int32: 
                     self._array = csarray_int_colMajor(shape)
                 elif dtype == numpy.dtype(long) or dtype == numpy.int: 
                     self._array = csarray_long_colMajor(shape)
@@ -72,7 +72,7 @@ class csarray(object):
                     self._array = csarray_signed_char_rowMajor(shape)    
                 elif dtype == numpy.int16: 
                     self._array = csarray_short_rowMajor(shape)
-                elif dtype == numpy.dtype(int): 
+                elif dtype == numpy.int32: 
                     self._array = csarray_int_rowMajor(shape)
                 elif dtype == numpy.dtype(long) or dtype == numpy.int: 
                     self._array = csarray_long_rowMajor(shape)
@@ -86,7 +86,11 @@ class csarray(object):
         try: 
             nonzeros = S.nonzero()
             if len(shape) == 2: 
-                self._array[nonzeros] = numpy.array(S[S.nonzero()]).flatten()
+                rowInds, colInds = nonzeros
+                rowInds = numpy.array(rowInds, numpy.int32)
+                colInds = numpy.array(colInds, numpy.int32)
+
+                self._array.put(numpy.array(S[S.nonzero()], dtype=dtype).flatten(), rowInds, colInds, True)
             elif len(shape) == 1: 
                 self._array[nonzeros[0]] = S[nonzeros[0]]
         except AttributeError: 

@@ -110,17 +110,3 @@ def rsvd(A, k, p=10, q=2, omega=None):
     return U, s, V 
         
         
-def diag(a): 
-    """
-    Takes a 1d numpy array and creates a csarray with the corresponding diagonal 
-    elements. 
-    """
-    n = a.shape[0]
-    A = csarray((n, n), dtype=a.dtype)
-    
-    A.put(a, numpy.arange(n), numpy.arange(n))
-    
-    return A
-    
-def eye(n): 
-    return diag(numpy.ones(n))

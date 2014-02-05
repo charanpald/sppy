@@ -6,15 +6,17 @@ Some utility function to create sparse arrays.
 """
 
 
-def diag(x): 
+def diag(a, storagetype="col"): 
     """
-    From a 1D numpy array x create a diagonal sparse array. 
+    Takes a 1d numpy array and creates a csarray with the corresponding diagonal 
+    elements. 
     """
-    result = csarray((x.shape[0], x.shape[0]), x.dtype)
-    result[(numpy.arange(x.shape[0]), numpy.arange(x.shape[0]))] = x
+    n = a.shape[0]
+    A = csarray((n, n), dtype=a.dtype, storagetype=storagetype)
     
-    return result 
+    A[numpy.arange(n), numpy.arange(n)] = a
     
+    return A
     
 def eye(n, dtype=numpy.float):
     """

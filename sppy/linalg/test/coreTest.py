@@ -112,6 +112,29 @@ class coreTest(unittest.TestCase):
         b = numpy.array(n+1)
         self.assertRaises(ValueError, sppy.linalg.biCGSTAB, A, b)
 
+    def testDiag(self): 
+        n = 5
+        a = numpy.random.rand(n)
+        
+        A = sppy.diag(a)
+        b = A.diag()
+
+        for i in range(n): 
+            self.assertEquals(A[i,i], a[i])
+        
+        self.assertEquals(A.nnz, n)
+        
+        nptst.assert_array_almost_equal(a, b)
+
+    def testEye(self): 
+        n = 5 
+        A = sppy.eye(n)
+        
+        for i in range(n): 
+            self.assertEquals(A[i,i], 1)
+        
+        self.assertEquals(A.nnz, n)
+
 if __name__ == '__main__':
     unittest.main()
 

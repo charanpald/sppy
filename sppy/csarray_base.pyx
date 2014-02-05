@@ -492,6 +492,17 @@ cdef template[DataType, StorageType] class csarray:
             
         return result     
 
+    def power(self, n): 
+        """
+        Raise all nonzero elements in the array to the nth power. 
+        """
+        result = self.copy()
+        rowInds, colInds = self.nonzero()
+        values = self.values()
+        
+        result.put(values**n, rowInds, colInds)
+        return result 
+
     def prune(self, double eps=10**-10, double precision=10**-20): 
         """
         Suppresses all nonzeros which are much smaller in magnitude than eps under the tolerence precision. 

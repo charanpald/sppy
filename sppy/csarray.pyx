@@ -348,6 +348,12 @@ class csarray(object):
             
         return result
 
+    def power(self, n): 
+        """
+        Returns a new array in which all nonzero elements in the array are raised to the nth power. 
+        """
+        return self._array.power(n)
+
     def prune(self, double eps=10**-10, double precision=10**-20): 
         """
         Suppresses all nonzeros which are much smaller in magnitude than eps under 

@@ -211,6 +211,13 @@ class csarray(object):
         result._array = self._array.__sub__(A._array)
         return result
 
+    def clip(self, minVal, maxVal): 
+        """
+        Given an interval, values outside the interval are clipped to the interval edges. For example, 
+        if an interval of [0, 1] is specified, values smaller than 0 become 0, and values larger than 1 become 1.
+        """
+        self._array.clip(minVal, maxVal)
+
     def compress(self): 
         """
         Turn this matrix into compressed sparse format by freeing extra memory 

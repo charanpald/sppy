@@ -250,7 +250,20 @@ cdef template[DataType, StorageType] class csarray:
         outputCode = self.thisPtr.biCGSTAB(&v[0], v.shape[0], &result[0], maxIterations, tol)
         return result, outputCode 
 
-
+    def clip(self, minVal, maxVal): 
+        """
+        Given an interval, values outside the interval are clipped to the interval edges. For example, 
+        if an interval of [0, 1] is specified, values smaller than 0 become 0, and values larger than 1 become 1.
+        """
+        (rowInds, colInds) = self.nonzero()
+        vals = self.values()
+            
+        for i in range(rowInds.shape[0]): 
+            if vals[i] < minVal or vals[i] > maxVal: 
+                self.thisPtr.insertVal(rowInds[i], colInds[i], 0) 
+                
+        self.prune()
+            
     def colInds(self, int i): 
         cdef unsigned int j
         cdef vector[int] vect = self.thisPtr.getIndsCol(i)
@@ -503,6 +516,13 @@ cdef template[DataType, StorageType] class csarray:
             if type(val) == numpy.ndarray:
                 for ix in range(len(rowInds)):
                     self.thisPtr.insertVal(rowInds[ix], colInds[ix], val[ix])
+                """elif type(val) == csarray[DataType, StorageType]: 
+                    #This is a slice operation 
+                    rowInds2, colInds2 = val.nonzero()
+                    values = val.values()
+                    for i in range(len(rowInds2)): 
+                        self.thisPtr.insertVal(rowInds[rowInds2[i]], colInds[colInds2[i]], values[i])    
+                """            
             else:
                 for ix in range(len(rowInds)):
                     self.thisPtr.insertVal(rowInds[ix], colInds[ix], val)   

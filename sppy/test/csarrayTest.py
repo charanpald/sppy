@@ -1364,6 +1364,22 @@ class csarrayTest(unittest.TestCase):
         A.prune()
         self.assertEquals(A.nnz, 1)        
         
+    def testClip(self): 
+        self.B.clip(0, 12.2)
+    
+        print(self.B)
+
+        self.assertEquals(self.B.nnz, 3)
+        self.assertEquals(self.B[0,1], 1)
+        self.assertEquals(self.B[1, 3], 5.2)
+        self.assertEquals(self.B[4, 4], 12.2)
+        
+        
+        self.B.clip(2, 12.2)
+        self.assertEquals(self.B.nnz, 2)
+        self.assertEquals(self.B[1, 3], 5.2)
+        self.assertEquals(self.B[4, 4], 12.2)
+        
 if __name__ == "__main__":
     unittest.main()
     

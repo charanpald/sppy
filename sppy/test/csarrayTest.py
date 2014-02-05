@@ -1366,8 +1366,6 @@ class csarrayTest(unittest.TestCase):
         
     def testClip(self): 
         self.B.clip(0, 12.2)
-    
-        print(self.B)
 
         self.assertEquals(self.B.nnz, 3)
         self.assertEquals(self.B[0,1], 1)
@@ -1379,6 +1377,12 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(self.B.nnz, 2)
         self.assertEquals(self.B[1, 3], 5.2)
         self.assertEquals(self.B[4, 4], 12.2)
+        
+    def testPower(self): 
+        B2 = self.B.toarray()**2
+        C = self.B.power(2)
+
+        nptst.assert_array_almost_equal(C.toarray(), B2)        
         
 if __name__ == "__main__":
     unittest.main()

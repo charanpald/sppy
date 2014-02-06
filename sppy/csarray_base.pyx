@@ -255,6 +255,7 @@ cdef template[DataType, StorageType] class csarray:
         Given an interval, values outside the interval are clipped to the interval edges. For example, 
         if an interval of [0, 1] is specified, values smaller than 0 become 0, and values larger than 1 become 1.
         """
+        cdef unsigned int i
         (rowInds, colInds) = self.nonzero()
         vals = self.values()
             

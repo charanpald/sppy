@@ -359,6 +359,8 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         //SparseMatrixExt *mat = new SparseMatrixExt<T, S>(size1, size2);
         int size1Ind = 0; 
         int size2Ind = 0; 
+        typedef Eigen::Triplet<double> R;
+        std::vector<R> tripletList;
 
         if (S == Eigen::ColMajor) { 
             //Assume column major class - j is col index 
@@ -371,7 +373,8 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                         }
     
                     if(it.row() == array1[size1Ind]) { 
-                        mat->insert(size1Ind, j) = it.value();                    
+                        //mat->insert(size1Ind, j) = it.value();  
+                        tripletList.push_back(R(size1Ind, j, it.value()));                  
                         }
                     }
                 }
@@ -386,11 +389,14 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                         }
     
                     if(it.col() == array2[size2Ind]) { 
-                        mat->insert(j, size2Ind) = it.value();                    
+                        //mat->insert(j, size2Ind) = it.value();  
+                        tripletList.push_back(R(j, size2Ind, it.value()));                  
                         }
                     }
                 }
             }
+
+        mat->setFromTriplets(tripletList.begin(), tripletList.end());
         }
 
     void scalarMultiply(double d) { 

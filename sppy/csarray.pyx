@@ -113,7 +113,7 @@ class csarray(object):
         Add this matrix to another one with identical dimentions. If A is a numpy 
         array it will be converted to a csarray. 
         
-        :param A: The matrix to add. 
+        :param A: The matrix to add, a numpy or csarray. 
         """
         if isinstance(A, numpy.ndarray):
             A = csarray(A)        
@@ -149,14 +149,15 @@ class csarray(object):
             
         return result 
 
-    def __mul__(self, x):
+    def __mul__(self, A):
         """
         Multiply this matrix with another one with identical dimentions.
         
         :param A: The matrix to multiply. 
+        
         """
         newArray = self.copy() 
-        newArray._array = newArray._array*x
+        newArray._array = newArray._array*A
         return newArray
 
     def __neg__(self): 
@@ -216,6 +217,10 @@ class csarray(object):
         """
         Given an interval, values outside the interval are clipped to the interval edges. For example, 
         if an interval of [0, 1] is specified, values smaller than 0 become 0, and values larger than 1 become 1.
+        
+        :param minVal: The minimum value to allow 
+        
+        :param maxVal: The maximum value to allow 
         """
         newArray = csarray(self.shape, self.dtype, self.storagetype)
         newArray._array = self._array.clip(minVal, maxVal)
@@ -277,7 +282,8 @@ class csarray(object):
         
         :param A: A scipy.sparse matrix 
         
-        :param storagetype: The storage order of the elements of the output csarray. 
+        :param storagetype: The storage order of the elements of the output csarray.
+        :type storagetype: `str`
         """
         try: 
             import scipy.sparse
@@ -298,7 +304,9 @@ class csarray(object):
 
     def hadamard(self, A): 
         """
-        Compute the hadamard (element-wise) product between this array and A. 
+        Compute the hadamard (element-wise) product between this array and A.
+        
+        :param A: The input numpy array or csarray. 
         """
         result = csarray(self.shape, self.dtype)
         result._array = self._array.hadamard(A._array)
@@ -354,6 +362,8 @@ class csarray(object):
     def power(self, n): 
         """
         Returns a new array in which all nonzero elements in the array are raised to the nth power. 
+        
+        :param n: The exponent of the power. 
         """
         return self._array.power(n)
 
@@ -364,9 +374,28 @@ class csarray(object):
         """
         self._array.prune(eps, precision) 
         
+        
+    def put(self, data, rowInds, colInds, init=False): 
+        """
+        Put some values into this matrix into the corresponding rowInds and colInds. We have 
+        A[rowInds[i], colInds[i]] = data[i]/data. Notice that this is faster if init=True 
+        but this setting is to be used only if the matrix has just been created.
+        
+        :param vals: A scalar or numpy array with the same dimension as rowsInds and colInds 
+        
+        :param rowInds: A 1d numpy array of row indices. 
+        
+        :param colInds: A 1d numpy array of column indices. 
+        """
+        self._array.put(data, rowInds, colInds, init)
+        
+        
     def reserve(self, int n): 
         """
-        Reserve n nonzero entries and turns the matrix into uncompressed mode. 
+        Reserve n nonzero entries and turns the matrix into uncompressed mode.
+        
+        :param n: The number of elements of space to reserve. 
+        :type n: `int`
         """
         self._array.reserve(n)
   
@@ -375,6 +404,7 @@ class csarray(object):
         Returns the non zero indices for the ith row. 
         
         :param i: The index of the row of the array. 
+        :type i: `int`
         """
         return self._array.rowInds(i)
       
@@ -388,6 +418,18 @@ class csarray(object):
         """
         Return a submatrix of the matrix given by A[startRow:startRows+blockRows, startCol:startCol+blockCols]
         in an efficient manner. 
+        
+        :param startRow: The starting row index 
+        :type startRow: `int`
+        
+        :param startCol: The starting column index 
+        :type startCol: `int`
+        
+        :param blockRows: The number of rows to take. 
+        :type blockRows: `int`
+        
+        :param blockCols: The number of columns to take. 
+        :type blockCols: `int`
         """
         if startRow < 0 or startRow > self.shape[0] or startCol < 0 or startCol > self.shape[1]: 
             raise ValueError("Invalid start row or column index")

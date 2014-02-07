@@ -10,6 +10,16 @@ Some functions to read and write matrix market files.
 def mmwrite(filename, A, comment='', field=None, precision=None): 
     """
     Write a csarray object in matrix market format. 
+    
+    :param filename: The filename of the matrix market file. 
+    
+    :param A: The csarray object to write 
+    
+    :param comment: A comment to add to the header of the file. 
+    
+    :param field: The type of values to write out either "integer" or "real". If None the type is inferred from A. 
+    
+    :param precision: If A stores real numbers, this is the precision to use when writing to file. 
     """
     
     if field == None: 
@@ -47,6 +57,10 @@ def mmread(filename, storagetype="col"):
     """
     Read from a matrix market file. Note that we do not allow comments (%) in the 
     body of the elements, only in the header lines. 
+    
+    :param filename: The filename of the matrix market file. 
+    
+    :param storagetype: The desired storage type ("row" or "col") of the output matrix. 
     """
     fileObj = open(filename, "r")
     

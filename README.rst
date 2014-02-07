@@ -8,6 +8,14 @@ Note: this code has been tested with Python 2.7/3.2, numpy 1.7.1 and scipy 0.12.
 Changelog
 ---------
 
+Changes in version 0.6.4: 
+
+* Constructor of csarray accepts scipy.sparse 
+* Added io module to read and write matrix market files 
+* In csarray: clip, and submatrix methods 
+* Various optimisations and bug fixes 
+* Better documentation 
+
 Changes in version 0.6.3: 
 
 * Added prune function to remove nnz elements 

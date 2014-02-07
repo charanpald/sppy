@@ -28,6 +28,9 @@ if use_cython:
     ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++", include_dirs=[numpy.get_include()], extra_compile_args=['-fopenmp'], extra_link_args=['-fopenmp'])) 
     ext_modules.append(Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++", include_dirs=[numpy.get_include()])) 
     cmdclass.update({ 'build_ext': build_ext })
+    
+    for ext in ext_modules:
+        ext.cython_directives = {"embedsignature": True}
 else:
     ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ], include_dirs=[numpy.get_include()]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"], include_dirs=[numpy.get_include()]), Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.cpp"], include_dirs=[numpy.get_include()])] 
 

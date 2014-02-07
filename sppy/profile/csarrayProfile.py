@@ -3,6 +3,7 @@ import sys
 import numpy
 import scipy.sparse
 from apgl.util import *
+import sppy
 from sppy import csarray
 from apgl.util.PySparseUtils import PySparseUtils 
 
@@ -177,6 +178,18 @@ class csarrayProfile():
         ProfileUtils.profile('A.pdot(W)', globals(), locals())
 
 
+    def profileRowSlice(self): 
+        numpy.random.seed(21)
+        m = 100000
+        n = 1000000
+        #numInds = 10000000
+        
+        X = sppy.rand((m, n), density=0.001, storagetype="row")
+        
+        
+        #ProfileUtils.profile('X[0:1000, :] ', globals(), locals())
+        ProfileUtils.profile('X.submatrix(0, 0, 1000, n)', globals(), locals())
+
 profiler = csarrayProfile()
 #profiler.profilePut()
 #profiler.profileSlicePys()
@@ -186,4 +199,5 @@ profiler = csarrayProfile()
 #profiler.profileGetNonZerosPys()
 #profiler.profileGetNonZerosSpa()
 #profiler.profilePutSorted()
-profiler.profileDot()
+#profiler.profileDot()
+profiler.profileRowSlice()

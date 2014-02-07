@@ -40,6 +40,10 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         return (SparseMatrixExt<T, S>)((*this) + other); 
         } 
         
+    SparseMatrixExt<T, S> submatrix(const unsigned int startRow, const unsigned int startCol, const unsigned int blockRows, const unsigned int blockCols) { 
+        return (SparseMatrixExt<T, S>)(this->block(startRow, startCol, blockRows, blockCols)); 
+        } 
+
     SparseMatrixExt<T, S> dot(const SparseMatrixExt& other) { 
         return (SparseMatrixExt<T, S>)((*this) * other); 
         }
@@ -353,6 +357,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         
         this->setFromTriplets(tripletList.begin(), tripletList.end());
         }
+
 
     void slice(int* array1, int size1, int* array2, int size2, SparseMatrixExt<T, S> *mat) { 
         //Array indices must be sorted 

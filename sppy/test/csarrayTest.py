@@ -1383,7 +1383,26 @@ class csarrayTest(unittest.TestCase):
         C = self.B.power(2)
 
         nptst.assert_array_almost_equal(C.toarray(), B2)        
+
+    def testSubmatrix(self): 
+        C = self.B.submatrix(0, 0, 4, 4)
         
+        nptst.assert_array_equal(C.toarray(), self.B.toarray()[0:4, 0:4])
+        
+        self.assertRaises(ValueError, self.B.submatrix, -1, 0, 4, 4)
+        self.assertRaises(ValueError, self.B.submatrix, 0, -1, 4, 4)
+        self.assertRaises(ValueError, self.B.submatrix, 0, 0, 40, 4)
+        self.assertRaises(ValueError, self.B.submatrix, 0, 0, 4, 40)
+        
+        C = self.B.submatrix(0, 0, 5, 7)
+        nptst.assert_array_equal(C.toarray(), self.B.toarray())
+        
+        C = self.F.submatrix(1, 1, 4, 4)
+        nptst.assert_array_equal(C.toarray(), self.F.toarray()[1:5, 1:5])
+        
+        C = self.G.submatrix(2, 3, 1, 2)
+        nptst.assert_array_equal(C.toarray(), self.G.toarray()[2:3, 3:5])
+       
 if __name__ == "__main__":
     unittest.main()
     

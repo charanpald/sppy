@@ -185,6 +185,7 @@ cdef template[DataType, StorageType] class csarray:
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.negate())
         return result       
 
+
     def __putUsingTriplets(self, numpy.ndarray[DataType, ndim=1, mode="c"] vals not None, numpy.ndarray[int, ndim=1] rowInds not None, numpy.ndarray[int, ndim=1] colInds not None): 
         """
         The row indices must be sorted in descending order if in column major order. 
@@ -249,6 +250,16 @@ cdef template[DataType, StorageType] class csarray:
         
         outputCode = self.thisPtr.biCGSTAB(&v[0], v.shape[0], &result[0], maxIterations, tol)
         return result, outputCode 
+
+    def submatrix(self, unsigned int startRow, unsigned int startCol, unsigned int blockRows, unsigned int blockCols): 
+        """
+        Return a submatrix of the matrix given by A[startRow:startRows+blockRows, startCol:startCol+blockCols]
+        in an efficient manner. 
+        """
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType](self.shape)
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.submatrix(startRow, startCol, blockRows, blockCols))
+        return result 
 
     def clip(self, minVal, maxVal): 
         """

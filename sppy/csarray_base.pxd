@@ -22,6 +22,7 @@ cdef extern from "include/SparseMatrixExt.h":
       SparseMatrixExt[T, S] dot(SparseMatrixExt[T, S]&)
       SparseMatrixExt[T, S] hadamard(SparseMatrixExt[T, S]&)
       SparseMatrixExt[T, S] negate()
+      SparseMatrixExt[T, S] submatrix(int, int, int, int)
       SparseMatrixExt[T, S] subtract(SparseMatrixExt[T, S]&)
       SparseMatrixExt[T, S] trans()
       T coeff(int, int)

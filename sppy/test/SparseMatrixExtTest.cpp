@@ -253,9 +253,27 @@ void testPrune() {
 	
 } 
 
+void testBlock() { 
+    const static int m = 4; 
+    const static int n = 4;
+    SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
+    SparseMatrixExt<double, Eigen::ColMajor> B(2, 2);
+
+    A.coeffRef(0, 0) = 1;
+    A.coeffRef(1, 1) = 2;
+    A.coeffRef(2, 2) = -3;
+    A.coeffRef(3, 3) = 5;
+
+    A.printValues();
+
+    B = A.submatrix(1, 1, 2, 2);
+
+    B.printValues();
+}
+
 int main()
 {
 
-    testPrune();
+    testBlock();
 
 }

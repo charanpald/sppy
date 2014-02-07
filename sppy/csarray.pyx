@@ -167,6 +167,7 @@ class csarray(object):
         result = csarray(resultArray.shape, self.dtype)
         result._array = resultArray
         return result
+          
         
     def __setitem__(self, inds, val):
         """
@@ -380,6 +381,20 @@ class csarray(object):
         Return the standard deviation of the array elements. 
         """
         return self._array.std()
+
+    def submatrix(self, startRow, startCol, blockRows, blockCols):
+        """
+        Return a submatrix of the matrix given by A[startRow:startRows+blockRows, startCol:startCol+blockCols]
+        in an efficient manner. 
+        """
+        if startRow < 0 or startRow > self.shape[0] or startCol < 0 or startCol > self.shape[1]: 
+            raise ValueError("Invalid start row or column index")
+        if startRow+blockRows < 0 or startRow+blockRows > self.shape[0] or startCol+blockCols < 0 or startCol+blockCols > self.shape[1]: 
+            raise ValueError("Invalid end row or column index")            
+        
+        result = csarray((blockRows, blockCols), self.dtype)
+        result._array = self._array.submatrix(startRow, startCol, blockRows, blockCols)
+        return result
 
     def sum(self, axis=None): 
         """

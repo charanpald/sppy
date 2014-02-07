@@ -12,7 +12,7 @@ numpy.import_array()
 from libc.math cimport sqrt 
 
 cdef template[DataType, StorageType] class csarray:
-    def __cinit__(self, shape):
+    def __cinit__(self, shape): 
         """
         Create a new column or row major dynamic array.
         """
@@ -261,20 +261,23 @@ cdef template[DataType, StorageType] class csarray:
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.submatrix(startRow, startCol, blockRows, blockCols))
         return result 
 
-    def clip(self, minVal, maxVal): 
+    def clip(self, DataType minVal, DataType maxVal): 
         """
         Given an interval, values outside the interval are clipped to the interval edges. For example, 
         if an interval of [0, 1] is specified, values smaller than 0 become 0, and values larger than 1 become 1.
         """
         cdef unsigned int i
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds
+        cdef numpy.ndarray[DataType, ndim=1, mode="c"] vals 
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType](self.shape)
+        
         (rowInds, colInds) = self.nonzero()
         vals = self.values()
-            
-        for i in range(rowInds.shape[0]): 
-            if vals[i] < minVal or vals[i] > maxVal: 
-                self.thisPtr.insertVal(rowInds[i], colInds[i], 0) 
+        inds = numpy.logical_and(vals >= minVal, vals <= maxVal)
+        result.put(vals[inds], rowInds[inds], colInds[inds], init=True)
                 
-        self.prune()
+        return result 
             
     def colInds(self, int i): 
         cdef unsigned int j

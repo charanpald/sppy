@@ -58,6 +58,7 @@ Reference guide:
    
    csarray
    linalg 
+   io
 
 Support
 --------

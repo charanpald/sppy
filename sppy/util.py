@@ -26,20 +26,23 @@ def eye(n, dtype=numpy.float):
     result = diag(numpy.ones(n, dtype=dtype))
     return result 
     
-def rand(shape, density, dtype=numpy.float): 
+def rand(shape, density, dtype=numpy.float, storagetype="col"): 
     """
     Generate a random sparse matrix with m rows and n cols with given density 
     and dtype. 
     """
-    result = csarray(shape, dtype)
+    result = csarray(shape, dtype, storagetype=storagetype)
     size = result.size
     numEntries = int(size*density)
     
+    print(size, numEntries)
     inds = numpy.random.randint(0, size, numEntries)
     
     if result.ndim == 2: 
-        rowInds, colInds = numpy.unravel_index(inds, shape)    
-        result[rowInds, colInds] = numpy.random.rand(numEntries)
+        rowInds, colInds = numpy.unravel_index(inds, shape) 
+        rowInds = numpy.array(rowInds, numpy.int32)
+        colInds = numpy.array(colInds, numpy.int32)
+        result.put(numpy.random.rand(numEntries), rowInds, colInds, init=True)
     elif result.ndim == 1: 
         result[inds] = numpy.random.rand(numEntries)
     

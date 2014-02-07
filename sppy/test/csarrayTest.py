@@ -1365,18 +1365,18 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(A.nnz, 1)        
         
     def testClip(self): 
-        self.B.clip(0, 12.2)
+        B = self.B.clip(0, 12.2)
 
-        self.assertEquals(self.B.nnz, 3)
-        self.assertEquals(self.B[0,1], 1)
-        self.assertEquals(self.B[1, 3], 5.2)
-        self.assertEquals(self.B[4, 4], 12.2)
+        self.assertEquals(B.nnz, 3)
+        self.assertEquals(B[0,1], 1)
+        self.assertEquals(B[1, 3], 5.2)
+        self.assertEquals(B[4, 4], 12.2)
         
         
-        self.B.clip(2, 12.2)
-        self.assertEquals(self.B.nnz, 2)
-        self.assertEquals(self.B[1, 3], 5.2)
-        self.assertEquals(self.B[4, 4], 12.2)
+        B = self.B.clip(2, 12.2)
+        self.assertEquals(B.nnz, 2)
+        self.assertEquals(B[1, 3], 5.2)
+        self.assertEquals(B[4, 4], 12.2)
         
     def testPower(self): 
         B2 = self.B.toarray()**2

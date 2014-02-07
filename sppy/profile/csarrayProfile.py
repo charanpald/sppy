@@ -190,6 +190,24 @@ class csarrayProfile():
         #ProfileUtils.profile('X[0:1000, :] ', globals(), locals())
         ProfileUtils.profile('X.submatrix(0, 0, 1000, n)', globals(), locals())
 
+    def profilePut3(self): 
+        numpy.random.seed(21)
+        m = 1000000
+        n = 1000000      
+        numInds = 10000000
+        
+        inds = numpy.random.randint(0, m*n, numInds)
+        inds = numpy.unique(inds)
+        vals = numpy.random.randn(inds.shape[0])
+        
+        rowInds, colInds = numpy.unravel_index(inds, (m, n), order="FORTRAN")
+        rowInds = numpy.array(rowInds, numpy.int32)
+        colInds = numpy.array(colInds, numpy.int32)
+                
+        A = csarray((m, n), storagetype="row")
+        ProfileUtils.profile('A.put(vals, rowInds, colInds, True)', globals(), locals())
+        
+
 profiler = csarrayProfile()
 #profiler.profilePut()
 #profiler.profileSlicePys()
@@ -200,4 +218,5 @@ profiler = csarrayProfile()
 #profiler.profileGetNonZerosSpa()
 #profiler.profilePutSorted()
 #profiler.profileDot()
-profiler.profileRowSlice()
+#profiler.profileRowSlice()
+profiler.profilePut3()

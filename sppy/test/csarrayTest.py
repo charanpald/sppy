@@ -4,6 +4,7 @@ import unittest
 import numpy
 import numpy.testing as nptst 
 import math 
+import pickle 
 
 from sppy import csarray 
 
@@ -1403,6 +1404,37 @@ class csarrayTest(unittest.TestCase):
         C = self.G.submatrix(2, 3, 1, 2)
         nptst.assert_array_equal(C.toarray(), self.G.toarray()[2:3, 3:5])
        
+    def testPickle(self): 
+        s = pickle.dumps(self.B)
+        B = pickle.loads(s)
+        
+        for i in range(self.B.shape[0]): 
+            for j in range(self.B.shape[1]): 
+                self.assertEquals(B[i,j], self.B[i,j])
+        
+        self.assertEquals(self.B.dtype, B.dtype)
+        self.assertEquals(self.B.storagetype, B.storagetype)
+
+        s = pickle.dumps(self.A)
+        A = pickle.loads(s)
+        
+        for i in range(self.A.shape[0]): 
+            for j in range(self.A.shape[1]): 
+                self.assertEquals(A[i,j], self.A[i,j])
+        
+        self.assertEquals(self.A.dtype, A.dtype)
+        self.assertEquals(self.A.storagetype, A.storagetype)
+      
+        s = pickle.dumps(self.F)
+        F = pickle.loads(s)
+        
+        for i in range(self.F.shape[0]): 
+            for j in range(self.F.shape[1]): 
+                self.assertEquals(F[i,j], self.F[i,j])
+        
+        self.assertEquals(self.F.dtype, F.dtype)
+        self.assertEquals(self.F.storagetype, F.storagetype)      
+      
 if __name__ == "__main__":
     unittest.main()
     

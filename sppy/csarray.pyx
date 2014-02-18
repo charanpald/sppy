@@ -22,6 +22,9 @@ class csarray(object):
         
         :param storagetype: One of "row" or "col". 
         """
+        self.__setObject(S, dtype, storagetype)        
+        
+    def __setObject(self, S, dtype=numpy.float, storagetype="col"): 
         if type(S) == tuple: 
             shape = S
         elif type(S) == int:  
@@ -149,6 +152,17 @@ class csarray(object):
             
         return result 
 
+    def __getstate__(self):
+        """
+        Used for pickling. 
+        """
+        objDict = {}
+        objDict['shape'] = self.shape
+        objDict["storagetype"] = self.storagetype
+        objDict['rowInds'], objDict['colInds'] = self.nonzero()
+        objDict['values'] = self.values()
+        return objDict
+
     def __mul__(self, A):
         """
         Multiply this matrix with another one with identical dimentions.
@@ -175,7 +189,22 @@ class csarray(object):
         Set some elements of this matrix using given indices and values. 
         """
         self._array.__setitem__(inds, val) 
+       
+    def __setstate__(self, objDict):
+        self.__setObject(objDict["shape"], objDict["values"].dtype, objDict["storagetype"])
         
+        if len(objDict["shape"]) == 2: 
+            rowInds = numpy.array(objDict["rowInds"], numpy.int32)
+            colInds = numpy.array(objDict["colInds"], numpy.int32)
+
+            self._array.put(objDict["values"], rowInds, colInds, True)
+        elif len(objDict["shape"]) == 1: 
+            self._array[objDict["rowInds"]] = objDict["values"]        
+        
+        del objDict['rowInds']
+        del objDict['colInds']
+        del objDict['values']
+       
     def __str__(self): 
         """
         Return a string representation of the non-zero elements of the array. 

@@ -496,20 +496,10 @@ class csarray(object):
             import scipy.sparse
         except ImportError: 
             raise 
-            
-        if self.storagetype != "col": 
-            raise ValueError("Method only supports col matrices")
     
         rowInds, colInds = self.nonzero()  
-        indPtrTemp = numpy.cumsum(numpy.bincount(colInds, minlength=self.shape[0]))
-        indPtr = numpy.zeros(self.shape[1]+1, numpy.int32)
-        indPtr[1:self.shape[1]+1] = indPtrTemp         
-
-        A = scipy.sparse.csc_matrix(self.shape, dtype=self.dtype)
-        A.indices = numpy.array(rowInds, numpy.int32) 
-        A.data = self.values()  
-        A.indptr = indPtr
-        
+        values = self.values()
+        A = scipy.sparse.csc_matrix((values, (rowInds, colInds)), shape=self.shape)
         return A 
         
     def toScipyCsr(self): 
@@ -521,20 +511,10 @@ class csarray(object):
             import scipy.sparse
         except ImportError: 
             raise 
-            
-        if self.storagetype != "row": 
-            raise ValueError("Method only supports row matrices")
     
         rowInds, colInds = self.nonzero()  
-        indPtrTemp = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[0]))
-        indPtr = numpy.zeros(self.shape[0]+1, numpy.int32)
-        indPtr[1:self.shape[0]+1] = indPtrTemp         
-
-        A = scipy.sparse.csr_matrix(self.shape, dtype=self.dtype)
-        A.indices = numpy.array(colInds, numpy.int32) 
-        A.data = self.values()  
-        A.indptr = indPtr
-        
+        values = self.values()
+        A = scipy.sparse.csr_matrix((values, (rowInds, colInds)), shape=self.shape)
         return A 
 
     def trace(self): 

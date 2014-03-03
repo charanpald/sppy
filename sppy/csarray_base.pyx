@@ -559,6 +559,7 @@ cdef template[DataType, StorageType] class csarray:
         """
         self.thisPtr.reserve(n)
 
+    @cython.boundscheck(False)
     def rowInds(self, int i):
         """
         Returns the non zero indices for the ith row. 

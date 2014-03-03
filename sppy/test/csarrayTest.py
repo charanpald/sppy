@@ -1435,6 +1435,27 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(self.F.dtype, F.dtype)
         self.assertEquals(self.F.storagetype, F.storagetype)      
       
+    def testNonzeroRows(self): 
+        omegaList = self.B.nonzeroRows()
+        
+        for i in range(self.B.shape[0]): 
+            nptst.assert_array_equal(omegaList[i], self.B.toarray()[i, :].nonzero()[0])
+
+        omegaList = self.C.nonzeroRows()
+        
+        for i in range(self.C.shape[0]): 
+            nptst.assert_array_equal(omegaList[i], self.C.toarray()[i, :].nonzero()[0])
+
+        omegaList = self.D.nonzeroRows()
+        
+        for i in range(self.D.shape[0]): 
+            nptst.assert_array_equal(omegaList[i], self.D.toarray()[i, :].nonzero()[0])
+            
+        omegaList = self.F.nonzeroRows()
+        
+        for i in range(self.F.shape[0]): 
+            nptst.assert_array_equal(omegaList[i], self.F.toarray()[i, :].nonzero()[0])
+      
 if __name__ == "__main__":
     unittest.main()
     

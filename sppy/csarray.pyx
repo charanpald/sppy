@@ -5,8 +5,10 @@ from sppy.csarray_sub cimport csarray_int_rowMajor, csarray_double_rowMajor, csa
 from sppy.csarray1d_sub import csarray1d_int, csarray1d_double, csarray1d_float, csarray1d_long, csarray1d_short, csarray1d_signed_char  
 from sppy.csarray1d_sub cimport csarray1d_int, csarray1d_double, csarray1d_float, csarray1d_long, csarray1d_short, csarray1d_signed_char 
 import struct
+import array
 import numpy 
 cimport numpy
+import cython 
  
 numpy.import_array()
 
@@ -370,6 +372,29 @@ class csarray(object):
         """
         return self._array.nonzero()
 
+    @cython.boundscheck(False)
+    def nonzeroRows(self): 
+        """
+        Return a list such that the ith element is an array of nonzero elements 
+        in the ith row of this matrix. 
+        """
+        cdef unsigned int i
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds = numpy.zeros(self.nnz, dtype=numpy.int32) 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds = numpy.zeros(self.nnz, dtype=numpy.int32) 
+        omegaList = []
+        rowInds, colInds = self._array.nonzero()
+        
+        for i in range(self.shape[0]): 
+            omegaList.append(array.array("I"))
+            
+        for i in range(self.nnz): 
+            omegaList[rowInds[i]].append(colInds[i])
+            
+        for i in range(self.shape[0]): 
+            omegaList[i] = numpy.array(omegaList[i])
+            
+        return omegaList 
+        
 
     def pdot(self, A): 
         """

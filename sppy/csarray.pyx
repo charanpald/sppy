@@ -391,7 +391,7 @@ class csarray(object):
             omegaList[rowInds[i]].append(colInds[i])
             
         for i in range(self.shape[0]): 
-            omegaList[i] = numpy.array(omegaList[i])
+            omegaList[i] = numpy.array(omegaList[i], numpy.uint)
             
         return omegaList 
         

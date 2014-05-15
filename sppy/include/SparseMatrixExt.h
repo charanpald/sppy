@@ -335,7 +335,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
 
     void putUsingTriplets(int* rowInds, int* colInds, T* vals, int numVals) { 
-        unsigned int i; 
+        int i; 
         typedef Eigen::Triplet<double> R;
         std::vector<R> tripletList;
         tripletList.reserve(numVals);
@@ -347,7 +347,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         }
 
     void putUsingTriplets2(int* rowInds, int* colInds, T val, int numVals) { 
-        unsigned int i; 
+        int i; 
         typedef Eigen::Triplet<double> R;
         std::vector<R> tripletList;
         tripletList.reserve(numVals);

@@ -448,6 +448,12 @@ class csarrayTest(unittest.TestCase):
         A = csarray((0, 0))
         self.assertRaises(ValueError, A.__getitem__, (numpy.array([0, 1, 3]), numpy.array([1, 3, 3])))
         
+        #Test oversampling 
+        B2 = self.B[0:1000, :]
+        nptst.assert_array_equal(B2.toarray(), self.B.toarray())
+        
+        B2 = self.B[:, 0:230]
+        nptst.assert_array_equal(B2.toarray(), self.B.toarray())
         
         #Test submatrix indexing 
         C = self.B[:, :]

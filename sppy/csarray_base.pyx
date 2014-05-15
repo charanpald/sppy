@@ -115,7 +115,7 @@ cdef template[DataType, StorageType] class csarray:
                     if index.stop == None: 
                         stop = self.shape[k]
                     else:
-                        stop = index.stop  
+                        stop = min(index.stop, self.shape[k])  
                     indArr = numpy.arange(start, stop)
                     indList.append(indArr)
             return self.subArray(indList[0], indList[1])

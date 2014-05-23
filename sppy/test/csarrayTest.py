@@ -1441,26 +1441,47 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(self.F.dtype, F.dtype)
         self.assertEquals(self.F.storagetype, F.storagetype)      
       
-    def testNonzeroRows(self): 
-        omegaList = self.B.nonzeroRows()
+    def testNonzeroRowsList(self): 
+        omegaList = self.B.nonzeroRowsList()
         
         for i in range(self.B.shape[0]): 
             nptst.assert_array_equal(omegaList[i], self.B.toarray()[i, :].nonzero()[0])
 
-        omegaList = self.C.nonzeroRows()
+        omegaList = self.C.nonzeroRowsList()
         
         for i in range(self.C.shape[0]): 
             nptst.assert_array_equal(omegaList[i], self.C.toarray()[i, :].nonzero()[0])
 
-        omegaList = self.D.nonzeroRows()
+        omegaList = self.D.nonzeroRowsList()
         
         for i in range(self.D.shape[0]): 
             nptst.assert_array_equal(omegaList[i], self.D.toarray()[i, :].nonzero()[0])
             
-        omegaList = self.F.nonzeroRows()
+        omegaList = self.F.nonzeroRowsList()
         
         for i in range(self.F.shape[0]): 
             nptst.assert_array_equal(omegaList[i], self.F.toarray()[i, :].nonzero()[0])
+
+    def testNonzeroRowsPtr(self): 
+        indPtr, colInds = self.B.nonzeroRowsPtr()
+        
+        for i in range(self.B.shape[0]): 
+            nptst.assert_array_equal(colInds[indPtr[i]:indPtr[i+1]], self.B.toarray()[i, :].nonzero()[0])
+
+        indPtr, colInds = self.C.nonzeroRowsPtr()
+        
+        for i in range(self.C.shape[0]): 
+            nptst.assert_array_equal(colInds[indPtr[i]:indPtr[i+1]], self.C.toarray()[i, :].nonzero()[0])
+
+        indPtr, colInds = self.D.nonzeroRowsPtr()
+        
+        for i in range(self.D.shape[0]): 
+            nptst.assert_array_equal(colInds[indPtr[i]:indPtr[i+1]], self.D.toarray()[i, :].nonzero()[0])
+            
+        indPtr, colInds = self.F.nonzeroRowsPtr()
+        
+        for i in range(self.F.shape[0]): 
+            nptst.assert_array_equal(colInds[indPtr[i]:indPtr[i+1]], self.F.toarray()[i, :].nonzero()[0])
       
 if __name__ == "__main__":
     unittest.main()

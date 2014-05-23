@@ -373,7 +373,7 @@ class csarray(object):
         return self._array.nonzero()
 
     @cython.boundscheck(False)
-    def nonzeroRows(self): 
+    def nonzeroRowsList(self): 
         """
         Return a list such that the ith element is an array of nonzero elements 
         in the ith row of this matrix. 
@@ -394,6 +394,23 @@ class csarray(object):
             omegaList[i] = numpy.array(omegaList[i], numpy.uint)
             
         return omegaList 
+
+    @cython.boundscheck(False)
+    def nonzeroRowsPtr(self): 
+        """
+        Returns two arrays indPtr, colInds, such that colInds[indPtr[i]:indPtr[i+1]] 
+        is the set of nonzero elements in the ith row of this matrix. 
+        """        
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds = numpy.zeros(self.nnz, dtype=numpy.int32) 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds = numpy.zeros(self.nnz, dtype=numpy.int32) 
+        cdef numpy.ndarray[long, ndim=1, mode="c"] indPtr
+        
+        result = csarray(self, storagetype="row")
+        rowInds, colInds = result._array.nonzero()
+        indPtr = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[1]))
+        indPtr = numpy.r_[numpy.array([0]), indPtr]
+            
+        return indPtr, colInds 
         
 
     def pdot(self, A): 

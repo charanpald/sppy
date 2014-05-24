@@ -403,12 +403,12 @@ class csarray(object):
         """        
         cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds = numpy.zeros(self.nnz, dtype=numpy.int32) 
         cdef numpy.ndarray[int, ndim=1, mode="c"] colInds = numpy.zeros(self.nnz, dtype=numpy.int32) 
-        cdef numpy.ndarray[long, ndim=1, mode="c"] indPtr
+        cdef numpy.ndarray[int, ndim=1, mode="c"] indPtr
         
         result = csarray(self, storagetype="row")
         rowInds, colInds = result._array.nonzero()
-        indPtr = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[1]))
-        indPtr = numpy.r_[numpy.array([0]), indPtr]
+        indPtr = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[1]), dtype=numpy.int32)
+        indPtr = numpy.array(numpy.r_[numpy.array([0]), indPtr], numpy.int32)
             
         return indPtr, colInds 
         

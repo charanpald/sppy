@@ -407,7 +407,7 @@ class csarray(object):
         
         result = csarray(self, storagetype="row")
         rowInds, colInds = result._array.nonzero()
-        indPtr = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[1]), dtype=numpy.int32)
+        indPtr = numpy.cumsum(numpy.bincount(rowInds, minlength=self.shape[0]), dtype=numpy.int32)
         indPtr = numpy.array(numpy.r_[numpy.array([0]), indPtr], numpy.int32)
             
         return indPtr, colInds 

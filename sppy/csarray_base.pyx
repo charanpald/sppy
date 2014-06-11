@@ -145,7 +145,7 @@ cdef template[DataType, StorageType] class csarray:
                 else: 
                     start = slc.start 
                 if slc.stop == None: 
-                    stop = self.shape[1]
+                    stop = self.shape[0]
                 else: 
                     stop = slc.stop 
                     

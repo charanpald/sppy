@@ -5,7 +5,7 @@ import numpy
 import numpy.testing as nptst 
 import math 
 import pickle 
-
+import sppy 
 from sppy import csarray 
 
 class csarrayTest(unittest.TestCase):
@@ -524,6 +524,10 @@ class csarrayTest(unittest.TestCase):
         self.assertEquals(d.shape, (4, ))
         self.assertEquals(d[0], 23)
         self.assertEquals(d[3], 1.2)
+        
+        #Test for particular bug 
+        B = sppy.rand((10, 5), 0.5)
+        nptst.assert_array_equal(B[:, 1].toarray().ravel(), B.toarray()[:, 1])
                 
     def testSubArray(self): 
         rowInds = numpy.array([0, 1], numpy.int)

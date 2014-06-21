@@ -3,10 +3,16 @@ sppy
 
 The aim of this project is to implement a fast sparse array library by wrapping the corresponding parts of Eigen in Python. The interface is similar to numpy so that existing code requires minimal change to work with sparse arrays. See http://packages.python.org/sppy/index.html for the documentation. 
 
-Note: this code has been tested with Python 2.7/3.2, numpy 1.7.1 and scipy 0.12.0 on Ubuntu 13.04 64-bit. 
+Note: this code has been tested with Python 2.7/3.2, numpy 1.7.1 and scipy 0.12.0 on Ubuntu 14.04 64-bit. 
 
 Changelog
 ---------
+
+Changes in version 0.6.5: 
+
+* Add methods to support pickling 
+* nonzeroRowsPtr method 
+* Several bug fixes 
 
 Changes in version 0.6.4: 
 

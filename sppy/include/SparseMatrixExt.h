@@ -373,7 +373,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                 size1Ind = 0; 
                 //For each col go through non-zero vals and copy to new array if indexed in array1
                 for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, array2[j]); it; ++it) {
-                    while (array1[size1Ind] < it.row() && size1Ind < size1) { 
+                    while (size1Ind < size1 && array1[size1Ind] < it.row()) { 
                         size1Ind++; 
                         }
     
@@ -389,7 +389,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                 size2Ind = 0; 
                 //For each row go through non-zero vals and copy to new array if indexed in array1
                 for (typename SparseMatrixExt<T, S>::InnerIterator it(*this, array1[j]); it; ++it) {
-                    while (array2[size2Ind] < it.col() && size2Ind < size2) { 
+                    while (size2Ind < size2 && array2[size2Ind] < it.col()) { 
                         size2Ind++; 
                         }
     

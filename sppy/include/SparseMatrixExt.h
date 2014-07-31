@@ -361,7 +361,6 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
 
     void slice(int* array1, int size1, int* array2, int size2, SparseMatrixExt<T, S> *mat) { 
         //Array indices must be sorted 
-        //SparseMatrixExt *mat = new SparseMatrixExt<T, S>(size1, size2);
         int size1Ind = 0; 
         int size2Ind = 0; 
         typedef Eigen::Triplet<double> R;
@@ -377,8 +376,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                         size1Ind++; 
                         }
     
-                    if(it.row() == array1[size1Ind]) { 
-                        //mat->insert(size1Ind, j) = it.value();  
+                    if(size1Ind != size1  && it.row() == array1[size1Ind]) { 
                         tripletList.push_back(R(size1Ind, j, it.value()));                  
                         }
                     }
@@ -393,8 +391,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
                         size2Ind++; 
                         }
     
-                    if(it.col() == array2[size2Ind]) { 
-                        //mat->insert(j, size2Ind) = it.value();  
+                    if(size2Ind != size2 && it.col() == array2[size2Ind]) { 
                         tripletList.push_back(R(j, size2Ind, it.value()));                  
                         }
                     }

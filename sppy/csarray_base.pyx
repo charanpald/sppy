@@ -1,5 +1,7 @@
 # cython: profile=True
-# cython: boundscheck=False
+#cython: boundscheck=False
+#cython: wraparound=False
+#cython: nonecheck=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 from libcpp.vector cimport vector
 from sppy.dtype import dataTypeDict
@@ -590,9 +592,10 @@ cdef template[DataType, StorageType] class csarray:
         
         rowIndsC = numpy.ascontiguousarray(rowInds, dtype=numpy.int32) 
         colIndsC = numpy.ascontiguousarray(colInds, dtype=numpy.int32) 
-        
+                
         if rowInds.shape[0] != 0 and colInds.shape[0] != 0: 
             self.thisPtr.slice(&rowIndsC[0], rowIndsC.shape[0], &colIndsC[0], colIndsC.shape[0], result.thisPtr) 
+
         return result 
 
     def std(self): 

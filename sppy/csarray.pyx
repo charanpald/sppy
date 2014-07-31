@@ -1,4 +1,7 @@
 # cython: profile=False
+#cython: boundscheck=False
+#cython: wraparound=False
+#cython: nonecheck=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 from sppy.csarray_sub import csarray_int_colMajor, csarray_double_colMajor, csarray_float_colMajor, csarray_long_colMajor, csarray_short_colMajor, csarray_signed_char_colMajor  
 from sppy.csarray_sub cimport csarray_int_rowMajor, csarray_double_rowMajor, csarray_float_rowMajor, csarray_long_rowMajor, csarray_short_rowMajor, csarray_signed_char_rowMajor
@@ -145,8 +148,8 @@ class csarray(object):
         return numpy.dtype(self._dtype)
         
     def __getitem__(self, inds):
-        result = self._array.__getitem__(inds) 
-        
+        result = self._array.__getitem__(inds)
+
         if type(result) in self.baseTypes: 
             newArray = csarray(result.shape, self.dtype)
             newArray.__convertBase(result, self.dtype)

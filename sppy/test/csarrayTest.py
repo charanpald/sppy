@@ -11,6 +11,7 @@ from sppy import csarray
 class csarrayTest(unittest.TestCase):
     def setUp(self):
         logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+        numpy.set_printoptions(suppress=True, precision=3, linewidth=150)
         self.A = csarray((5, 5))
 
         nrow = 5 
@@ -569,6 +570,38 @@ class csarrayTest(unittest.TestCase):
         
         A = self.A.subArray(rowInds, colInds)
         self.assertEquals(A.shape, (0, 0))
+        
+    def testSlice(self): 
+        
+        numRuns = 100
+        dtypes = [numpy.float, numpy.float32, numpy.float64]
+        storagetypes = ["row", "col"]
+        size = 5
+        
+        
+        for i in range(numRuns):            
+            for dtype in dtypes: 
+                for storagetype in storagetypes: 
+                    
+                    m = numpy.random.randint(5, 20)
+                    n = numpy.random.randint(5, 20)
+                    density = numpy.random.rand()
+                    
+                    #print(i, m, n, density, dtype, storagetype)
+                    A = sppy.rand((m, n), density, dtype=dtype, storagetype=storagetype)
+                    D = A.toarray()
+                    
+                    rowInds = numpy.random.choice(m, size, replace=False)
+                    colInds = numpy.random.choice(n, size, replace=False)
+                    
+                    rowInds = numpy.sort(rowInds)
+                    colInds = numpy.sort(colInds)
+                    
+                    B = A[rowInds, :]
+                    nptst.assert_array_equal(B.toarray(), D[rowInds, :])
+                    
+                    C = A[:, colInds]
+                    nptst.assert_array_equal(C.toarray(), D[:, colInds])
     
 
     #@unittest.skip("")          

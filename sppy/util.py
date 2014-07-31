@@ -46,7 +46,7 @@ def rand(shape, density, dtype=numpy.float, storagetype="col"):
     
     :param density: The proportion of non zero elements to create
     
-    :param dtype: The data type of the output array (e.g. numpy.int)  
+    :param dtype: The data type of the output array (only supports floats at the moment)  
     
     :param storagetype: The storage type of the csarray ("row" or "col")
     :type storagetype: `str`
@@ -61,9 +61,9 @@ def rand(shape, density, dtype=numpy.float, storagetype="col"):
         rowInds, colInds = numpy.unravel_index(inds, shape) 
         rowInds = numpy.array(rowInds, numpy.int32)
         colInds = numpy.array(colInds, numpy.int32)
-        result.put(numpy.random.rand(numEntries), rowInds, colInds, init=True)
+        result.put(numpy.array(numpy.random.rand(numEntries), dtype), rowInds, colInds, init=True)
     elif result.ndim == 1: 
-        result[inds] = numpy.random.rand(numEntries)
+        result[inds] = numpy.array(numpy.random.rand(numEntries), dtype)
     
     return result 
     

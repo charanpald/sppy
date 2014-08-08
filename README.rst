@@ -8,6 +8,12 @@ Note: this code has been tested with Python 2.7/3.2, numpy 1.7.1 and scipy 0.12.
 Changelog
 ---------
 
+Changes in version 0.6.6: 
+
+* Fix bugs in slicing 
+* Turn off bounds checking 
+* Element-wise sin, cos, floor, ceil, sign 
+
 Changes in version 0.6.5: 
 
 * Add methods to support pickling 

@@ -54,8 +54,24 @@ def expandTemplate(inFileName, outFileName, templateList, force=False):
     inFile.close()     
     logging.debug("Read input file " + inFileName)
     
+    
+    #Create regular expression for csarray[float,colMajor]  -> csarray_float_colMajor 
+    findString = className + "\[" 
+    replaceString = className + "_"
+    for i in range(len(templateList[0])):
+        if i != len(templateList[0])-1:
+            findString += "\s*([\w_ ]+)\s*,\s*"
+            replaceString += "\\" + str(i+1) + "_"
+        else: 
+            findString += "\s*([\w_ ]+)\s*\]"
+            replaceString += "\\" + str(i+1)    
+    
+    p = re.compile(findString)
+    
     for templateTypes in templateList:
-        newClassName = className + "_" + string.replace(string.join(templateTypes), " ", "_")
+        newClassName = className + "[" + string.join(templateTypes, ",") + "]"
+        newClassName = p.sub(replaceString, newClassName)
+        newClassName = newClassName.replace(" ", "_")
         outFile.write("cdef class " + newClassName +  ":\n")
         logging.debug("Writing class " + newClassName)
         
@@ -67,16 +83,23 @@ def expandTemplate(inFileName, outFileName, templateList, force=False):
             else: 
                 templateClassName += str(templateParam) 
         templateClassName += "]"
-        #print(templateClassName, newClassName)
         
         for line in classDefLines:
             outLine = line  
-            outLine = string.replace(outLine, templateClassName, newClassName)
-            #print(outLine)
             
+            #Replace e.g. DataType with int 
             for i, templateType in enumerate(templateTypes): 
-                outLine = (string.replace(outLine, templateParams[i], templateType))
+                outLine = (string.replace(outLine, templateParams[i], templateType))            
+
+            # csarray[float,colMajor]  -> csarray_float_colMajor 
+            reResults = p.search(outLine)
+
+            if reResults != None:  
+                outLine = p.sub(replaceString, outLine)
                 
+                for word in reResults.groups():
+                    outLine = outLine.replace(word, word.replace(" ", "_"))
+
             outFile.write(outLine)
                 
     outFile.close() 
@@ -93,6 +116,7 @@ def expand_base(workdir='.', force=False):
     outFileName = os.path.join(workdir, "csarray_sub.pyx")
     expandTemplate(inFileName, outFileName, templateList, force)
 
+    
     inFileName = os.path.join(workdir, "csarray_base.pxd")
     outFileName = os.path.join(workdir, "csarray_sub.pxd")
     expandTemplate(inFileName, outFileName, templateList, force)
@@ -106,6 +130,7 @@ def expand_base(workdir='.', force=False):
     inFileName = os.path.join(workdir, "csarray1d_base.pxd")
     outFileName = os.path.join(workdir, "csarray1d_sub.pxd")
     expandTemplate(inFileName, outFileName, templateList, force)
-
+    
+    
 if __name__ == '__main__':
     expand_base(force=False)

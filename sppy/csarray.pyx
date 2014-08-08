@@ -247,6 +247,14 @@ class csarray(object):
         result._array = self._array.__sub__(A._array)
         return result
 
+    def ceil(self): 
+        """
+        Take the ceil of the nonzero elements of this array, and return a new array. 
+        """
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.ceil()
+        return result   
+
     def clip(self, minVal, maxVal): 
         """
         Given an interval, values outside the interval are clipped to the interval edges. For example, 
@@ -274,6 +282,14 @@ class csarray(object):
         newArray = csarray(self.shape, self.dtype, self.storagetype)
         newArray._array = self._array.copy()
         return newArray 
+        
+    def cos(self): 
+        """
+        Take the cosine of the nonzero elements of this array, and return a new array. 
+        """
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.cos()
+        return result              
         
     def diag(self): 
         """
@@ -308,6 +324,14 @@ class csarray(object):
                 result = resultArray
             
         return result
+
+    def floor(self): 
+        """
+        Take the floor of the nonzero elements of this array, and return a new array. 
+        """
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.floor()
+        return result   
 
     @staticmethod 
     def fromScipySparse(A, storagetype="col"): 
@@ -481,6 +505,22 @@ class csarray(object):
         :type i: `int`
         """
         return self._array.rowInds(i)
+      
+    def sign(self): 
+        """
+        Take the sign of the nonzero elements of this array, and return a new array. 
+        """
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.sign()
+        return result         
+      
+    def sin(self): 
+        """
+        Take the sine of the nonzero elements of this array, and return a new array. 
+        """
+        result = csarray(self.shape, self.dtype)
+        result._array = self._array.sin()
+        return result      
       
     def std(self): 
         """

@@ -1520,6 +1520,139 @@ class csarrayTest(unittest.TestCase):
         for i in range(self.F.shape[0]): 
             nptst.assert_array_equal(colInds[indPtr[i]:indPtr[i+1]], self.F.toarray()[i, :].nonzero()[0])
       
+      
+    def testSin(self):
+        #B, C, F, G        
+        B = self.B.sin()
+        rowInds, colInds = self.B.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(B[rowInds[i], colInds[i]], numpy.sin(self.B[rowInds[i], colInds[i]]))
+      
+        C = self.C.sin()
+        rowInds, colInds = self.C.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(C[rowInds[i], colInds[i]], numpy.sin(self.C[rowInds[i], colInds[i]]))
+            
+        F = self.F.sin()
+        rowInds, colInds = self.F.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(F[rowInds[i], colInds[i]], numpy.sin(self.F[rowInds[i], colInds[i]]))
+                  
+        G = self.G.sin()
+        rowInds, colInds = self.G.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(G[rowInds[i], colInds[i]], numpy.sin(self.G[rowInds[i], colInds[i]]))            
+            
+ 
+    def testCos(self):
+        #B, C, F, G        
+        B = self.B.cos()
+        rowInds, colInds = self.B.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(B[rowInds[i], colInds[i]], numpy.cos(self.B[rowInds[i], colInds[i]]))
+      
+        C = self.C.cos()
+        rowInds, colInds = self.C.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(C[rowInds[i], colInds[i]], numpy.cos(self.C[rowInds[i], colInds[i]]))
+            
+        F = self.F.cos()
+        rowInds, colInds = self.F.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(F[rowInds[i], colInds[i]], numpy.cos(self.F[rowInds[i], colInds[i]]))
+                  
+        G = self.G.cos()
+        rowInds, colInds = self.G.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(G[rowInds[i], colInds[i]], numpy.cos(self.G[rowInds[i], colInds[i]]))   
+     
+
+    def testSign(self):
+        #B, C, F, G        
+        B = self.B.sign()
+        rowInds, colInds = self.B.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(B[rowInds[i], colInds[i]], numpy.sign(self.B[rowInds[i], colInds[i]]))
+      
+        C = self.C.sign()
+        rowInds, colInds = self.C.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(C[rowInds[i], colInds[i]], numpy.sign(self.C[rowInds[i], colInds[i]]))
+            
+        F = self.F.sign()
+        rowInds, colInds = self.F.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(F[rowInds[i], colInds[i]], numpy.sign(self.F[rowInds[i], colInds[i]]))
+                  
+        G = self.G.sign()
+        rowInds, colInds = self.G.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(G[rowInds[i], colInds[i]], numpy.sign(self.G[rowInds[i], colInds[i]]))        
+     
+    def testCeil(self):
+        #B, C, F, G        
+        B = self.B.ceil()
+        rowInds, colInds = self.B.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(B[rowInds[i], colInds[i]], numpy.ceil(self.B[rowInds[i], colInds[i]]))
+      
+        C = self.C.ceil()
+        rowInds, colInds = self.C.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(C[rowInds[i], colInds[i]], numpy.ceil(self.C[rowInds[i], colInds[i]]))
+            
+        F = self.F.ceil()
+        rowInds, colInds = self.F.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(F[rowInds[i], colInds[i]], numpy.ceil(self.F[rowInds[i], colInds[i]]))
+                  
+        G = self.G.ceil()
+        rowInds, colInds = self.G.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(G[rowInds[i], colInds[i]], numpy.ceil(self.G[rowInds[i], colInds[i]]))         
+     
+    def testFloor(self):
+        #B, C, F, G        
+        B = self.B.floor()
+        rowInds, colInds = self.B.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(B[rowInds[i], colInds[i]], numpy.floor(self.B[rowInds[i], colInds[i]]))
+      
+        C = self.C.floor()
+        rowInds, colInds = self.C.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(C[rowInds[i], colInds[i]], numpy.floor(self.C[rowInds[i], colInds[i]]))
+            
+        F = self.F.floor()
+        rowInds, colInds = self.F.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(F[rowInds[i], colInds[i]], numpy.floor(self.F[rowInds[i], colInds[i]]))
+                  
+        G = self.G.floor()
+        rowInds, colInds = self.G.nonzero()
+           
+        for i in range(rowInds.shape[0]): 
+            self.assertEquals(G[rowInds[i], colInds[i]], numpy.floor(self.G[rowInds[i], colInds[i]]))        
+     
 if __name__ == "__main__":
     unittest.main()
     

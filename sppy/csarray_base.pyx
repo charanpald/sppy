@@ -18,7 +18,7 @@ cdef template[DataType, StorageType] class csarray:
         """
         Create a new column or row major dynamic array.
         """
-        self.thisPtr = new SparseMatrixExt[DataType, StorageType](shape[0], shape[1]) 
+        self.thisPtr = new SparseMatrixExt[DataType, StorageType](shape[0], shape[1])   
   
     def __abs__(self): 
         """
@@ -253,15 +253,22 @@ cdef template[DataType, StorageType] class csarray:
         outputCode = self.thisPtr.biCGSTAB(&v[0], v.shape[0], &result[0], maxIterations, tol)
         return result, outputCode 
 
-    def submatrix(self, unsigned int startRow, unsigned int startCol, unsigned int blockRows, unsigned int blockCols): 
+
+
+    def ceil(self): 
         """
-        Return a submatrix of the matrix given by A[startRow:startRows+blockRows, startCol:startCol+blockCols]
-        in an efficient manner. 
+        Take the ceil function of the nonzero elements of this array, and return a new array. 
         """
-        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType](self.shape)
-        del result.thisPtr
-        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.submatrix(startRow, startCol, blockRows, blockCols))
-        return result 
+        cdef csarray[long, StorageType] result = csarray[long, StorageType](self.shape)     
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds 
+        cdef numpy.ndarray[long, ndim=1, mode="c"] values = numpy.zeros(self.nnz, dtype=long)         
+        
+        rowInds, colInds = self.nonzero() 
+        numpy.ceil(self.values(), values) 
+        
+        result.put(values, rowInds, colInds, init=True) 
+        return result     
 
     def clip(self, DataType minVal, DataType maxVal): 
         """
@@ -307,6 +314,21 @@ cdef template[DataType, StorageType] class csarray:
         del result.thisPtr
         result.thisPtr = new SparseMatrixExt[DataType, StorageType](deref(self.thisPtr))
         return result 
+    
+    def cos(self): 
+        """
+        Take the cosine of the nonzero elements of this array, and return a new array. 
+        """
+        cdef csarray[double, StorageType] result = csarray[double, StorageType](self.shape)     
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds 
+        cdef numpy.ndarray[double, ndim=1, mode="c"] values        
+        
+        rowInds, colInds = self.nonzero() 
+        values = numpy.cos(self.values()) 
+        
+        result.put(values, rowInds, colInds, init=True) 
+        return result     
     
     def diag(self): 
         """
@@ -361,6 +383,21 @@ cdef template[DataType, StorageType] class csarray:
         Return the dtype of the current object. 
         """
         return dataTypeDict["DataType"]    
+    
+    def floor(self): 
+        """
+        Take the floor function of the nonzero elements of this array, and return a new array. 
+        """
+        cdef csarray[long, StorageType] result = csarray[long, StorageType](self.shape)     
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds 
+        cdef numpy.ndarray[long, ndim=1, mode="c"] values = numpy.zeros(self.nnz, dtype=long)      
+        
+        rowInds, colInds = self.nonzero() 
+        numpy.floor(self.values(), values) 
+        
+        result.put(values, rowInds, colInds, init=True) 
+        return result        
     
     def getnnz(self): 
         """
@@ -579,6 +616,36 @@ cdef template[DataType, StorageType] class csarray:
     def setZero(self):
         self.thisPtr.setZero()
 
+    def sign(self): 
+        """
+        Take the sign function of the nonzero elements of this array, and return a new array. 
+        """
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType](self.shape)     
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds 
+        cdef numpy.ndarray[DataType, ndim=1, mode="c"] values        
+        
+        rowInds, colInds = self.nonzero() 
+        values = numpy.sign(self.values()) 
+        
+        result.put(values, rowInds, colInds, init=True) 
+        return result    
+
+    def sin(self): 
+        """
+        Take the sine of the nonzero elements of this array, and return a new array. 
+        """
+        cdef csarray[double, StorageType] result = csarray[double, StorageType](self.shape)     
+        cdef numpy.ndarray[int, ndim=1, mode="c"] rowInds 
+        cdef numpy.ndarray[int, ndim=1, mode="c"] colInds 
+        cdef numpy.ndarray[double, ndim=1, mode="c"] values        
+        
+        rowInds, colInds = self.nonzero() 
+        values = numpy.sin(self.values()) 
+        
+        result.put(values, rowInds, colInds, init=True) 
+        return result 
+
     def subArray(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] rowInds, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] colInds): 
         """
         Explicitly perform an array slice to return a submatrix with the given
@@ -596,6 +663,16 @@ cdef template[DataType, StorageType] class csarray:
         if rowInds.shape[0] != 0 and colInds.shape[0] != 0: 
             self.thisPtr.slice(&rowIndsC[0], rowIndsC.shape[0], &colIndsC[0], colIndsC.shape[0], result.thisPtr) 
 
+        return result 
+
+    def submatrix(self, unsigned int startRow, unsigned int startCol, unsigned int blockRows, unsigned int blockCols): 
+        """
+        Return a submatrix of the matrix given by A[startRow:startRows+blockRows, startCol:startCol+blockCols]
+        in an efficient manner. 
+        """
+        cdef csarray[DataType, StorageType] result = csarray[DataType, StorageType](self.shape)
+        del result.thisPtr
+        result.thisPtr = new SparseMatrixExt[DataType, StorageType](self.thisPtr.submatrix(startRow, startCol, blockRows, blockCols))
         return result 
 
     def std(self): 

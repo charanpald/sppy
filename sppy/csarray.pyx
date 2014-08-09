@@ -251,7 +251,7 @@ class csarray(object):
         """
         Take the ceil of the nonzero elements of this array, and return a new array. 
         """
-        result = csarray(self.shape, self.dtype)
+        result = csarray(self.shape, long)
         result._array = self._array.ceil()
         return result   
 
@@ -329,7 +329,7 @@ class csarray(object):
         """
         Take the floor of the nonzero elements of this array, and return a new array. 
         """
-        result = csarray(self.shape, self.dtype)
+        result = csarray(self.shape, long)
         result._array = self._array.floor()
         return result   
 

@@ -1605,6 +1605,7 @@ class csarrayTest(unittest.TestCase):
         #B, C, F, G        
         B = self.B.ceil()
         rowInds, colInds = self.B.nonzero()
+        self.assertEquals(B.dtype, numpy.int)
            
         for i in range(rowInds.shape[0]): 
             self.assertEquals(B[rowInds[i], colInds[i]], numpy.ceil(self.B[rowInds[i], colInds[i]]))
@@ -1617,6 +1618,7 @@ class csarrayTest(unittest.TestCase):
             
         F = self.F.ceil()
         rowInds, colInds = self.F.nonzero()
+        
            
         for i in range(rowInds.shape[0]): 
             self.assertEquals(F[rowInds[i], colInds[i]], numpy.ceil(self.F[rowInds[i], colInds[i]]))
@@ -1631,6 +1633,7 @@ class csarrayTest(unittest.TestCase):
         #B, C, F, G        
         B = self.B.floor()
         rowInds, colInds = self.B.nonzero()
+        self.assertEquals(B.dtype, numpy.int)
            
         for i in range(rowInds.shape[0]): 
             self.assertEquals(B[rowInds[i], colInds[i]], numpy.floor(self.B[rowInds[i], colInds[i]]))

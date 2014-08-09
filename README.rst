@@ -12,7 +12,7 @@ Changes in version 0.6.6:
 
 * Fix bugs in slicing 
 * Turn off bounds checking 
-* Element-wise sin, cos, floor, ceil, sign 
+* Element-wise sin, cos, floor, ceil, sign for 2D arrays 
 
 Changes in version 0.6.5: 
 

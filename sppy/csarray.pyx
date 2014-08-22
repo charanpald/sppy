@@ -49,7 +49,7 @@ class csarray(object):
                 self._array = csarray1d_signed_char(shape)    
             elif dtype == numpy.int16: 
                 self._array = csarray1d_short(shape)
-            elif dtype == numpy.dtype(int): 
+            elif dtype == numpy.dtype(int) or dtype == numpy.int32: 
                 self._array = csarray1d_int(shape)
             elif dtype == numpy.dtype(long) or dtype == numpy.int: 
                 self._array = csarray1d_long(shape)
@@ -164,7 +164,11 @@ class csarray(object):
         objDict = {}
         objDict['shape'] = self.shape
         objDict["storagetype"] = self.storagetype
-        objDict['rowInds'], objDict['colInds'] = self.nonzero()
+        objDict["dtype"] = self.dtype
+        if self.ndim == 2: 
+            objDict['rowInds'], objDict['colInds'] = self.nonzero()
+        else: 
+            objDict['rowInds'] = self.nonzero()[0]
         objDict['values'] = self.values()
         return objDict
 
@@ -196,18 +200,18 @@ class csarray(object):
         self._array.__setitem__(inds, val) 
        
     def __setstate__(self, objDict):
-        self.__setObject(objDict["shape"], objDict["values"].dtype, objDict["storagetype"])
+        self.__setObject(objDict["shape"], objDict["dtype"], objDict["storagetype"])
         
         if len(objDict["shape"]) == 2: 
             rowInds = numpy.array(objDict["rowInds"], numpy.int32)
             colInds = numpy.array(objDict["colInds"], numpy.int32)
 
             self._array.put(objDict["values"], rowInds, colInds, True)
+            del objDict['colInds']
         elif len(objDict["shape"]) == 1: 
             self._array[objDict["rowInds"]] = objDict["values"]        
         
         del objDict['rowInds']
-        del objDict['colInds']
         del objDict['values']
        
     def __str__(self): 

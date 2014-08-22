@@ -1476,7 +1476,27 @@ class csarrayTest(unittest.TestCase):
                 self.assertEquals(F[i,j], self.F[i,j])
         
         self.assertEquals(self.F.dtype, F.dtype)
-        self.assertEquals(self.F.storagetype, F.storagetype)      
+        self.assertEquals(self.F.storagetype, F.storagetype)    
+        
+        #Test vector        
+        s = pickle.dumps(self.a)
+        a = pickle.loads(s)
+        
+        for i in range(self.a.shape[0]): 
+            self.assertEquals(a[i], self.a[i])
+        
+        self.assertEquals(self.a.dtype, a.dtype)
+        self.assertEquals(self.a.storagetype, a.storagetype)         
+        
+        #Different dtype 
+        s = pickle.dumps(self.b)
+        b = pickle.loads(s)
+        
+        for i in range(self.b.shape[0]): 
+            self.assertEquals(b[i], self.b[i])
+        
+        self.assertEquals(self.b.dtype, b.dtype)
+        self.assertEquals(self.b.storagetype, b.storagetype)  
       
     def testNonzeroRowsList(self): 
         omegaList = self.B.nonzeroRowsList()

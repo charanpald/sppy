@@ -3,6 +3,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 import numpy 
 cimport numpy
 import cython 
+from sppy.dtype import dataTypeDict
 from libcpp.vector cimport vector
 numpy.import_array()
 
@@ -23,100 +24,34 @@ cdef template[DataType] class csarray1d:
             raise ValueError("Invalid input: " + str(shape))
             
         self.thisPtr = new SparseVectorExt[DataType](shapeVal) 
-            
+      
+    def __abs__(self): 
+        """
+        Return a matrix whose elements are the absolute values of this array. 
+        """
+        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.abs())
+        return result 
+      
+    def __add__(csarray1d[DataType] self, csarray1d[DataType] a): 
+        """
+        Add two matrices together. 
+        """
+        if self.shape != a.shape: 
+            raise ValueError("Cannot add matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+        
+        cdef int shapeVal = self.shape[0]
+        cdef csarray1d[DataType] result = csarray1d[DataType](shapeVal)
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.add(deref(a.thisPtr)))
+        return result          
+      
     def __dealloc__(self): 
         """
         Deallocate the SparseVectorExt object.  
         """
         del self.thisPtr
-        
-    def __getNDim(self): 
-        """
-        Return the number of dimensions of this array. 
-        """
-        return 1 
-        
-    def __getShape(self):
-        """
-        Return the shape of this array
-        """
-        return (self.thisPtr.size(), )
-        
-    def __getSize(self): 
-        """
-        Return the size of this array, that is the number of elements. 
-        """
-        return self.thisPtr.size()   
-        
-    def getnnz(self): 
-        """
-        Return the number of non-zero elements in the array. 
-        """
-        return self.thisPtr.nonZeros()
-
-    def __setitem__(self, ind, val):
-        """
-        Set elements of the array. If i is integers then the corresponding 
-        value in the array is set. 
-        """
-
-        if type(ind) == numpy.ndarray : 
-            self.put(val, ind)
-        elif type(ind) == int:
-            ind = int(ind) 
-            if ind < 0 or ind>=self.thisPtr.rows(): 
-                raise ValueError("Invalid index " + str(ind))   
-            self.thisPtr.insertVal(ind, val) 
-        else:
-            raise ValueError("Invalid index " + str(ind))  
-            
-            
-
-    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] inds not None): 
-        """
-        Insert a value or array of values into the array. 
-        """
-        cdef unsigned int ix 
-        self.reserve(len(inds))
-        
-        if type(val) == numpy.ndarray: 
-            for ix in range(len(inds)): 
-                self.thisPtr.insertVal(inds[ix], val[ix])
-        else:
-            for ix in range(len(inds)): 
-                self.thisPtr.insertVal(inds[ix], val)
-                
-    def reserve(self, int n): 
-        """
-        Reserve n nonzero entries  
-        """
-        self.thisPtr.reserve(n)
-        
-    def toarray(self): 
-        """
-        Convert this sparse matrix into a numpy array. 
-        """
-        cdef numpy.ndarray[double, ndim=1, mode="c"] result = numpy.zeros(self.shape, numpy.float)
-        cdef numpy.ndarray[long, ndim=1, mode="c"] inds
-        cdef unsigned int i
-        
-        (inds, ) = self.nonzero()
-            
-        for i in range(inds.shape[0]): 
-            result[inds[i]] += self.thisPtr.coeff(inds[i])   
-            
-        return result 
-
-    def nonzero(self): 
-        """
-        Return a tuple of arrays corresponding to nonzero elements. 
-        """
-        cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(self.getnnz(), dtype=numpy.int64) 
-        
-        if self.getnnz() != 0:
-            self.thisPtr.nonZeroInds(&inds[0])
-        
-        return (inds, )
 
     def __getitem__(self, ind):
         """
@@ -158,45 +93,70 @@ cdef template[DataType] class csarray1d:
 
             if ind < 0 or ind>=self.thisPtr.rows(): 
                 raise ValueError("Invalid row index " + str(ind))       
-            return self.thisPtr.coeff(ind)     
-
-    def subArray(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] inds): 
-        """
-        Explicitly perform an array slice to return a submatrix with the given
-        indices. Only works with ascending ordered indices. This is similar 
-        to using numpy.ix_. 
-        """
-        cdef numpy.ndarray[int, ndim=1, mode="c"] indsC 
-        cdef csarray1d[DataType] result = csarray1d[DataType](inds.shape[0])     
+            return self.thisPtr.coeff(ind)          
         
-        indsC = numpy.ascontiguousarray(inds, dtype=numpy.int32) 
+    def __getNDim(self): 
+        """
+        Return the number of dimensions of this array. 
+        """
+        return 1 
         
-        if inds.shape[0] != 0: 
-            self.thisPtr.slice(&indsC[0], indsC.shape[0], result.thisPtr) 
+    def __getShape(self):
+        """
+        Return the shape of this array
+        """
+        return (self.thisPtr.size(), )
+        
+    def __getSize(self): 
+        """
+        Return the size of this array, that is the number of elements. 
+        """
+        return self.thisPtr.size()   
+        
+    def __mul__(self, double x):
+        """
+        Return a new array multiplied by a scalar value x. 
+        """
+        cdef csarray1d[DataType] result = self.copy() 
+        result.thisPtr.scalarMultiply(x)
         return result 
 
-    def sum(self): 
+    def __neg__(self): 
         """
-        Sum all of the elements in this array. 
-        """      
-        return self.thisPtr.sumValues()
-
-    def mean(self,): 
-        """
-        Find the mean value of this array. 
-        """
-        if self.thisPtr.size() != 0:
-            return self.sum()/float(self.thisPtr.size())
-        else: 
-            return float("nan")
-
-    def __abs__(self): 
-        """
-        Return a matrix whose elements are the absolute values of this array. 
+        Return the negation of this array. 
         """
         cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
         del result.thisPtr
-        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.abs())
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.negate())
+        return result 
+
+    def __setitem__(self, ind, val):
+        """
+        Set elements of the array. If i is integers then the corresponding 
+        value in the array is set. 
+        """
+        
+        if type(ind) == numpy.ndarray: 
+            self.put(val, ind)
+        elif type(ind) == int:
+            ind = int(ind) 
+            if ind < 0 or ind>=self.thisPtr.rows(): 
+                raise ValueError("Invalid index " + str(ind))   
+            self.thisPtr.insertVal(ind, val) 
+        else:
+            raise ValueError("Invalid index " + str(ind))  
+
+    def __sub__(csarray1d[DataType] self, csarray1d[DataType] a): 
+        """
+        Subtract two matrices together. 
+        """
+        if self.shape != a.shape: 
+            raise ValueError("Cannot subtract matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+        
+        cdef int shapeVal = self.shape[0]
+        cdef csarray1d[DataType] result = csarray1d[DataType](shapeVal)
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.subtract(deref(a.thisPtr)))
         return result 
 
     def copy(self): 
@@ -207,15 +167,66 @@ cdef template[DataType] class csarray1d:
         del result.thisPtr
         result.thisPtr = new SparseVectorExt[DataType](deref(self.thisPtr))
         return result 
-
+      
+    def dotCsarray1d(self, csarray1d[DataType] a): 
+        if self.shape != a.shape: 
+            raise ValueError("Cannot compute dot product of matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+            
+        return self.thisPtr.dot(deref(a.thisPtr))
          
-    def __mul__(self, double x):
+    def dtype(self): 
         """
-        Return a new array multiplied by a scalar value x. 
+        Return the dtype of the current object. 
         """
-        cdef csarray1d[DataType] result = self.copy() 
-        result.thisPtr.scalarMultiply(x)
+        return dataTypeDict["DataType"]    
+
+    def getnnz(self): 
+        """
+        Return the number of non-zero elements in the array. 
+        """
+        return self.thisPtr.nonZeros()
+
+    def hadamard(self, csarray1d[DataType] a): 
+        """
+        Find the element-wise matrix (hadamard) product. 
+        """
+        if self.shape != a.shape: 
+            raise ValueError("Cannot elementwise multiply matrices of shapes " + str(self.shape) + " and " + str(a.shape))
+        
+        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
+        del result.thisPtr
+        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.hadamard(deref(a.thisPtr)))
         return result 
+
+    def max(self): 
+        """
+        Find the maximum element of this array. 
+        """
+        cdef numpy.ndarray[long, ndim=1, mode="c"] inds
+        cdef unsigned int i
+        cdef DataType maxVal 
+        
+        if self.size == 0: 
+            return float("nan")
+        elif self.getnnz() != self.size: 
+            maxVal = 0 
+        
+        (inds,) = self.nonzero()
+            
+        for i in range(inds.shape[0]): 
+            if self.thisPtr.coeff(inds[i]) > maxVal: 
+                maxVal = self.thisPtr.coeff(inds[i])
+            
+        return maxVal         
+
+    def mean(self,): 
+        """
+        Find the mean value of this array. 
+        """
+        if self.thisPtr.size() != 0:
+            return self.sum()/float(self.thisPtr.size())
+        else: 
+            return float("nan")
 
     def min(self): 
         """
@@ -238,27 +249,97 @@ cdef template[DataType] class csarray1d:
             
         return minVal 
 
-    def max(self): 
+    def nonzero(self): 
         """
-        Find the maximum element of this array. 
+        Return a tuple of arrays corresponding to nonzero elements. 
         """
+        cdef numpy.ndarray[long, ndim=1, mode="c"] inds = numpy.zeros(self.getnnz(), dtype=numpy.int64) 
+        
+        if self.getnnz() != 0:
+            self.thisPtr.nonZeroInds(&inds[0])
+        
+        return (inds, )
+
+    def ones(self): 
+        """
+        Fill the array with ones. 
+        """
+        self.thisPtr.fill(1)
+
+    def put(self, val, numpy.ndarray[numpy.int_t, ndim=1] inds not None): 
+        """
+        Insert a value or array of values into the array. 
+        """
+        cdef unsigned int ix 
+        self.reserve(len(inds))
+        
+        if type(val) == numpy.ndarray: 
+            for ix in range(len(inds)): 
+                self.thisPtr.insertVal(inds[ix], val[ix])
+        else:
+            for ix in range(len(inds)): 
+                self.thisPtr.insertVal(inds[ix], val)
+                
+    def reserve(self, int n): 
+        """
+        Reserve n nonzero entries  
+        """
+        self.thisPtr.reserve(n)
+        
+    def std(self): 
+        """
+        Return the standard deviation of the array elements. 
+        """
+        return numpy.sqrt(self.var())
+
+    def subArray(self, numpy.ndarray[numpy.int_t, ndim=1, mode="c"] inds): 
+        """
+        Explicitly perform an array slice to return a submatrix with the given
+        indices. Only works with ascending ordered indices. This is similar 
+        to using numpy.ix_. 
+        """
+        cdef numpy.ndarray[int, ndim=1, mode="c"] indsC 
+        cdef csarray1d[DataType] result = csarray1d[DataType](inds.shape[0])     
+        
+        indsC = numpy.ascontiguousarray(inds, dtype=numpy.int32) 
+        
+        if inds.shape[0] != 0: 
+            self.thisPtr.slice(&indsC[0], indsC.shape[0], result.thisPtr) 
+        return result         
+
+    def sum(self): 
+        """
+        Sum all of the elements in this array. 
+        """      
+        return self.thisPtr.sumValues()
+        
+    def toarray(self): 
+        """
+        Convert this sparse matrix into a numpy array. 
+        """
+        cdef numpy.ndarray[double, ndim=1, mode="c"] result = numpy.zeros(self.shape, numpy.float)
         cdef numpy.ndarray[long, ndim=1, mode="c"] inds
         cdef unsigned int i
-        cdef DataType maxVal 
         
-        if self.size == 0: 
-            return float("nan")
-        elif self.getnnz() != self.size: 
-            maxVal = 0 
-        
-        (inds,) = self.nonzero()
+        (inds, ) = self.nonzero()
             
         for i in range(inds.shape[0]): 
-            if self.thisPtr.coeff(inds[i]) > maxVal: 
-                maxVal = self.thisPtr.coeff(inds[i])
+            result[inds[i]] += self.thisPtr.coeff(inds[i])   
             
-        return maxVal 
+        return result 
+        
+    def values(self): 
+        """
+        Return the values of this object according to the elements returned 
+        using nonzero.  
+        """
 
+        cdef numpy.ndarray[DataType, ndim=1, mode="c"] vals = numpy.zeros(self.getnnz(), self.dtype()) 
+        
+        if self.getnnz() != 0:
+            self.thisPtr.nonZeroVals(&vals[0])
+        
+        return vals           
         
     def var(self): 
         """
@@ -282,72 +363,6 @@ cdef template[DataType] class csarray1d:
         
         return result 
     
-    def std(self): 
-        """
-        Return the standard deviation of the array elements. 
-        """
-        return numpy.sqrt(self.var())
-
-    def __neg__(self): 
-        """
-        Return the negation of this array. 
-        """
-        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
-        del result.thisPtr
-        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.negate())
-        return result 
-
-    def __add__(csarray1d[DataType] self, csarray1d[DataType] a): 
-        """
-        Add two matrices together. 
-        """
-        if self.shape != a.shape: 
-            raise ValueError("Cannot add matrices of shapes " + str(self.shape) + " and " + str(a.shape))
-        
-        cdef int shapeVal = self.shape[0]
-        cdef csarray1d[DataType] result = csarray1d[DataType](shapeVal)
-        del result.thisPtr
-        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.add(deref(a.thisPtr)))
-        return result    
-        
-    def __sub__(csarray1d[DataType] self, csarray1d[DataType] a): 
-        """
-        Subtract two matrices together. 
-        """
-        if self.shape != a.shape: 
-            raise ValueError("Cannot subtract matrices of shapes " + str(self.shape) + " and " + str(a.shape))
-        
-        cdef int shapeVal = self.shape[0]
-        cdef csarray1d[DataType] result = csarray1d[DataType](shapeVal)
-        del result.thisPtr
-        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.subtract(deref(a.thisPtr)))
-        return result 
-
-    def ones(self): 
-        """
-        Fill the array with ones. 
-        """
-        self.thisPtr.fill(1)
-
-    def hadamard(self, csarray1d[DataType] a): 
-        """
-        Find the element-wise matrix (hadamard) product. 
-        """
-        if self.shape != a.shape: 
-            raise ValueError("Cannot elementwise multiply matrices of shapes " + str(self.shape) + " and " + str(a.shape))
-        
-        cdef csarray1d[DataType] result = csarray1d[DataType](self.shape[0])
-        del result.thisPtr
-        result.thisPtr = new SparseVectorExt[DataType](self.thisPtr.hadamard(deref(a.thisPtr)))
-        return result 
-
-    def dotCsarray1d(self, csarray1d[DataType] a): 
-        if self.shape != a.shape: 
-            raise ValueError("Cannot compute dot product of matrices of shapes " + str(self.shape) + " and " + str(a.shape))
-            
-        return self.thisPtr.dot(deref(a.thisPtr))
-
-
 
     shape = property(__getShape)
     size = property(__getSize)

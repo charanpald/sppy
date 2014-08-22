@@ -28,27 +28,37 @@ class SparseVectorExt:public SparseVector<T> {
         return *this;
         }
     
+    SparseVectorExt<T> abs() { 
+        SparseVector<T> A = this-> cwiseAbs();
+        return (SparseVectorExt<T>)A; 
+        }
+
+    SparseVectorExt<T> add(const SparseVectorExt& other) { 
+        return (SparseVectorExt<T>)((*this) + other); 
+        }
+
+    T dot(const SparseVectorExt& other) { 
+        return (T)(this->hadamard(other)).sumValues(); 
+        }
+
+    void fill(T val) { 
+        for (int i=0; i<this->rows(); i++) 
+                this->coeffRef(i) = val;
+        }
+
+    SparseVectorExt<T> hadamard(SparseVectorExt const& other) { 
+        return (SparseVectorExt<T>)this->cwiseProduct(other); 
+        }
+
     void insertVal(int ind, T val) { 
         if (this->coeff(ind) != val)
             this->coeffRef(ind) = val;
         }
 
-    void printValues() { 
-      for (typename SparseVectorExt<T>::InnerIterator it(*this); it; ++it) {
-        std::cout << "(" << it.index() << ") " << it.value() << std::endl;  
-        }  
-    } 
-
-
-    T sumValues() { 
-       T result = 0; 
-      for (typename SparseVectorExt<T>::InnerIterator it(*this); it; ++it) {
-        result += it.value();  
-        }  
-
-        return result; 
-    } 
-
+    SparseVectorExt<T> negate() { 
+        SparseVector<T> A = -(*this);
+        return (SparseVectorExt<T>)A; 
+        }
 
     //Have function to give nonzero elements by passing in points to arrays 
     //Input array points must have the same size as the number of nonzeros in this matrix
@@ -59,6 +69,26 @@ class SparseVectorExt:public SparseVector<T> {
             i++; 
         }  
     }
+
+    void nonZeroVals(T* array) { 
+        int i = 0; 
+
+        for (typename SparseVectorExt<T>::InnerIterator it(*this); it; ++it) {
+            array[i] = it.value(); 
+            i++; 
+            }
+        }
+
+    void printValues() { 
+      for (typename SparseVectorExt<T>::InnerIterator it(*this); it; ++it) {
+        std::cout << "(" << it.index() << ") " << it.value() << std::endl;  
+        }  
+    } 
+
+    SparseVectorExt<T> subtract(SparseVectorExt const& other) { 
+        return ((SparseVectorExt<T>)((*this) - other)); 
+        }
+
 
     void slice(int* array1, int size1, SparseVectorExt<T> *mat) { 
         //Array indices must be sorted 
@@ -76,42 +106,18 @@ class SparseVectorExt:public SparseVector<T> {
             }    
         }
 
-    SparseVectorExt<T> abs() { 
-        SparseVector<T> A = this-> cwiseAbs();
-        return (SparseVectorExt<T>)A; 
-        }
-
     void scalarMultiply(double d) { 
         (*this)*=d; 
         }
 
+    T sumValues() { 
+       T result = 0; 
+      for (typename SparseVectorExt<T>::InnerIterator it(*this); it; ++it) {
+        result += it.value();  
+        }  
 
-    SparseVectorExt<T> negate() { 
-        SparseVector<T> A = -(*this);
-        return (SparseVectorExt<T>)A; 
-        }
-
-    SparseVectorExt<T> add(const SparseVectorExt& other) { 
-        return (SparseVectorExt<T>)((*this) + other); 
-        }
-
-    SparseVectorExt<T> subtract(SparseVectorExt const& other) { 
-        return ((SparseVectorExt<T>)((*this) - other)); 
-        }
-
-    void fill(T val) { 
-        for (int i=0; i<this->rows(); i++) 
-                this->coeffRef(i) = val;
-        }
-
-    T dot(const SparseVectorExt& other) { 
-        return (T)(this->hadamard(other)).sumValues(); 
-        }
-
-    SparseVectorExt<T> hadamard(SparseVectorExt const& other) { 
-        return (SparseVectorExt<T>)this->cwiseProduct(other); 
-        }
-
+        return result; 
+    } 
   };
 
 #endif

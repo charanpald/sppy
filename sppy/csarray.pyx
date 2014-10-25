@@ -337,26 +337,7 @@ class csarray(object):
         result._array = self._array.floor()
         return result   
 
-    @staticmethod 
-    def fromScipySparse(A, storagetype="col"): 
-        """
-        Take a scipy sparse matrix A and return a csarray, copying the data. 
-        
-        :param A: A scipy.sparse matrix 
-        
-        :param storagetype: The storage order of the elements of the output csarray.
-        :type storagetype: `str`
-        """
-        try: 
-            import scipy.sparse
-        except ImportError: 
-            raise         
-        
-        rowInds, colInds = A.nonzero() 
-        B = csarray(A.shape, dtype=A.dtype, storagetype=storagetype)
-        B.put(A.data, rowInds, colInds, init=True)
-        
-        return B 
+
 
     def getnnz(self): 
         """

@@ -4,7 +4,6 @@ expand classes written as:
     cdef template[T] class X: 
 where T is a template type. 
 """
-import string 
 import re 
 import logging 
 import sys 
@@ -29,15 +28,15 @@ def expandTemplate(inFileName, outFileName, templateList, force=False):
     classDefLines = []
     
     for line in lines: 
-        if string.find(line, "cdef template") == 0: 
+        if line.find("cdef template") == 0: 
             inClass = True
             words = line.split()
             #print(words)
-            className = string.strip(words[-1], ":")
+            className = words[-1].strip(":")
             
             templateParams = words[1:-2] 
-            templateParams[0] = string.replace(templateParams[0], "template[", "")
-            templateParams[-1] = string.replace(templateParams[-1], "]", "")
+            templateParams[0] = templateParams[0].replace("template[", "")
+            templateParams[-1] = templateParams[-1].replace("]", "")
             
             #Remove "," from params 
             for i in range(len(templateParams)):
@@ -45,7 +44,7 @@ def expandTemplate(inFileName, outFileName, templateList, force=False):
             
         elif not inClass: 
             outFile.write(line)
-        elif inClass and (len(string.split(line, "   ")[0]) == 0 or len(string.strip(line)) == 0): 
+        elif inClass and (len(line.split("   ")[0]) == 0 or len(line.strip()) == 0): 
             inClass = True
             classDefLines.append(line)       
         else: 
@@ -69,7 +68,7 @@ def expandTemplate(inFileName, outFileName, templateList, force=False):
     p = re.compile(findString)
     
     for templateTypes in templateList:
-        newClassName = className + "[" + string.join(templateTypes, ",") + "]"
+        newClassName = className + "[" + ",".join(templateTypes) + "]"
         newClassName = p.sub(replaceString, newClassName)
         newClassName = newClassName.replace(" ", "_")
         outFile.write("cdef class " + newClassName +  ":\n")
@@ -89,7 +88,7 @@ def expandTemplate(inFileName, outFileName, templateList, force=False):
             
             #Replace e.g. DataType with int 
             for i, templateType in enumerate(templateTypes): 
-                outLine = (string.replace(outLine, templateParams[i], templateType))            
+                outLine = (outLine.replace(templateParams[i], templateType))            
 
             # csarray[float,colMajor]  -> csarray_float_colMajor 
             reResults = p.search(outLine)

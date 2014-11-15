@@ -8,8 +8,6 @@ Welcome to SpPy's documentation!
 
 SpPy is a fast sparse matrix/array library written in Python and based on the C++ matrix library Eigen. A sparse matrix is one in which many of the elements are zeros, and by storing only non-zero elements, one can often make memory and computational savings over dense matrices which store all elements. The library supports (compressed) sparse matrices, sparse vectors and a number of linear algebra operations (such as the randomised SVD and matrix norm). Furthermore, SpPy has a similar interface to numpy so that existing code requires minimal change to work with sparse matrices and vectors.
 
-Update: this project was formerly called sparray. 
-
 
 Getting Started 
 ---------------

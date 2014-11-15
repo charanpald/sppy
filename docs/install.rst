@@ -4,7 +4,7 @@ Download for Windows, Linux or Mac OS using:
 
 -  `The Python Package Index (PyPI) <http://pypi.python.org/pypi/sppy/>`_ 
 
-To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_, `Eigen 3.2 or higher <http://eigen.tuxfamily.org/>`_ and `OpenMP <http://openmp.org/wp/>`_. If you are using Python 3.3 or higher you will need `distribute <https://pypi.python.org/pypi/distribute>`_. The code has been verified on Python 2.7.4, Numpy 1.8.1 and Eigen 3.2.1 on Ubuntu 14.04. The automatic testing routine requires Python 2.7 or later. The source code repository is available at `github <https://github.com/charanpald/SpPy>`_ for those that want the bleeding edge, or are interested in development (see also the `wiki <https://github.com/charanpald/sppy/wiki>`_ in the later case).  
+To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_, `Eigen 3.2 or higher <http://eigen.tuxfamily.org/>`_ and `OpenMP <http://openmp.org/wp/>`_. If you are using Python 3.3 or higher you will need `distribute <https://pypi.python.org/pypi/distribute>`_. The source code repository is available at `github <https://github.com/charanpald/SpPy>`_ for those that want the bleeding edge, or are interested in development (see also the `wiki <https://github.com/charanpald/sppy/wiki>`_ in the later case).  
 
 Installation 
 ============
@@ -14,7 +14,7 @@ Ensure that `pip <http://pypi.python.org/pypi/pip>`_ is installed, and then inst
 
 	pip install sppy
 
-If installing from source unzip the SpPy-x.y.z.tar.gz file and then run setup.py as follows: 
+If installing from source unzip the sppy-x.y.z.tar.gz file and then run setup.py as follows: 
 
 ::
 

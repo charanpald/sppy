@@ -1,6 +1,10 @@
-#from distutils.core import setup
 import numpy 
-from setuptools import setup
+try: 
+    #setuptools is useful since you can use the develop flag 
+    from setuptools import setup
+except ImportError: 
+    #For installing the package distutils is fine 
+    from distutils.core import setup
 from distutils.extension import Extension
 
 try:

@@ -75,7 +75,7 @@ def rsvd(A, k, p=10, q=2, omega=None):
         L = GeneralLinearOperator.asLinearOperator(A) 
     
     n = L.shape[1]
-    if omega == None: 
+    if omega is None: 
         omega = numpy.random.randn(n, k+p)
     else: 
         omega = numpy.c_[omega, numpy.random.randn(n, p+k - omega.shape[1])]

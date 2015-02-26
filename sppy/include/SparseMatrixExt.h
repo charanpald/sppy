@@ -45,6 +45,7 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         } 
 
     SparseMatrixExt<T, S> dot(const SparseMatrixExt& other) { 
+    SparseMatrixExt<T, S> dotCol(const SparseMatrixExt& other) { 
         return (SparseMatrixExt<T, S>)((*this) * other); 
         }
 
@@ -225,7 +226,10 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         return inds; 
 		}
 
-    
+    int getOrder() { 
+        return S;
+    }    
+
     void insertVal(int row, int col, T val) { 
         if (this->coeff(row, col) != val)
             this->coeffRef(row, col) = val;

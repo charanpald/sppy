@@ -1,4 +1,4 @@
-
+#include <typeinfo>
 #include <iostream>
 #include <eigen3/Eigen/Sparse>
 #include "../include/SparseMatrixExt.h"
@@ -274,8 +274,8 @@ void testBlock() {
 void testTranpose() { 
     const static int m = 4; 
     const static int n = 4;
-    SparseMatrixExt<double, Eigen::ColMajor> A(m, n);  
-    SparseMatrixExt<double, Eigen::RowMajor> B(2, 2);
+    SparseMatrixExt<double> A(m, n);  
+    SparseMatrixExt<double, 1> B(2, 2);
 
     A.coeffRef(0, 0) = 1;
     A.coeffRef(1, 2) = 2;
@@ -283,12 +283,12 @@ void testTranpose() {
     A.coeffRef(3, 3) = 5;
 
     //A.printValues();
-    B = A.transpose(); 
-    
+    B = (SparseMatrixExt<double, 1>)  A.trans(); 
+    std::cout << A.getOrder() << std::endl;
+    std::cout << B.getOrder() << std::endl;
     B.printValues();
-
-
 }
+
 
 int main()
 {

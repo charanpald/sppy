@@ -14,6 +14,7 @@ using namespace Eigen;
 
 template <class T, int S=Eigen::ColMajor>
 class SparseMatrixExt:public SparseMatrix<T, S> {
+
   public:
 	SparseMatrixExt<T, S>(): 
 		SparseMatrix<T, S>(){
@@ -45,7 +46,6 @@ class SparseMatrixExt:public SparseMatrix<T, S> {
         } 
 
     SparseMatrixExt<T, S> dot(const SparseMatrixExt& other) { 
-    SparseMatrixExt<T, S> dotCol(const SparseMatrixExt& other) { 
         return (SparseMatrixExt<T, S>)((*this) * other); 
         }
 

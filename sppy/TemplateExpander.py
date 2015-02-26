@@ -163,4 +163,4 @@ def expand_base(workdir='.', force=False):
     expandTemplate(inFileName, outFileName, paramDict, force)
     
 if __name__ == '__main__':
-    expand_base(force=True)
+    expand_base(force=False)

@@ -6,6 +6,7 @@ from apgl.util import *
 import sppy
 from sppy import csarray
 from apgl.util.PySparseUtils import PySparseUtils 
+from sandbox.util.ProfileUtils import ProfileUtils
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 numpy.random.seed(21)
@@ -178,6 +179,14 @@ class csarrayProfile():
         ProfileUtils.profile('A.pdot(W)', globals(), locals())
 
 
+    def profileDot2(self): 
+        density = 0.01
+        m = 10000
+        n = 10000
+        a_sppy = sppy.rand((m, n), density, storagetype='row')
+        a_sppy_T = sppy.csarray(a_sppy.T, storagetype="col")
+        ProfileUtils.profile('a_sppy.dot(a_sppy_T)', globals(), locals())
+
     def profileRowSlice(self): 
         numpy.random.seed(21)
         m = 100000
@@ -219,4 +228,5 @@ profiler = csarrayProfile()
 #profiler.profilePutSorted()
 #profiler.profileDot()
 #profiler.profileRowSlice()
-profiler.profilePut3()
+#profiler.profilePut3()
+profiler.profileDot2()

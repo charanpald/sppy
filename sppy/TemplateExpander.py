@@ -77,8 +77,9 @@ def replaceTemplateNotation(className, classDefLines):
         match = re.search(regExp, line)
         
         if match != None:
-            params = match.group(1).replace(" ", "")
-            replaceStr = className + "_" + params.replace(",", "_")
+            params = match.group(1)
+            suffix = re.sub(r",?\s", "_", params)
+            replaceStr = className + "_" + suffix
             classDefLines[i] = re.sub(regExp, replaceStr, line)
 
 def generateKwargs(paramDict): 

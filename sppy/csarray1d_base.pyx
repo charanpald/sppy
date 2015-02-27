@@ -1,4 +1,4 @@
-# cython: profile=False
+#cython: profile=False
 from cython.operator cimport dereference as deref, preincrement as inc 
 import numpy 
 cimport numpy

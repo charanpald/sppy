@@ -1,4 +1,4 @@
-# cython: profile=False
+#cython: profile=False
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: nonecheck=False

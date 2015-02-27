@@ -16,3 +16,4 @@ docs/_build/
 /sppy/test/SparseVectorExtTest
 /sppy/csarray1d_sub.pxd
 /sppy/csarray_sub.pxd
+/sppy/test/SparseMatrixExtTime

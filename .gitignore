@@ -21,3 +21,5 @@ docs/_build/
 /sppy/test/SparseVectorExtTest
 /sppy/test/SparseMatrixExtTime
 vendor/
+
+.venv/

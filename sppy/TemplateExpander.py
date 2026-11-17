@@ -45,9 +45,11 @@ def expand_template(source: Path, destination: Path, combinations) -> None:
         destination.write_text(generated, encoding="utf-8")
 
 
-def expand_base(workdir=".", force=False):
+def expand_base(workdir=".", force=False, output_dir=None):
     """Generate sources deterministically; retain force for old build callers."""
     directory = Path(workdir)
+    destination = Path(output_dir) if output_dir is not None else directory
+    destination.mkdir(parents=True, exist_ok=True)
     for stem, combinations in (
         ("csarray", tuple(product(SCALARS, STORAGE))),
         ("csarray1d", tuple((scalar,) for scalar in SCALARS)),
@@ -55,10 +57,15 @@ def expand_base(workdir=".", force=False):
         for suffix in ("pyx", "pxd"):
             expand_template(
                 directory / f"{stem}_base.{suffix}",
-                directory / f"{stem}_sub.{suffix}",
+                destination / f"{stem}_sub.{suffix}",
                 combinations,
             )
 
 
 if __name__ == "__main__":
-    expand_base(Path(__file__).parent)
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path)
+    arguments = parser.parse_args()
+    expand_base(Path(__file__).parent, output_dir=arguments.output_dir)

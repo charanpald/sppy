@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=77", "wheel", "Cython>=3.3.1,<4", "numpy>=2,<3"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.12", "Cython>=3.3.1,<4", "numpy>=2,<3"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "sppy"
@@ -15,13 +15,29 @@ dependencies = ["numpy>=2,<3"]
 [project.optional-dependencies]
 scipy = ["scipy>=1.14"]
 test = ["pytest>=8", "scipy>=1.14"]
-dev = ["pytest>=8", "scipy>=1.14", "build>=1", "ruff>=0.9", "clang-format>=18"]
 
-[tool.setuptools.packages.find]
-include = ["sppy*"]
+[dependency-groups]
+dev = ["pytest>=8", "scipy>=1.14", "ruff>=0.9", "clang-format>=18"]
 
-[tool.setuptools.package-data]
-sppy = ["*.pyx", "*.pxd", "include/*.h"]
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+wheel.packages = ["sppy"]
+wheel.exclude = ["**/__pycache__/**", "sppy/*_sub.pyx", "sppy/*_sub.pxd"]
+sdist.include = ["uv.lock", ".python-version", ".clang-format"]
+sdist.exclude = [".pytest_cache/**", ".ruff_cache/**", "**/*.so", "**/*.pyd", "**/__pycache__/**", "sppy/*_sub.pyx", "sppy/*_sub.pxd", "sppy/*.cpp", "vendor/**", "build/**", "dist/**", ".venv/**", "*.egg-info/**"]
+
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "CMakeLists.txt" },
+    { file = "cmake/**/*.cmake" },
+    { file = "sppy/*_base.pyx" },
+    { file = "sppy/*_base.pxd" },
+    { file = "sppy/include/*.h" },
+    { file = "sppy/TemplateExpander.py" },
+    { env = "EIGEN_INCLUDE_DIR" },
+    { env = "SPPY_OPENMP" },
+]
 
 [tool.pytest.ini_options]
 python_files = ["test_*.py", "*Test.py", "test*.py"]

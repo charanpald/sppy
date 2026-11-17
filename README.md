@@ -21,95 +21,105 @@ dense = np.asarray(a)
 See the [migration guide](docs/migration.rst) for Pythonic names, compatibility
 aliases, behavior changes, and NumPy compatibility limits.
 
-## Installation
+## Installation with uv
 
-Building from source requires:
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and a C++17
+compiler (GCC, Clang, or MSVC). Download and extract
+[Eigen 5.0.1 or newer](https://libeigen.gitlab.io/); it is a separate header-only
+C++ dependency. `EIGEN_INCLUDE_DIR` must point to the directory containing
+`Eigen/Core`.
 
-- Python 3.11 or newer.
-- A C++17 compiler, such as GCC, Clang, or MSVC.
-- Eigen 5.0.1 or newer, installed separately as C++ headers.
-
-Pip installs NumPy 2 and the required Cython 3.3.1+ build dependency automatically.
-SciPy is optional for sparse format conversion and Matrix Market IO. OpenMP is
-optional for parallel kernels.
-
-### Install from this checkout
-
-First, download and extract Eigen from the [Eigen website](https://libeigen.gitlab.io/).
-Use the directory containing `Eigen/Core` as `EIGEN_INCLUDE_DIR`.
-
-On Linux or macOS, run these commands from the repository root:
+From the repository root on Linux or macOS:
 
 ```sh
-python -m venv .venv
-. .venv/bin/activate
-python -m pip install --upgrade pip
 export EIGEN_INCLUDE_DIR=/path/to/eigen-5.0.1
+uv sync --locked
+uv run --locked python -c "import sppy; print(sppy.eye(3).toarray())"
+```
+
+`uv sync` creates `.venv`, installs this package in editable mode, and installs
+NumPy, SciPy, pytest, and the development tools at the versions in `uv.lock`.
+No manual environment activation is required. The `.python-version` file selects
+Python 3.14; uv can download it if needed. Python 3.11–3.14 are covered by CI;
+to use another supported interpreter, run `uv sync --locked --python 3.12`.
+
+On Windows, run from a PowerShell session with the MSVC C++ build tools available:
+
+```powershell
+$env:EIGEN_INCLUDE_DIR = "C:\path\to\eigen-5.0.1"
+uv sync --locked
+uv run --locked python -c "import sppy; print(sppy.eye(3).toarray())"
+```
+
+Installed Eigen CMake packages, standard system include directories, and
+`vendor/eigen` are also searched. macOS and Windows have not been validated
+locally.
+
+For a minimal environment without development dependencies:
+
+```sh
+uv sync --locked --no-dev
+uv run --locked --no-dev python -c "import sppy; print(sppy.__version__)"
+```
+
+Add `--extra scipy` to both commands when you need SciPy interoperability or
+Matrix Market IO. SciPy is included in the default development environment.
+Python build dependencies (Cython, NumPy headers, and scikit-build-core) are
+installed in an isolated build environment. CMake and Ninja are provisioned by
+the backend if suitable tools are not already installed.
+
+### Development and validation
+
+```sh
+uv run --locked pytest
+uv run --locked ruff check .
+uv run --locked ruff format --check sppy
+uv run --locked clang-format --dry-run --Werror sppy/include/*.h sppy/test/*.cpp
+uv build
+```
+
+The native extensions build with CMake and scikit-build-core, configured by
+`pyproject.toml` and `CMakeLists.txt`. Generated Cython sources stay in the build
+directory. `uv build` creates a source distribution and wheel in `dist/`.
+
+After changing dependency declarations, run `uv lock` and commit `uv.lock`.
+To rebuild native code or pick up externally updated Eigen headers, run:
+
+```sh
+uv sync --locked --reinstall-package sppy
+```
+
+To enable OpenMP, the compiler and linker must support it and its runtime must
+be installed. Set `SPPY_OPENMP=1` before syncing or building:
+
+```sh
+SPPY_OPENMP=1 uv sync --locked --reinstall-package sppy
+SPPY_OPENMP=1 uv build
+```
+
+Keep the variable set for subsequent `uv run` commands to retain that build
+configuration. Without OpenMP, parallel kernels run serially. The CMake option
+`-Ccmake.define.SPPY_OPENMP=ON` is also available with `uv build`.
+
+For a regular non-editable installation, pip remains supported:
+
+```sh
 python -m pip install .
 ```
 
-To include SciPy interoperability and Matrix Market IO, replace the last command
-with:
-
-```sh
-python -m pip install '.[scipy]'
-```
-
-On Windows, use a PowerShell session with the MSVC C++ build tools available:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-$env:EIGEN_INCLUDE_DIR = "C:\path\to\eigen-5.0.1"
-python -m pip install ".[scipy]"
-```
-
-Standard system Eigen include directories and `vendor/eigen` are also searched,
-so `EIGEN_INCLUDE_DIR` can be omitted when suitable headers are found there.
-The current build has been validated locally on Linux; macOS and Windows have
-not been validated locally.
-
-Verify the installation:
-
-```sh
-python -c "import sppy; print(sppy.__version__); print(sppy.eye(3).toarray())"
-```
-
-### Development installation
-
-With Eigen configured as above, install the editable package and development
-tools:
-
-```sh
-python -m pip install -e '.[dev]'
-python -m pytest
-ruff check .
-ruff format --check sppy setup.py
-clang-format --dry-run --Werror sppy/include/*.h sppy/test/*.cpp
-python -m build
-```
-
-To enable OpenMP, set `SPPY_OPENMP=1` before installing or building:
-
-```sh
-SPPY_OPENMP=1 python -m pip install .
-```
-
-The compiler and linker must support OpenMP and its runtime must be available.
-Without OpenMP, parallel kernels run serially. See the
-[installation guide](docs/install.rst) for additional build details.
+Set `EIGEN_INCLUDE_DIR` first as above. See the
+[installation guide](docs/install.rst) for more details.
 
 ## Changes in version 0.7.0
 
-- Modern isolated builds via `pyproject.toml` and setuptools.
+- Modern isolated builds via `pyproject.toml`, scikit-build-core, and CMake.
+- Reproducible development environments with uv and a committed lockfile.
 - Eigen 5, Cython 3, NumPy 2, and C++17 support.
 - A Pythonic `SparseArray` interface with compatibility aliases.
 - NumPy-style indexing, matrix multiplication, dtype conversion, and reductions.
 - Optional OpenMP, explicit Eigen discovery, and safer native operations.
 - SciPy Matrix Market IO, formatting checks, and pytest CI.
 
-## Changelog
 
 ### 0.6.7
 
@@ -157,5 +167,5 @@ Without OpenMP, parallel kernels run serially. See the
 * sppy.linalg.GeneralLinearOperator to work with some scipy.sparse.linalg functions
 * Optimisations to put method
 * Convert from scipy.sparse matrices (csarray.fromScipySparse)
-* Automatic generation of specialised templates in setup.py (credit: Björn Dahlgren)
+* Automatic generation of specialised templates during builds (credit: Björn Dahlgren)
 

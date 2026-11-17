@@ -1,43 +1,36 @@
-Downloading
-===========
-Download for Windows, Linux or Mac OS using: 
-
--  `The Python Package Index (PyPI) <http://pypi.python.org/pypi/sppy/>`_ 
-
-To use this library, you must have `Python <http://www.python.org/>`_, `NumPy <http://numpy.scipy.org/>`_, `Eigen 3.2 or higher <http://eigen.tuxfamily.org/>`_ and `OpenMP <http://openmp.org/wp/>`_. If you are using Python 3.3 or higher you will need `distribute <https://pypi.python.org/pypi/distribute>`_. The source code repository is available at `github <https://github.com/charanpald/SpPy>`_ for those that want the bleeding edge, or are interested in development (see also the `wiki <https://github.com/charanpald/sppy/wiki>`_ in the later case).  
-
-Installation 
+Installation
 ============
-Ensure that `pip <http://pypi.python.org/pypi/pip>`_ is installed, and then install SpPy in the following way: 
 
-::
+SpPy requires Python 3.11 or newer, NumPy 2, Cython 3.3.1 or newer,
+Eigen 5.0.1 or newer, and a compiler supporting C++17. Cython and NumPy
+build dependencies are installed automatically by pip in an isolated environment.
+Eigen is a header-only C++ dependency and must be installed separately.
+Download it from https://libeigen.gitlab.io/ and extract the release archive.
 
-	pip install sppy
+From a source checkout::
 
-If installing from source unzip the sppy-x.y.z.tar.gz file and then run setup.py as follows: 
+    EIGEN_INCLUDE_DIR=/path/to/eigen-5.0.1 python -m pip install .
 
-::
+The include directory must contain ``Eigen/Core``. Standard system Eigen
+locations and ``vendor/eigen`` are also searched. On Windows, set the same
+environment variable in PowerShell before running pip and use MSVC with C++17.
 
-	python setup.py install 
+For development::
 
-In order to test the library (recommended), using the following commands in python 
+    EIGEN_INCLUDE_DIR=/path/to/eigen-5.0.1 python -m pip install -e '.[dev]'
+    python -m pytest
+    ruff check .
+    ruff format --check sppy setup.py
+    EIGEN_INCLUDE_DIR=/path/to/eigen-5.0.1 python -m build
 
-::
+SciPy interoperability, Matrix Market IO, and the full test suite require SciPy.
+Install ``sppy[scipy]`` when using these features.
 
-	import sppy 
-	sppy.test() 
+OpenMP is optional. Set ``SPPY_OPENMP=1`` to enable it when the compiler and
+linker support the corresponding flags. Without it, ``pdot`` runs serially.
+On macOS the default build does not require an OpenMP runtime.
 
-and check that all tested pass. 
-
-Windows 
--------
-
-To install on Windows one needs to have Python installed along with Numpy and a C++ compiler such as `MinGW <http://www.mingw.org/>`_. Here we assume that you are using MinGW. Download Eigen and copy it to the MinGW include directory, which is typically C:\\MinGW32\\include. One can then build and install sppy using the following two commands: 
-
-::
-
-    python setup.py build --compiler=mingw32
-    python setup.py install 
-
-Note that sppy is currently untested on Windows. 
-
+The public ``csarray`` API is retained. Removed NumPy aliases such as
+``numpy.float`` and ``numpy.int`` must be replaced in user code with ``float``
+and ``int`` or explicit NumPy dtypes. Sparse dimensions and stored-entry
+indices are limited to signed 32-bit integers.

@@ -9,14 +9,17 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 numpy.random.seed(21)
 
 
-class ioProfile():
+class ioProfile:
     def __init__(self):
         numpy.random.seed(21)
-        
-    def profileMmread(self): 
-        matrixFileName = PathDefaults.getDataDir() + "reference/authorDocumentMatrix.mtx"
-            
-        ProfileUtils.profile('mmread(matrixFileName)', globals(), locals())
-        
-profiler = ioProfile() 
+
+    def profileMmread(self):
+        matrixFileName = (
+            PathDefaults.getDataDir() + "reference/authorDocumentMatrix.mtx"
+        )
+
+        ProfileUtils.profile("mmread(matrixFileName)", globals(), locals())
+
+
+profiler = ioProfile()
 profiler.profileMmread()

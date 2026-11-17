@@ -47,6 +47,7 @@ User guide:
    :maxdepth: 2
   
    install
+   migration
    sparseops 
    
 Reference guide:

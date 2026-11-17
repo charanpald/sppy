@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77", "wheel", "Cython>=3.3.1,<4", "numpy>=2,<3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sppy"
+version = "0.7.0"
+description = "NumPy-style sparse arrays backed by Eigen"
+readme = "README.md"
+requires-python = ">=3.11"
+license-files = ["LICENSE"]
+authors = [{name = "Charanpal Dhanjal", email = "charanpal@gmail.com"}]
+dependencies = ["numpy>=2,<3"]
+
+[project.optional-dependencies]
+scipy = ["scipy>=1.14"]
+test = ["pytest>=8", "scipy>=1.14"]
+dev = ["pytest>=8", "scipy>=1.14", "build>=1", "ruff>=0.9", "clang-format>=18"]
+
+[tool.setuptools.packages.find]
+include = ["sppy*"]
+
+[tool.setuptools.package-data]
+sppy = ["*.pyx", "*.pxd", "include/*.h"]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py", "*Test.py", "test*.py"]
+testpaths = ["sppy"]
+
+[tool.ruff]
+target-version = "py311"
+exclude = ["build", "sppy/profile", "sppy/*/profile"]
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]

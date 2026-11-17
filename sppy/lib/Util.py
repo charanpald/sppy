@@ -1,14 +1,15 @@
-
 import numpy
 
+
 class Util(object):
-    '''
+    """
     A class with some general useful function that don't fit in anywhere else.
-    '''
+    """
+
     def __init__(self):
         pass
 
-    @staticmethod 
+    @staticmethod
     def indSvd(P, s, Q, inds):
         """
         Take the output of numpy.linalg.svd and return the eigenvalue and vectors
@@ -26,5 +27,3 @@ class Util(object):
             Q = numpy.zeros((Q.shape[0], 0))
 
         return P, s, Q
-    
- 

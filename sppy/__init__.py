@@ -1,27 +1,27 @@
-from sppy.csarray import csarray
-from sppy.util import diag, eye, rand, ones, zeros
+"""NumPy-style sparse arrays backed by Eigen."""
+
+from sppy.csarray import SparseArray, csarray
+from sppy.util import asarray, diag, eye, rand, ones, zeros
 from sppy.version import __version__
 
+__all__ = [
+    "SparseArray",
+    "asarray",
+    "csarray",
+    "diag",
+    "eye",
+    "rand",
+    "ones",
+    "zeros",
+    "__version__",
+    "test",
+]
+
+
 def test():
-    """
-    A function which uses the unittest library to find all tests within sparray (those files
-    matching "*Test.py"), and run those tests. 
-    """
-    try:
-        import traceback
-        import sys
-        import os
-        import unittest
-        import logging
+    """Run the installed regression suite and return pytest's exit status."""
+    from pathlib import Path
 
-        logging.disable(logging.WARNING)
-        sourceDir = os.path.dirname(__file__) + os.sep
-        print("Running tests from " + sourceDir)
+    import pytest
 
-        overallTestSuite = unittest.TestSuite()
-        overallTestSuite.addTest(unittest.defaultTestLoader.discover(sourceDir, pattern='*Test.py', top_level_dir=sourceDir))
-        unittest.TextTestRunner(verbosity=1).run(overallTestSuite)
-    except ImportError as error:
-        traceback.print_exc(file=sys.stdout)
-
-
+    return pytest.main([str(Path(__file__).parent)])

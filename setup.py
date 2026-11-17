@@ -1,66 +1,81 @@
-import numpy 
-try: 
-    #setuptools is useful since you can use the develop flag 
-    from setuptools import setup
-except ImportError: 
-    #For installing the package distutils is fine 
-    from distutils.core import setup
-from distutils.extension import Extension
+"""Build the Eigen-backed Cython extensions."""
 
-try:
-    from Cython.Distutils import build_ext
-except ImportError:
-    use_cython = False
-else:
-    use_cython = True
+import importlib.util
+import os
+import re
+from pathlib import Path
+import sys
 
-def execfile3(file, globals=globals(), locals=locals()):
-    with open(file, "r") as fh:
-        exec(fh.read()+"\n", globals, locals)
+from Cython.Build import cythonize
+import numpy
+from setuptools import Extension, setup
 
-execfile3('sppy/version.py')
-
-cmdclass = { }
-
-if use_cython:
-    # Expand cdef template and generate _sub.pyx files:
-    import sys
-    sys.path.append('./sppy/') # Circumvents loading __init__.py before csarray module is built
-    import TemplateExpander
-    TemplateExpander.expand_base(workdir='./sppy')
-    ext_modules=[Extension("sppy.csarray", ["sppy/csarray.pyx"], language="c++", include_dirs=[numpy.get_include()], extra_compile_args=['-fopenmp'], extra_link_args=['-fopenmp'])] 
-    ext_modules.append(Extension("sppy.csarray_sub", ["sppy/csarray_sub.pyx"], language="c++", include_dirs=[numpy.get_include()], extra_compile_args=['-fopenmp'], extra_link_args=['-fopenmp'])) 
-    ext_modules.append(Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.pyx"], language="c++", include_dirs=[numpy.get_include()])) 
-    cmdclass.update({ 'build_ext': build_ext })
-    
-    for ext in ext_modules:
-        ext.cython_directives = {"embedsignature": True}
-else:
-    ext_modules = [Extension("sppy.csarray", [ "sppy/csarray.cpp" ], include_dirs=[numpy.get_include()]), Extension("sppy.csarray_sub", ["sppy/csarray_sub.cpp"], include_dirs=[numpy.get_include()]), Extension("sppy.csarray1d_sub", ["sppy/csarray1d_sub.cpp"], include_dirs=[numpy.get_include()])] 
-
-descriptionFile = open("Description.rst")
-description = "".join(descriptionFile.readlines()) 
-descriptionFile.close()
+ROOT = Path(__file__).parent.resolve()
 
 
-setup(name = 'sppy',
-      version = __version__,
-      author = 'Charanpal Dhanjal',
-      author_email = 'charanpal@gmail.com',
-      packages = ['sppy', 'sppy.test', 'sppy.linalg', 'sppy.linalg.test', "sppy.lib", 'sppy.lib.test', 'sppy.io'],
-      package_data = {'': ['*.pyx', '*.pxd']},
-      install_requires=['numpy>=1.5.0'],
-      url = 'http://packages.python.org/sppy/',
-      license = 'GNU Library or Lesser General Public License (LGPL)',
-      platforms=["OS Independent"],
-      keywords=['numpy', 'sparse matrix'],
-      long_description= description,
-      classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        ],
-      ext_modules=ext_modules, 
-      cmdclass=cmdclass)
+def eigen_include():
+    """Find Eigen without relying on a platform-specific include spelling."""
+    candidates = [
+        Path(os.environ.get("EIGEN_INCLUDE_DIR", ROOT / "vendor" / "eigen")),
+        Path(sys.prefix) / "include" / "eigen3",
+        Path("/usr/local/include/eigen3"),
+        Path("/usr/include/eigen3"),
+        Path("/opt/homebrew/include/eigen3"),
+    ]
+    for candidate in candidates:
+        if (candidate / "Eigen" / "Core").is_file():
+            version_header = candidate / "Eigen/Version"
+            if not version_header.is_file():
+                raise RuntimeError(
+                    f"Eigen >=5.0.1 required; older headers found at {candidate}"
+                )
+            macros = version_header.read_text(encoding="utf-8")
+
+            version = tuple(
+                int(re.search(rf"#define EIGEN_{part}_VERSION\s+(\d+)", macros)[1])
+                for part in ("MAJOR", "MINOR", "PATCH")
+            )
+            if version < (5, 0, 1):
+                raise RuntimeError(
+                    f"Eigen >=5.0.1 required; found {version} at {candidate}"
+                )
+            return str(candidate)
+    raise RuntimeError(
+        "Eigen >=5.0.1 headers not found. Set EIGEN_INCLUDE_DIR to the directory containing Eigen/Core."
+    )
+
+
+spec = importlib.util.spec_from_file_location(
+    "template_expander", ROOT / "sppy/TemplateExpander.py"
+)
+expander = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(expander)
+expander.expand_base(str(ROOT / "sppy"), force=True)
+
+compile_args = ["/std:c++17"] if sys.platform == "win32" else ["-std=c++17"]
+link_args = []
+if os.environ.get("SPPY_OPENMP") == "1":
+    compile_args += ["/openmp"] if sys.platform == "win32" else ["-fopenmp"]
+    if sys.platform != "win32":
+        link_args.append("-fopenmp")
+
+include_dirs = [numpy.get_include(), eigen_include()]
+extensions = [
+    Extension(
+        f"sppy.{name}",
+        [f"sppy/{name}.pyx"],
+        language="c++",
+        include_dirs=include_dirs,
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
+        extra_compile_args=compile_args,
+        extra_link_args=link_args,
+    )
+    for name in ("csarray_sub", "csarray1d_sub")
+]
+setup(
+    ext_modules=cythonize(
+        extensions,
+        compiler_directives={"language_level": 3, "embedsignature": True},
+        build_dir="build/cython",
+    )
+)

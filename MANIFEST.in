@@ -1,4 +1,4 @@
-include README.rst 
+include README.md
 include Description.rst 
 include LICENSE
 recursive-include sppy *.py
@@ -6,3 +6,6 @@ global-include *.pyx
 global-include *.pxd 
 global-include *.cpp 
 global-include *.h
+
+recursive-include docs *.rst
+include .clang-format

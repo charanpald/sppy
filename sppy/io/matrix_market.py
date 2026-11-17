@@ -1,106 +1,39 @@
+"""Matrix Market interoperability using SciPy's maintained reader and writer."""
 
-import numpy 
-import string
+import numpy as np
+
 from sppy import csarray
-"""
-Some functions to read and write matrix market files. 
-"""
 
 
-def mmwrite(filename, A, comment='', field=None, precision=None): 
+def mmwrite(filename, A, comment="", field=None, precision=None):
+    """Write a two-dimensional sparse array to a Matrix Market file.
+
+    SciPy is required. Paths and open binary streams are accepted.
     """
-    Write a csarray object in matrix market format. 
-    
-    :param filename: The filename of the matrix market file. 
-    
-    :param A: The csarray object to write 
-    
-    :param comment: A comment to add to the header of the file. 
-    
-    :param field: The type of values to write out either "integer" or "real". If None the type is inferred from A. 
-    
-    :param precision: If A stores real numbers, this is the precision to use when writing to file. 
-    """
-    
-    if field == None: 
-        if A.dtype.kind == "i": 
-            field = "integer"
-        else: 
-            field = "real"
-    
-    if field == "real": 
-        if precision != None: 
-            fmtStr = "%." + str(precision) + "f"
-        else: 
-            fmtStr = "%f"
-    else: 
-        fmtStr = "%d"
-    
-    fileObj = open(filename, "w")
-    
-    fileObj.write("%%MatrixMarket matrix coordinate " + field + " general\n")
-    fileObj.write("%%" + comment + "\n")
-    fileObj.write("%%\n")
-    
-    fileObj.write(str(A.shape[0]) + " " + str(A.shape[1]) + " " + str(A.nnz) + "\n")
-    
-    rowInds, colInds = A.nonzero()
-    vals = A.values()
-    
-    for i, val in enumerate(vals):
-        valStr = fmtStr % val
-        fileObj.write(str(rowInds[i]+1) + " " + str(colInds[i]+1) + " " + valStr + "\n")
-    
-    fileObj.close()
-        
-def mmread(filename, storagetype="col"): 
-    """
-    Read from a matrix market file. Note that we do not allow comments (%) in the 
-    body of the elements, only in the header lines. 
-    
-    :param filename: The filename of the matrix market file. 
-    
-    :param storagetype: The desired storage type ("row" or "col") of the output matrix. 
-    """
-    fileObj = open(filename, "r")
-    
-    line = fileObj.readline()
-    line.strip().strip("#")
-    
-    vals = line.split()
-    
-    if vals[3] == "integer": 
-        dtype = numpy.int 
-    elif vals[3] == "real": 
-        dtype = numpy.float 
-    else:
-        raise ValueError("Invalid data type: " + vals[3])
-    
-    line = fileObj.readline()
-    while string.find(line, "%") == 0: 
-        line = fileObj.readline()    
-    
-    vals = line.split()
-    m = int(vals[0])
-    n = int(vals[1])
-    nnz = int(vals[2])
-    
-    rowInds = numpy.zeros(nnz, numpy.int32)
-    colInds = numpy.zeros(nnz, numpy.int32)
-    values = numpy.zeros(nnz, dtype)
-    
-    #This reads the rest of the file reasonably quickly 
-    Z = numpy.fromfile(fileObj, sep=" ")
-    Z = Z.reshape((nnz, 3))
+    from scipy.io import mmwrite as scipy_mmwrite
 
-    rowInds = numpy.array(Z[:, 0], numpy.int32)-1 
-    colInds = numpy.array(Z[:, 1], numpy.int32)-1 
-    values = numpy.ascontiguousarray(Z[:, 2], dtype=dtype)
+    if A.ndim != 2:
+        raise ValueError("Matrix Market requires a two-dimensional array")
+    scipy_mmwrite(
+        filename,
+        A.toScipyCsc(),
+        comment=comment,
+        field=field,
+        precision=precision,
+        symmetry="general",
+    )
 
-    fileObj.close()
 
-    A = csarray((m, n), dtype=dtype, storagetype=storagetype)
-    A.reserve(nnz)
-    A.put(values, rowInds, colInds, init=True)
-    
-    return A     
+def mmread(filename, storagetype="col"):
+    """Read a Matrix Market file into a sparse array.
+
+    SciPy is required. Symmetric files, comments, and compressed files are
+    handled by SciPy. Only real and integer values are supported by csarray.
+    """
+    from scipy.io import mmread as scipy_mmread
+
+    matrix = scipy_mmread(filename, spmatrix=False)
+    if matrix.dtype.kind not in "iuf":
+        raise ValueError(f"Unsupported Matrix Market dtype: {matrix.dtype}")
+    dtype = np.int64 if matrix.dtype.kind in "iu" else np.float64
+    return csarray(matrix, dtype=dtype, storagetype=storagetype)

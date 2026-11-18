@@ -248,7 +248,7 @@ cdef template[DataType, StorageType] class csarray:
 
     def biCGSTAB(self, numpy.ndarray[DataType, ndim=1, mode="c"] v, int maxIter=1000, double tol=10**-6):
         cdef int outputCode = 0
-        cdef numpy.ndarray[DataType, ndim=1, mode="c"] result = numpy.zeros(v.shape[0])
+        cdef numpy.ndarray[DataType, ndim=1, mode="c"] result = numpy.zeros(v.shape[0], dtype=self.dtype())
 
         if self.shape[0] != self.shape[1]:
             raise ValueError("Can only operate on square matrices")
@@ -526,6 +526,9 @@ cdef template[DataType, StorageType] class csarray:
         """
         if self.shape[1] != v.shape[0]:
             raise ValueError("Cannot multiply using shapes " + str(self.shape) + " and " + str(v.shape[0]))
+
+        if self.storage != "rowMajor":
+            return self.dotNumpy1d(v)
 
         cdef numpy.ndarray[double, ndim=1, mode="c"] result = numpy.zeros(self.shape[0])
         cdef int numCpus = multiprocessing.cpu_count()

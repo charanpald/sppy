@@ -53,8 +53,8 @@ With the default development environment::
 
     uv run --locked pytest
     uv run --locked ruff check .
-    uv run --locked ruff format --check sppy
-    uv run --locked clang-format --dry-run --Werror sppy/include/*.h sppy/test/*.cpp
+    uv run --locked ruff format --check sppy tests profiling
+    uv run --locked clang-format --dry-run --Werror sppy/include/*.h tests/native/*.cpp profiling/native/*.cpp
     uv build
 
 ``uv build`` writes the source distribution and wheel to ``dist/``. Native
@@ -87,3 +87,27 @@ installation remains supported::
     EIGEN_INCLUDE_DIR=/path/to/eigen-5.0.1 python -m pip install .
 
 Use ``'.[scipy]'`` instead of ``.`` to include SciPy support.
+
+Tests and profiling layout
+--------------------------
+
+The pytest suite lives in the repository's top-level ``tests/`` directory.
+Tests use Arrange–Act–Assert sections, parametrized cases, isolated temporary
+files, and local random generators. Run a focused subset with, for example,
+``uv run pytest tests/test_numpy_compatibility.py``. Native C++ tests are run by
+pytest when a GCC/Clang compiler and Eigen headers are available; select them
+with ``uv run pytest -m native``. Missing native prerequisites are reported as
+skips.
+
+``sppy.test()`` locates checkout tests and does not search installed packages.
+Runtime wheels do not include tests or profiling tools; source archives do.
+
+Opt-in profiling tools are in ``profiling/``. For example::
+
+    uv run python -m profiling.sparse_array --operation dot --size 1000
+    uv run python -m profiling.linear_operator --size 1000 --columns 8
+    uv run python -m profiling.matrix_market --size 1000
+    uv run python -m profiling.benchmark --operation dot --size 1000
+
+See ``profiling/README.md`` for workload settings, profile files, and benchmark
+output. Importing these modules performs no profiling or input generation.

@@ -73,8 +73,8 @@ the backend if suitable tools are not already installed.
 ```sh
 uv run --locked pytest
 uv run --locked ruff check .
-uv run --locked ruff format --check sppy
-uv run --locked clang-format --dry-run --Werror sppy/include/*.h sppy/test/*.cpp
+uv run --locked ruff format --check sppy tests profiling
+uv run --locked clang-format --dry-run --Werror sppy/include/*.h tests/native/*.cpp profiling/native/*.cpp
 uv build
 ```
 
@@ -109,6 +109,37 @@ python -m pip install .
 
 Set `EIGEN_INCLUDE_DIR` first as above. See the
 [installation guide](docs/install.rst) for more details.
+
+## Tests and profiling
+
+The pytest suite is in `tests/`, with focused, parametrized tests following
+Arrange–Act–Assert (AAA). Tests use local random generators and temporary files;
+they do not change application logging or NumPy print settings. Native C++
+contracts in `tests/native/` are compiled and run by pytest when GCC/Clang and
+Eigen headers are available; otherwise those tests are reported as skipped.
+
+```sh
+uv run --locked pytest
+uv run --locked pytest tests/test_numpy_compatibility.py
+uv run --locked pytest -m native
+```
+
+`sppy.test()` remains a convenience wrapper for running checkout tests. Tests
+and profiling tools ship in source distributions, not runtime wheels.
+
+Opt-in profiling commands live in `profiling/` and run only when invoked:
+
+```sh
+uv run python -m profiling.sparse_array --operation dot --size 1000 --entries 5000
+uv run python -m profiling.linear_operator --size 1000 --columns 8
+uv run python -m profiling.matrix_market --size 1000 --entries 5000
+uv run python -m profiling.benchmark --operation dot --size 1000
+```
+
+See [profiling/README.md](profiling/README.md) for saved profiles, JSON timings,
+and the native Eigen benchmark. The scripts use standard-library profiling,
+configurable workloads, and deterministic inputs without external research
+project dependencies or import-time execution.
 
 ## Changes in version 0.7.0
 

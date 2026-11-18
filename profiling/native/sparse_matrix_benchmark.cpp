@@ -2,7 +2,9 @@
 #include <Eigen/Sparse>
 #include <algorithm>
 #include <cstdlib>
+#include <functional>
 #include <iostream>
+#include <random>
 #include <time.h>
 #include <vector>
 

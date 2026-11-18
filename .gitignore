@@ -17,9 +17,6 @@ sppy/csarray1d_sub.pxd
 docs/_build/
 /MANIFEST
 /sppy/*.cpp
-/sppy/test/SparseMatrixExtTest
-/sppy/test/SparseVectorExtTest
-/sppy/test/SparseMatrixExtTime
 vendor/
 
 .venv/

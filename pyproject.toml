@@ -40,12 +40,13 @@ cache-keys = [
 ]
 
 [tool.pytest.ini_options]
-python_files = ["test_*.py", "*Test.py", "test*.py"]
-testpaths = ["sppy"]
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+markers = ["native: C++ header contracts compiled with GCC or Clang"]
 
 [tool.ruff]
 target-version = "py311"
-exclude = ["build", "sppy/profile", "sppy/*/profile"]
+exclude = ["build"]
 
 [tool.ruff.lint]
 select = ["E9", "F63", "F7", "F82"]

@@ -69,7 +69,7 @@ uv run --locked --only-group docs mkdocs build --strict
 uv run --locked pytest
 uv run --locked ruff check .
 uv run --locked ruff format --check sppy tests profiling
-uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp profiling/native/*.cpp
+uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
 uv build
 ```
 

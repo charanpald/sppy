@@ -38,7 +38,7 @@ With the default development environment:
 uv run --locked pytest
 uv run --locked ruff check .
 uv run --locked ruff format --check sppy tests profiling
-uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp profiling/native/*.cpp
+uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
 uv build
 ```
 
@@ -82,10 +82,8 @@ Runtime wheels do not include tests or profiling tools; source archives do.
 Opt-in profiling tools are in `profiling/`. For example:
 
 ```sh
-uv run python -m profiling.sparse_array --operation dot --size 1000
-uv run python -m profiling.linear_operator --size 1000 --columns 8
-uv run python -m profiling.matrix_market --size 1000
-uv run python -m profiling.benchmark --operation dot --size 1000
+uv run --locked python -m profiling.benchmark --operations all --size 1000 --output /tmp/sppy-benchmark.json
+uv run --locked python -m profiling.profile --operation matmat --backend sppy_C --output /tmp/sppy.prof
 ```
 
 See the [profiling guide](https://github.com/charanpald/sppy/blob/master/profiling/README.md) for workload settings, profile files, and benchmark

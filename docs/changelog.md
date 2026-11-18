@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0
+
+- Replace generated Cython classes with typed pybind11/Eigen bindings.
+- Add complex64/128 arrays, adjoint products, and complex Matrix Market IO.
+- Add Eigen LLT/LDLT, LU, and QR sparse factorizations with symbolic reuse.
+- Add CG, BiCGSTAB, and least-squares CG with diagnostics and built-in preconditioners.
+- Add AMD/COLAMD/natural orderings, triangular solves, and factor access.
+- Add triplet/compressed assembly, storage controls, scaling, and sparse coefficient operations.
+- Remove compatibility aliases and legacy helpers; default consistently to C order.
+- Make stored_indices/values distinct from nonzero-value coordinates.
+
+See [migration](migration.md) and [Eigen coverage](eigen-coverage.md).
+
 ## 0.7.0
 
 - Modern isolated builds via `pyproject.toml`, scikit-build-core, and CMake.

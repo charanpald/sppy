@@ -1,92 +1,74 @@
-# Migrating to 0.7
+# Migrating to 1.0
 
-The Python interface is ordinary, formatted Python; typed Cython 3 extensions
-implement the Eigen kernels. SpPy supports one- and two-dimensional arrays with
-signed integer (8/16/32/64 bit) or float32/float64 values. Complex, unsigned, and
-boolean storage are not yet supported.
+Version 1.0 is a breaking release. The generated Cython backends have been
+replaced by a typed pybind11/Eigen implementation, including native complex
+storage, direct factorizations, iterative solvers, preconditioners, and orderings.
+Rebuild the package after pulling these changes; old binary extensions are not
+compatible with the new interface.
 
-## NumPy-style usage
-
-```python
-import numpy as np
-import sppy
-
-a = sppy.asarray([[0., 2.], [3., 0.]], order="C")
-b = sppy.eye(2, dtype=np.float64)
-product = a @ b           # SparseArray
-elementwise = a * b      # SparseArray
-vector = a @ np.ones(2)  # ndarray
-row = a[0]               # one-dimensional SparseArray
-reversed_rows = a[::-1]
-means = np.mean(a, axis=0, keepdims=True)
-single = a.astype(np.float32)
-dense = np.asarray(a)    # explicitly allocates dense storage
-scipy_csr = a.to_scipy_csr()
+```sh
+uv sync --locked --reinstall-package sppy
 ```
 
-`asarray` infers the input dtype. Compatible sparse input can be reused with
-`copy=False`; conversion from dense input always needs a copy. `zeros`,
-`ones`, and `eye` default to C (row) order, as NumPy does. The legacy
-`SparseArray(shape)`/`csarray(shape)` constructor retains column order unless
-`order` is supplied. A tuple passed to the constructor specifies a shape;
-use `asarray` to interpret a tuple as data.
+## Removed compatibility APIs
 
-## Renamed APIs
-
-| Preferred | Compatibility alias |
+| Removed | Use in 1.0 |
 | --- | --- |
-| `SparseArray` | `csarray` |
-| `to_scipy_csr` | `toScipyCsr` |
-| `to_scipy_csc` | `toScipyCsc` |
-| `row_indices` | `rowInds` |
-| `column_indices` | `colInds` |
-| `subarray` | `subArray` |
-| `nonzero_rows_list` | `nonzeroRowsList` |
-| `nonzero_rows_ptr` | `nonzeroRowsPtr` |
-| `parallel_dot` | `pdot` |
-| `multiply` | `hadamard` |
-| `diagonal` | `diag` (main diagonal) |
-| `linalg.bicgstab` | `linalg.biCGSTAB` |
-| `as_linear_operator` | `asLinearOperator` |
-| `as_linear_operator_sum` | `asLinearOperatorSum` |
+| `sppy.csarray`, `sppy.csarray` module | `sppy.SparseArray`, `sppy.sparse_array` module |
+| `storagetype`, `storage_type`, `storageType` | `order="C"` for rows, `order="F"` for columns |
+| `toScipyCsr`, `toScipyCsc` | `to_scipy_csr`, `to_scipy_csc` |
+| `rowInds`, `colInds` | `row_indices`, `column_indices` |
+| `subArray` | `subarray` |
+| `nonzeroRowsList`, `nonzeroRowsPtr` | `nonzero_rows_list`, `nonzero_rows_ptr` |
+| `pdot`, `hadamard`, `getnnz`, `diag` method | `parallel_dot`, `multiply`, `nnz`, `diagonal` |
+| `biCGSTAB(maxIter=..., tol=...)` | `bicgstab(maxiter=..., rtol=...)` |
+| `asLinearOperator`, `asLinearOperatorSum` | `as_linear_operator`, `as_linear_operator_sum` |
+| `sppy.linalg.GeneralLinearOperator` module | Import the class from `sppy.linalg` |
+| `eye(n, dtype)` positional shorthand | `eye(n, dtype=dtype)` |
+| `prune(eps, precision)` | `prune(tolerance=...)`, using an absolute magnitude threshold |
+| `sppy.lib.Parameter`, `sppy.lib.Util` | Ordinary Python/NumPy validation and operations |
 
-The linear operator implementation lives in
-`sppy.linalg.general_linear_operator`; the old module remains importable.
-`bicgstab` accepts `maxiter` and `rtol`; its legacy wrapper retains
-`maxIter` and `tol`. Solver status codes retain SpPy's convention, documented
-in the function, rather than SciPy's codes.
+All factories and the direct constructor now default to **C order**.
+`mmread` takes keyword-only `order="C"`, replacing `storagetype`.
+Tuple constructor input still denotes a shape; `asarray` treats a tuple as data.
+Old pickle state dictionaries are not supported; export arrays before upgrading.
 
-## Intentional behavior changes
+## Stored entries versus nonzero values
 
-* Integer indexing drops an axis. Negative assignments, reversed/stepped
-  slices, per-axis boolean masks, and broadcasting of paired indices work like
-  NumPy. Sparse slices are independent copies, including basic slices.
-* `*` is elementwise and `@` is matrix multiplication. Sparse addition,
-  subtraction, and elementwise multiplication require matching shapes; general
-  arithmetic broadcasting is not implemented. Nonzero scalar addition raises
-  `NotImplementedError` because it would fill implicit zeros.
-* Reductions accept `axis`, `out`, and `keepdims`. Sum, mean, variance,
-  and standard deviation also support `dtype`; variance and standard deviation
-  accept `ddof`. Reduction results are dense scalars or arrays. Empty min/max
-  retain the historical NaN result.
-* Dense conversion preserves dtype, including exact int64 values. Arithmetic
-  promotes dtypes, and sum promotes small integers as NumPy does.
-* `clip` clamps values rather than discarding out-of-range entries.
-  `ceil` and `floor` follow NumPy's output dtype rather than always int64.
-  `cos` includes implicit zeros, so its result can store every element.
-* `eliminate_zeros` removes only exact stored zeros. `prune` remains the
-  tolerance-based operation. `nnz` counts stored entries; `count_nonzero`
-  excludes stored zeros.
-* SciPy is optional for conversion and Matrix Market IO. The maintained SciPy
-  reader handles coordinate formats, comments, symmetry, and compressed files.
+`nnz` counts stored entries, including explicit zeros. `nonzero()` now excludes
+stored zeros. Code that pairs coordinates with `values()` must use
+`stored_indices()` instead:
 
-## Limits
+```python
+import sppy
 
-There is no complete implementation of NumPy's array-function/ufunc dispatch.
-`np.asarray` explicitly densifies; NumPy operations that coerce their arguments
-may also densify. Prefer sparse methods and operators for large arrays. New-axis
-indexing, whole-array boolean masks, more than two dimensions, and the full set
-of NumPy reduction keyword arguments are not supported. Stored-entry indices
-and individual dimensions use signed 32-bit limits. OpenMP is optional and its
-absence makes parallel kernels serial. CI covers Linux; macOS and Windows have
-not been validated locally.
+a = sppy.eye(3)
+rows, columns = a.stored_indices()
+values = a.values()
+assert len(values) == len(rows) == len(columns) == a.nnz
+```
+
+`compressed_arrays()` returns `(values, indices, indptr)` in the selected
+CSR/CSC storage order. Each array is an independent copy.
+
+## Solvers and complex values
+
+The iterative functions return `IterativeResult`. Existing tuple unpacking
+`x, status = bicgstab(a, b)` still works. The result also exposes `iterations`
+and `error`. Status values use `ComputationInfo`: success=0, numerical issue=1,
+no convergence=2, invalid input=3. These are Eigen's values, not SciPy's codes.
+
+Use reusable `SparseLU`, `SparseQR`, `SimplicialLLT`, or `SimplicialLDLT`
+factors for repeated solves. Direct numerical failures raise
+`numpy.linalg.LinAlgError`. Pattern reuse requires the same shape, dtype,
+and stored coordinates. An unsuccessful refactorization invalidates solving.
+
+`T` is a transpose; `H` is a conjugate transpose. Linear operators now use the
+adjoint for reverse products. Randomized SVD reconstructs complex inputs as
+`(u * s) @ v.conj().T`; it uses a local generator instead of global RNG state.
+`rand` also uses a local generator; pass `rng=` to reproduce a workload.
+
+NumPy compatibility remains partial: slicing returns copies, arithmetic requires
+matching shapes, and NumPy coercion can allocate a dense array. See
+[interoperability](interoperability.md) and the explicit
+[Eigen coverage boundaries](eigen-coverage.md).

@@ -1,8 +1,8 @@
 # Installation
 
 SpPy requires Python 3.11 or newer, Eigen 5.0.1 or newer, and a C++17 compiler.
-The native build uses scikit-build-core and CMake, with Cython 3.3.1+ and NumPy 2
-headers installed automatically in an isolated build environment. CMake and Ninja
+The native build uses scikit-build-core and CMake, with pybind11 3
+installed automatically in an isolated build environment. CMake and Ninja
 are provisioned by the backend when suitable tools are not installed.
 
 Install uv using https://docs.astral.sh/uv/getting-started/installation/.

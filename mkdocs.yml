@@ -16,7 +16,8 @@ nav:
   - User guide:
       - Sparse arrays: sparseops.md
       - NumPy and SciPy: interoperability.md
-      - Migration to 0.7: migration.md
+      - Migration to 1.0: migration.md
+  - Eigen coverage: eigen-coverage.md
   - API reference:
       - Arrays and constructors: csarray.md
       - Linear algebra: linalg.md

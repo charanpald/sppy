@@ -24,7 +24,7 @@ def main(argv=None):
             path = Path(directory) / "matrix.mtx"
             mmwrite(path, matrix)
         run_profile(
-            lambda: mmread(path, storagetype="row" if options.order == "C" else "col"),
+            lambda: mmread(path, order=options.order),
             options.repeats,
             options.output,
         )

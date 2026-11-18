@@ -1,60 +1,26 @@
+"""Sparse norms and randomized singular-value decomposition."""
+
 import gc
 import numpy
 from sppy.linalg.general_linear_operator import GeneralLinearOperator
-from sppy.lib.Parameter import Parameter
-import sppy.csarray as csarray
 
 
-def biCGSTAB(A, b, maxIter=1000, tol=10**-6):
-    """
-    Solve the linear system of equations given by A x = b where A is a csarray
-    and b is a numpy array of the same dtype. Uses the Iterative stabilized
-    bi-conjugate gradient method.
-
-    :param A: A csarray object of size n x n
-
-    :param b: A numpy array of length n of the same dtype as A.
-
-    :param maxIter: The maximum number of iteartions of the method
-
-    :param tol: The error tolerance
-
-    :return x: A numpy array corresponding to the solution vector.
-
-    :return i: The output code: 0 = success, 1 = numerical Issue, 2 = no convergence, 3 = invalid input
-    """
-    return A._array.biCGSTAB(b, maxIter, tol)
+def norm(a, ord=None):
+    """Vector p-norm or matrix Frobenius/1/infinity norm, without densifying."""
+    if a.ndim == 1:
+        if isinstance(ord, (int, float)) and ord < 0 and a.count_nonzero() < a.size:
+            return 0.0
+        return numpy.linalg.norm(a.values(), ord=ord)
+    if ord in (None, "fro"):
+        return a._array.norm()
+    if ord == 1:
+        return abs(a).sum(axis=0).max(initial=0)
+    if ord == numpy.inf:
+        return abs(a).sum(axis=1).max(initial=0)
+    raise ValueError("Supported matrix norms are fro, 1, and infinity")
 
 
-def bicgstab(a, b, *, maxiter=1000, rtol=1e-6):
-    """Solve a floating-point sparse linear system; return (solution, status).
-
-    Status codes retain SpPy's convention: 0 success, 1 numerical issue,
-    2 no convergence, 3 invalid input.
-    """
-    if a.dtype.kind != "f":
-        raise ValueError("bicgstab requires floating-point values")
-    if maxiter <= 0 or rtol <= 0:
-        raise ValueError("maxiter and rtol must be positive")
-    b = numpy.ascontiguousarray(b, dtype=a.dtype)
-    return a._array.biCGSTAB(b, maxiter, rtol)
-
-
-def norm(A, ord=None):
-    """
-    This function returns the Frobenius norm of the input A, which is defined as
-    sqrt(sum A_ij^2).
-
-    :param A: A csarray object.
-
-    :param ord: The type of norm required, currently ignored.
-
-    :return: The Frobenius norm of A.
-    """
-    return A._array.norm()
-
-
-def rsvd(A, k, p=10, q=2, omega=None):
+def rsvd(A, k, p=10, q=2, omega=None, *, rng=None):
     """
     Compute the randomised SVD using the algorithm on page 9 of Halko et al.,
     Finding Structure with randomness: stochastic algorithms for constructing
@@ -63,7 +29,7 @@ def rsvd(A, k, p=10, q=2, omega=None):
     Finds the partial SVD of a sparse or dense matrix A, resolving the largest k
     singular vectors/values, using exponent q and k+p projections. Returns the
     left and right singular vectors, and the singular values. The resulting matrix
-    can be approximated using A ~ U s V.T. To improve the approximation quality
+    can be approximated using A ~ (U * s) @ V.conj().T. To improve the approximation quality
     for a fixed k, increase p or q.
 
     :param A: A sparse or dense matrix or GeneralLinearOperator
@@ -76,15 +42,17 @@ def rsvd(A, k, p=10, q=2, omega=None):
 
     :param omega: An initial matrix to perform random projections onto with at least k columns
 
+    :param rng: Optional NumPy Generator or seed for reproducible projections.
+
     :return U: The left singular vectors
 
     :return s: The singular values
 
     :return V: The right singular vectors
     """
-    Parameter.checkInt(k, 1, float("inf"))
-    Parameter.checkInt(p, 0, float("inf"))
-    Parameter.checkInt(q, 0, float("inf"))
+    for name, value, minimum in (("k", k, 1), ("p", p, 0), ("q", q, 0)):
+        if not isinstance(value, (int, numpy.integer)) or value < minimum:
+            raise ValueError(f"Invalid {name}")
 
     if isinstance(A, GeneralLinearOperator):
         L = A
@@ -92,10 +60,21 @@ def rsvd(A, k, p=10, q=2, omega=None):
         L = GeneralLinearOperator.as_linear_operator(A)
 
     n = L.shape[1]
+    if k > min(L.shape):
+        raise ValueError("k exceeds matrix dimensions")
+    rng = numpy.random.default_rng(rng)
     if omega is None:
-        omega = numpy.random.randn(n, k + p)
+        omega = rng.standard_normal((n, min(n, k + p)))
     else:
-        omega = numpy.c_[omega, numpy.random.randn(n, p + k - omega.shape[1])]
+        omega = numpy.asarray(omega)
+        if (
+            omega.ndim != 2
+            or omega.shape[0] != n
+            or not k <= omega.shape[1] <= min(n, p + k)
+        ):
+            raise ValueError("Invalid projection matrix shape")
+        missing = min(n, p + k) - omega.shape[1]
+        omega = numpy.c_[omega, rng.standard_normal((n, missing))]
 
     Y = L.matmat(omega)
     Q, R = numpy.linalg.qr(Y)
@@ -114,10 +93,10 @@ def rsvd(A, k, p=10, q=2, omega=None):
     del R
     gc.collect()
 
-    B = L.rmatmat(Q).T
+    B = L.rmatmat(Q).conj().T
     U, s, V = numpy.linalg.svd(B, full_matrices=False)
     del B
-    V = V.T
+    V = V.conj().T
     U = Q.dot(U)
 
     U = U[:, 0:k]

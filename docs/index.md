@@ -20,20 +20,22 @@ dense = np.asarray(a)             # Explicitly allocate a dense array
 
 Start with [installation](install.md) and the [quick start](quickstart.md),
 then explore the [sparse array guide](sparseops.md). Existing users should read
-[the 0.7 migration guide](migration.md).
+[the 1.0 migration guide](migration.md).
 
 ## What to expect
 
 - Signed integer storage: `int8`, `int16`, `int32`, and `int64`.
-- Floating-point storage: `float32` and `float64`.
+- Floating-point storage: `float32` and `float64`; complex: `complex64` and `complex128`.
 - Row-major (`order="C"`) and column-major (`order="F"`) matrices.
 - Optional [SciPy conversion and Matrix Market IO](interoperability.md).
 - [Linear solvers, Frobenius norms, and randomized SVD](linalg.md).
 
 SpPy requires Python 3.11+, NumPy 2, Eigen 5.0.1+, and a C++17 compiler to build.
 It supports vectors and matrices, rather than arbitrary-dimensional tensors.
-Complex, unsigned, and boolean storage are unsupported. NumPy compatibility is
+Unsigned and boolean storage are unsupported. NumPy compatibility is
 partial; see [interoperability and limits](interoperability.md).
+
+See [Eigen coverage](eigen-coverage.md) for supported modules and boundaries.
 
 ## Project and support
 

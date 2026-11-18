@@ -1,10 +1,10 @@
 [build-system]
-requires = ["scikit-build-core>=0.12", "Cython>=3.3.1,<4", "numpy>=2,<3"]
+requires = ["scikit-build-core>=0.12", "pybind11>=3,<4"]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "sppy"
-version = "0.7.0"
+version = "1.0.0"
 description = "NumPy-style sparse arrays backed by Eigen"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -22,21 +22,21 @@ docs = ["mkdocs>=1.6,<2", "mkdocstrings[python]>=0.30,<1", "pymdown-extensions>=
 dev = ["pytest>=8", "scipy>=1.14", "ruff>=0.9", "clang-format>=18"]
 
 [tool.scikit-build]
+build-dir = "build/native/{wheel_tag}"
 minimum-version = "build-system.requires"
 wheel.packages = ["sppy"]
-wheel.exclude = ["**/__pycache__/**", "sppy/*_sub.pyx", "sppy/*_sub.pxd"]
+wheel.exclude = ["**/__pycache__/**", "sppy/native/**"]
 sdist.include = ["uv.lock", ".python-version", ".clang-format"]
-sdist.exclude = [".pytest_cache/**", ".ruff_cache/**", "**/*.so", "**/*.pyd", "**/__pycache__/**", "sppy/*_sub.pyx", "sppy/*_sub.pxd", "sppy/*.cpp", "vendor/**", "build/**", "dist/**", ".venv/**", "*.egg-info/**"]
+sdist.exclude = [".pytest_cache/**", ".ruff_cache/**", "**/*.so", "**/*.pyd", "**/__pycache__/**", "vendor/**", "build/**", "dist/**", ".venv/**", "*.egg-info/**"]
 
 [tool.uv]
 cache-keys = [
     { file = "pyproject.toml" },
     { file = "CMakeLists.txt" },
     { file = "cmake/**/*.cmake" },
-    { file = "sppy/*_base.pyx" },
-    { file = "sppy/*_base.pxd" },
-    { file = "sppy/include/*.h" },
-    { file = "sppy/TemplateExpander.py" },
+    { file = "sppy/**/*.py" },
+    { file = "sppy/native/**/*.h" },
+    { file = "sppy/native/**/*.cpp" },
     { env = "EIGEN_INCLUDE_DIR" },
     { env = "SPPY_OPENMP" },
 ]
@@ -44,7 +44,7 @@ cache-keys = [
 [tool.pytest.ini_options]
 python_files = ["test_*.py"]
 testpaths = ["tests"]
-markers = ["native: C++ header contracts compiled with GCC or Clang"]
+markers = ["native: contracts at the pybind11/Eigen boundary"]
 
 [tool.ruff]
 target-version = "py311"

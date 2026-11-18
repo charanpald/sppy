@@ -22,7 +22,7 @@ Dense conversion preserves the stored dtype, including exact `int64` values.
 coerce to dense arrays; do not assume they preserve sparsity.
 
 Supported storage dtypes are signed 8/16/32/64-bit integers and 32/64-bit floats.
-Boolean, unsigned, and complex storage are unsupported. Arrays have one or two
+Complex64/128 storage is supported. Boolean and unsigned storage are unsupported. Arrays have one or two
 dimensions. Individual dimensions and stored-entry indices use signed 32-bit
 limits. General arithmetic broadcasting, whole-array boolean masks, new-axis
 indexing, and the full set of NumPy reduction keywords are unsupported.
@@ -62,5 +62,5 @@ with TemporaryDirectory() as directory:
 
 Matrix Market IO requires two-dimensional arrays and SciPy. The reader supports
 comments, symmetry, and compressed input through SciPy. Integer files are loaded
-as `int64`, real files as `float64`; complex values are rejected.
+as `int64`, real files as `float64`; complex files as `complex128`.
 See the [IO reference](io.md) for arguments and storage selection.

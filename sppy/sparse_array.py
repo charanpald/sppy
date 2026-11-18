@@ -1,0 +1,1153 @@
+"""One- and two-dimensional arrays with owned Eigen sparse storage."""
+
+import operator
+import numpy
+from sppy import _native
+
+_DTYPES = {
+    numpy.dtype(name): name
+    for name in (
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "float32",
+        "float64",
+        "complex64",
+        "complex128",
+    )
+}
+
+
+def _shape(shape):
+    if isinstance(shape, (int, numpy.integer)):
+        shape = (operator.index(shape),)
+    if not isinstance(shape, tuple) or len(shape) not in {1, 2}:
+        raise ValueError("Only one- and two-dimensional shapes are supported")
+    if any(
+        not isinstance(n, (int, numpy.integer))
+        or isinstance(n, (bool, numpy.bool_))
+        or n < 0
+        or n > numpy.iinfo(numpy.int32).max
+        for n in shape
+    ):
+        raise ValueError("Dimensions must be nonnegative 32-bit integers")
+    return tuple(map(int, shape))
+
+
+class SparseArray:
+    """An owned Eigen sparse vector or matrix.
+
+    Parameters:
+        data: A shape (integer or tuple), dense data, sparse array, or SciPy sparse object.
+        dtype: Signed integer, float32/64, or complex64/128 dtype. Inferred from data.
+        order: "C" for row-major or "F" for column-major storage. Defaults to "C".
+
+    Tuple input specifies a shape. Use :func:`sppy.asarray` to treat tuples as data.
+    Sparse indexing returns independent copies, rather than views.
+    """
+
+    __array_priority__ = 1000
+
+    def __init__(self, data, dtype=None, *, order="C"):
+        if order not in {"C", "F"}:
+            raise ValueError("order must be 'C' or 'F'")
+        source = data
+        if not isinstance(data, (tuple, int, numpy.integer)) and not hasattr(
+            data, "shape"
+        ):
+            source = numpy.asarray(data)
+        shape = _shape(
+            source if isinstance(source, (tuple, int, numpy.integer)) else source.shape
+        )
+        dtype = numpy.dtype(
+            dtype if dtype is not None else getattr(source, "dtype", numpy.float64)
+        )
+        if dtype not in _DTYPES:
+            raise ValueError(f"Unsupported dtype: {dtype}")
+        self._dtype, self._order, self._shape = dtype, order, shape
+        backend = getattr(
+            _native, f"{_DTYPES[dtype]}_{order if len(shape) == 2 else 'F'}"
+        )
+        self._array = backend(shape[0], shape[1] if len(shape) == 2 else 1)
+        if isinstance(source, SparseArray):
+            self._put_coordinates(
+                source.values().astype(dtype), source.stored_indices()
+            )
+        elif hasattr(source, "tocoo"):
+            coo = source.tocoo(copy=True)
+            if coo.ndim == 1:
+                self._put_coordinates(coo.data.astype(dtype), coo.coords)
+            else:
+                self._put_coordinates(coo.data.astype(dtype), (coo.row, coo.col))
+        elif hasattr(source, "shape"):
+            source = numpy.asarray(source, dtype=dtype)
+            indices = source.nonzero()
+            self._put_coordinates(source[indices], indices)
+
+    @classmethod
+    def _from_backend(cls, backend, dtype, order, shape=None):
+        result = object.__new__(cls)
+        result._array, result._dtype, result._order = backend, numpy.dtype(dtype), order
+        result._shape = tuple(backend.shape) if shape is None else tuple(shape)
+        return result
+
+    def _wrap_backend(self, backend, shape=None):
+        return self._from_backend(backend, self.dtype, self.order, shape)
+
+    @property
+    def dtype(self):
+        """Stored NumPy scalar dtype."""
+        return self._dtype
+
+    @property
+    def shape(self):
+        """Logical vector or matrix dimensions."""
+        return self._shape
+
+    @property
+    def ndim(self):
+        return len(self.shape)
+
+    @property
+    def size(self):
+        return int(numpy.prod(self.shape, dtype=numpy.int64))
+
+    @property
+    def order(self):
+        """'C' for row storage, 'F' for column storage."""
+        return self._order
+
+    @property
+    def nnz(self):
+        """Number of stored entries, including explicit zeros."""
+        return self._array.nnz
+
+    @property
+    def is_compressed(self):
+        return self._array.is_compressed
+
+    @property
+    def inner_size(self):
+        return self._array.inner_size
+
+    @property
+    def outer_size(self):
+        return self._array.outer_size
+
+    def stored_indices(self):
+        """Coordinates in storage order, aligned with :meth:`values`, including zeros."""
+        coordinates = self._array.coordinates()
+        return coordinates if self.ndim == 2 else coordinates[:1]
+
+    def nonzero(self):
+        """Coordinates of nonzero values, excluding explicitly stored zeros."""
+        mask = self.values() != 0
+        return tuple(index[mask] for index in self.stored_indices())
+
+    def values(self):
+        """Return a copy of stored values aligned with :meth:`stored_indices`."""
+        return self._array.values()
+
+    def _put_coordinates(self, values, coordinates):
+        indices = tuple(numpy.asarray(i) for i in coordinates)
+        if len(indices) != self.ndim or any(i.ndim != 1 for i in indices):
+            raise ValueError("Expected one coordinate vector per axis")
+        values = numpy.asarray(values, dtype=self.dtype)
+        if values.ndim != 1 or any(len(i) != len(values) for i in indices):
+            raise ValueError("Coordinate and value lengths differ")
+        for axis, index in enumerate(indices):
+            if index.size and (
+                index.dtype.kind not in "iu"
+                or (index < 0).any()
+                or (index >= self.shape[axis]).any()
+            ):
+                raise ValueError("Coordinate out of bounds")
+        indices = tuple(numpy.ascontiguousarray(i, dtype=numpy.int32) for i in indices)
+        rows = indices[0]
+        columns = (
+            indices[1]
+            if self.ndim == 2
+            else numpy.zeros(len(values), dtype=numpy.int32)
+        )
+        self._array.assemble(rows, columns, numpy.ascontiguousarray(values))
+
+    def _put_assignment(self, values, coordinates):
+        # Assignment has last-write-wins semantics; assembly sums duplicates.
+        rows = numpy.ascontiguousarray(coordinates[0], dtype=numpy.int32)
+        columns = (
+            numpy.ascontiguousarray(coordinates[1], dtype=numpy.int32)
+            if self.ndim == 2
+            else numpy.zeros(len(rows), dtype=numpy.int32)
+        )
+        self._array.assign(
+            rows, columns, numpy.ascontiguousarray(values, dtype=self.dtype)
+        )
+
+    def put(self, data, row_indices, column_indices=None, *, init=False):
+        """Assign paired coordinates; init=True replaces storage and sums duplicates."""
+        indices = (numpy.asarray(row_indices),)
+        if self.ndim == 2:
+            if column_indices is None:
+                raise ValueError("Matrix assignment requires column indices")
+            indices += (numpy.asarray(column_indices),)
+        elif column_indices is not None:
+            raise ValueError("Vectors have one coordinate axis")
+        if any(i.ndim != 1 for i in indices) or any(
+            len(i) != len(indices[0]) for i in indices
+        ):
+            raise ValueError("Coordinate lengths differ")
+        for axis, index in enumerate(indices):
+            if index.size and (
+                index.dtype.kind not in "iu"
+                or (index < 0).any()
+                or (index >= self.shape[axis]).any()
+            ):
+                raise ValueError("Coordinate out of bounds")
+        data = numpy.asarray(data)
+        if data.ndim != 0 and (data.ndim != 1 or len(data) != len(indices[0])):
+            raise ValueError("Expected a scalar or one value per coordinate")
+        values = numpy.broadcast_to(data, (len(indices[0]),)).astype(self.dtype)
+        if init:
+            self._put_coordinates(values, indices)
+        else:
+            self._put_assignment(values, indices)
+
+    @classmethod
+    def from_triplets(cls, shape, rows, columns, values, *, dtype=None, order="C"):
+        """Assemble a matrix from unsorted coordinates; duplicate entries are summed."""
+        values = numpy.asarray(values, dtype=dtype)
+        result = cls(_shape(shape), dtype=values.dtype, order=order)
+        if result.ndim != 2:
+            raise ValueError("Triplets require a matrix shape")
+        result._put_coordinates(values, (rows, columns))
+        return result
+
+    @classmethod
+    def from_compressed(cls, shape, values, indices, indptr, *, order="C", dtype=None):
+        """Copy CSR (C) or CSC (F) arrays, validating pointer bounds and indices."""
+        shape = _shape(shape)
+        if len(shape) != 2 or order not in {"C", "F"}:
+            raise ValueError("Compressed storage requires a matrix and C/F order")
+        values, indices, indptr = (
+            numpy.asarray(values, dtype=dtype),
+            numpy.asarray(indices),
+            numpy.asarray(indptr),
+        )
+        outer, inner = shape if order == "C" else shape[::-1]
+        if (
+            values.ndim != 1
+            or indices.ndim != 1
+            or indptr.ndim != 1
+            or len(indices) != len(values)
+            or len(indptr) != outer + 1
+        ):
+            raise ValueError("Invalid compressed array lengths")
+        if (
+            indptr.dtype.kind not in "iu"
+            or indptr[0] != 0
+            or indptr[-1] != len(values)
+            or (indptr[1:] < indptr[:-1]).any()
+            or (indptr > len(values)).any()
+        ):
+            raise ValueError("Invalid compressed pointers")
+        if indices.size and (
+            indices.dtype.kind not in "iu"
+            or (indices < 0).any()
+            or (indices >= inner).any()
+        ):
+            raise ValueError("Invalid compressed inner indices")
+        outer_indices = numpy.repeat(
+            numpy.arange(outer), numpy.diff(indptr.astype(numpy.int64))
+        )
+        rows, columns = (
+            (outer_indices, indices) if order == "C" else (indices, outer_indices)
+        )
+        return cls.from_triplets(shape, rows, columns, values, order=order)
+
+    def compressed_arrays(self):
+        """Return independent (values, indices, indptr) copies in CSR/CSC order."""
+        if self.ndim != 2:
+            raise ValueError("Compressed arrays require a matrix")
+        return self._array.compressed_arrays()
+
+    def toarray(self):
+        """Allocate a dense array, preserving dtype."""
+        result = numpy.zeros(self.shape, dtype=self.dtype)
+        result[self.stored_indices()] = self.values()
+        return result
+
+    def to_scipy_csr(self):
+        """Copy into a SciPy CSR matrix (SciPy is optional)."""
+        from scipy.sparse import csr_matrix
+
+        if self.ndim != 2:
+            raise ValueError("SciPy matrices require two dimensions")
+        data, indices, indptr = self.copy(order="C").compressed_arrays()
+        return csr_matrix((data, indices, indptr), shape=self.shape)
+
+    def to_scipy_csc(self):
+        """Copy into a SciPy CSC matrix (SciPy is optional)."""
+        from scipy.sparse import csc_matrix
+
+        if self.ndim != 2:
+            raise ValueError("SciPy matrices require two dimensions")
+        data, indices, indptr = self.copy(order="F").compressed_arrays()
+        return csc_matrix((data, indices, indptr), shape=self.shape)
+
+    def copy(self, order="K"):
+        """Independent copy, optionally changing storage order."""
+        if order not in {"K", "C", "F"}:
+            raise ValueError("Invalid order")
+        return self.astype(self.dtype, order=order, copy=True)
+
+    def astype(self, dtype, order="K", casting="unsafe", subok=True, copy=True):
+        """Cast stored values without allocating a dense array."""
+        dtype = numpy.dtype(dtype)
+        if not numpy.can_cast(self.dtype, dtype, casting=casting):
+            raise TypeError(
+                f"Cannot cast {self.dtype} to {dtype} with {casting!r} casting"
+            )
+        if order not in {"K", "A", "C", "F"}:
+            raise ValueError("Invalid order")
+        order = self.order if order in {"K", "A"} else order
+        if not copy and dtype == self.dtype and order == self.order:
+            return self
+        result = SparseArray(self.shape, dtype=dtype, order=order)
+        result._put_coordinates(
+            self.values().astype(dtype, casting=casting), self.stored_indices()
+        )
+        return result
+
+    def _binary_sparse(self, other, operation):
+        if numpy.isscalar(other):
+            if other == 0:
+                return self.copy()
+            raise NotImplementedError(
+                "Adding nonzero scalars would densify the sparse array"
+            )
+        if not isinstance(other, SparseArray):
+            other = SparseArray(numpy.asarray(other))
+        if self.shape != other.shape:
+            raise ValueError("Sparse arithmetic requires equal shapes")
+        dtype = numpy.result_type(self.dtype, other.dtype)
+        left = self.astype(dtype, copy=False)
+        right = other.astype(dtype, order=self.order, copy=False)
+        return left._wrap_backend(
+            getattr(left._array, operation)(right._array), self.shape
+        )
+
+    def __add__(self, other):
+        return self._binary_sparse(other, "add")
+
+    def __sub__(self, other):
+        return self._binary_sparse(other, "subtract")
+
+    def __rsub__(self, other):
+        return -self + other
+
+    __radd__ = __add__
+
+    def __neg__(self):
+        return self * -1
+
+    def __abs__(self):
+        return self._map_values(numpy.abs)
+
+    def multiply(self, other):
+        """Elementwise sparse multiplication, with matching shapes."""
+        if numpy.isscalar(other):
+            return self * other
+        return self._binary_sparse(other, "multiply")
+
+    def dot(self, other):
+        """Matrix/vector product, equivalent to @ (without conjugation)."""
+        if isinstance(other, SparseArray):
+            if self.shape[-1] != other.shape[0]:
+                raise ValueError("Product shape mismatch")
+            dtype = numpy.result_type(self.dtype, other.dtype)
+            if self.ndim == 1:
+                if other.ndim == 1:
+                    indices = self.stored_indices()[0]
+                    return numpy.dot(
+                        self.values().astype(dtype),
+                        other[indices].toarray().astype(dtype),
+                    )
+                return other.T.dot(self)
+            # Column storage gives vectors O(nnz) entry storage and one outer
+            # pointer, independent of their logical C/F order metadata.
+            left = self.astype(dtype, order="F", copy=False)
+            right = other.astype(dtype, order="F", copy=False)
+            backend = left._array.matmul(right._array)
+            shape = (self.shape[0],) if other.ndim == 1 else tuple(backend.shape)
+            result = self._from_backend(backend, dtype, "F", shape)
+            return result.astype(dtype, order=self.order, copy=False)
+        dense = numpy.asarray(other)
+        if dense.ndim not in {1, 2} or self.shape[-1] != dense.shape[0]:
+            raise ValueError("Product shape mismatch")
+        dtype = numpy.result_type(self.dtype, dense.dtype)
+        if self.ndim == 1:
+            return self.values().astype(dtype) @ dense[self.stored_indices()[0]].astype(
+                dtype
+            )
+        left = self.astype(dtype, copy=False)
+        operand = dense[:, None] if dense.ndim == 1 else dense
+        result = left._array.dense_matmul(numpy.ascontiguousarray(operand, dtype=dtype))
+        return result[:, 0] if dense.ndim == 1 else result
+
+    __matmul__ = dot
+
+    def __rmatmul__(self, other):
+        dense = numpy.asarray(other)
+        if dense.ndim == 1:
+            return self.T.dot(dense)
+        return self.T.dot(dense.T).T
+
+    def parallel_dot(self, other):
+        """Dense product using Eigen's configured thread count and optional OpenMP."""
+        return self.dot(other)
+
+    def transpose(self, *axes):
+        """Return a sparse copy with axes reversed."""
+        if len(axes) == 1 and isinstance(axes[0], (tuple, list)):
+            axes = tuple(axes[0])
+        if any(
+            not isinstance(a, (int, numpy.integer)) or not -self.ndim <= a < self.ndim
+            for a in axes
+        ):
+            raise ValueError("Invalid transpose axes")
+        axes = tuple(a % self.ndim for a in axes)
+        if axes == tuple(range(self.ndim)) or self.ndim == 1:
+            return self.copy()
+        if axes and axes != tuple(reversed(range(self.ndim))):
+            raise ValueError("Invalid transpose axes")
+        return self._wrap_backend(self._array.transpose())
+
+    T = property(transpose)
+
+    def conjugate(self):
+        """Conjugate stored values without changing sparsity."""
+        return self._map_values(numpy.conjugate)
+
+    def adjoint(self):
+        """Conjugate transpose (H)."""
+        return (
+            self.conjugate()
+            if self.ndim == 1
+            else self._wrap_backend(self._array.adjoint())
+        )
+
+    H = property(adjoint)
+
+    @property
+    def real(self):
+        return self._map_values(numpy.real)
+
+    @property
+    def imag(self):
+        return self._map_values(numpy.imag)
+
+    def reserve(self, n):
+        """Reserve a total capacity, or additional capacity per outer vector."""
+        if numpy.ndim(n) == 0:
+            self._array.reserve(operator.index(n))
+        else:
+            n = numpy.asarray(n)
+            if (
+                n.dtype.kind not in "iu"
+                or (n < 0).any()
+                or (n > numpy.iinfo(numpy.int32).max).any()
+            ):
+                raise ValueError("Invalid capacities")
+            self._array.reserve_per_outer(numpy.ascontiguousarray(n, dtype=numpy.int32))
+
+    def compress(self):
+        """Convert to compressed storage."""
+        self._array.compress()
+
+    def uncompress(self):
+        """Enable uncompressed insertion storage."""
+        self._array.uncompress()
+
+    def squeeze(self):
+        """Compress storage and release unused entry capacity."""
+        self._array.squeeze()
+
+    def set_zero(self):
+        """Remove all entries while preserving shape."""
+        self._array.set_zero()
+
+    def fill(self, value):
+        """Fill every position; nonzero values store the entire logical array."""
+        if value == 0:
+            self.set_zero()
+        else:
+            indices = numpy.unravel_index(numpy.arange(self.size), self.shape)
+            self._put_coordinates(
+                numpy.full(self.size, value, dtype=self.dtype), indices
+            )
+
+    def ones(self):
+        """Fill every position with one."""
+        self.fill(1)
+
+    def resize(self, shape, *, preserve=False):
+        """Resize in place; preserve=True retains entries within new bounds."""
+        shape = _shape(shape)
+        if len(shape) != self.ndim:
+            raise ValueError("Resize cannot change dimensionality")
+        self._array.resize(shape[0], shape[1] if self.ndim == 2 else 1, preserve)
+        self._shape = shape
+
+    def prune(self, tolerance=1e-12):
+        """Remove entries whose absolute value is at most tolerance, in place."""
+        self._array.prune(tolerance)
+
+    def eliminate_zeros(self):
+        """Remove only exact stored zeros, in place."""
+        self.prune(0)
+
+    def triangular(self, *, lower=True, unit_diagonal=False):
+        """Materialize a sparse lower/upper triangular copy."""
+        if self.ndim != 2:
+            raise ValueError("Triangular operations require a matrix")
+        return self._wrap_backend(self._array.triangular(lower, unit_diagonal))
+
+    def selfadjoint(self, *, lower=True):
+        """Reconstruct a Hermitian matrix from its lower or upper triangle."""
+        if self.ndim != 2:
+            raise ValueError("Self-adjoint operations require a matrix")
+        return self._wrap_backend(self._array.selfadjoint(lower))
+
+    def permuted(self, rows=None, columns=None):
+        """Gather rows/columns in permutation order; vectors accept only rows."""
+
+        def check(values, size):
+            if values is None:
+                return numpy.arange(size)
+            values = numpy.asarray(values)
+            if (
+                values.ndim != 1
+                or values.dtype.kind not in "iu"
+                or not numpy.array_equal(numpy.sort(values), numpy.arange(size))
+            ):
+                raise ValueError("Expected a permutation of the axis")
+            return values
+
+        rows = check(rows, self.shape[0])
+        if self.ndim == 1:
+            if columns is not None:
+                raise ValueError("Vectors have one axis")
+            return self[rows]
+        return self.subarray(rows, check(columns, self.shape[1]))
+
+    def row_indices(self, row):
+        """Stored column indices in a row."""
+        if self.ndim != 2 or not 0 <= row < self.shape[0]:
+            raise ValueError("Row out of bounds")
+        rows, columns = self.stored_indices()
+        return numpy.sort(columns[rows == row])
+
+    def column_indices(self, column):
+        """Stored row indices in a column."""
+        if self.ndim != 2 or not 0 <= column < self.shape[1]:
+            raise ValueError("Column out of bounds")
+        rows, columns = self.stored_indices()
+        return numpy.sort(rows[columns == column])
+
+    def nonzero_rows_list(self):
+        return [self.row_indices(i) for i in range(self.shape[0])]
+
+    def nonzero_rows_ptr(self):
+        _, indices, indptr = self.copy(order="C").compressed_arrays()
+        return indptr, indices
+
+    def submatrix(self, start_row, start_column, rows, columns):
+        """Copy a rectangular block."""
+        if (
+            self.ndim != 2
+            or min(start_row, start_column, rows, columns) < 0
+            or start_row + rows > self.shape[0]
+            or start_column + columns > self.shape[1]
+        ):
+            raise ValueError("Invalid block bounds")
+        return self[start_row : start_row + rows, start_column : start_column + columns]
+
+    def __truediv__(self, scalar):
+        """Divide by a scalar; division by zero also transforms implicit zeros."""
+        if not numpy.isscalar(scalar):
+            raise ValueError("Sparse division requires a scalar")
+        return self._map_values(lambda values: numpy.true_divide(values, scalar))
+
+    def _inplace(self, result):
+        if result.shape != self.shape:
+            raise ValueError("In-place operations cannot change shape")
+        result = result.astype(
+            self.dtype, order=self.order, casting="same_kind", copy=False
+        )
+        self._array = result._array
+        return self
+
+    def __iadd__(self, other):
+        return self._inplace(self + other)
+
+    def __isub__(self, other):
+        return self._inplace(self - other)
+
+    def __imul__(self, other):
+        return self._inplace(self * other)
+
+    def __itruediv__(self, other):
+        return self._inplace(self / other)
+
+    def vdot(self, other):
+        """Conjugating inner product of equally sized sparse vectors."""
+        if not isinstance(other, SparseArray):
+            other = SparseArray(numpy.asarray(other))
+        if self.ndim != 1 or other.ndim != 1 or self.shape != other.shape:
+            raise ValueError("vdot requires equal-length vectors")
+        return self.conjugate().dot(other)
+
+    def outer(self, other):
+        """Sparse vector outer product without conjugation."""
+        if not isinstance(other, SparseArray):
+            other = SparseArray(numpy.asarray(other))
+        if self.ndim != 1 or other.ndim != 1:
+            raise ValueError("outer requires vectors")
+        dtype = numpy.result_type(self.dtype, other.dtype)
+        left, right = self.astype(dtype, copy=False), other.astype(dtype, copy=False)
+        backend = left._array.matmul(right._array.transpose())
+        return self._from_backend(backend, dtype, "F").copy(order=self.order)
+
+    def lp_norm(self, p=2):
+        """Entrywise p-norm for p >= 1, including the infinity norm."""
+        if p < 1 or numpy.isnan(p):
+            raise ValueError("p must be at least one")
+        values = numpy.abs(
+            self.values().astype(numpy.result_type(self.dtype, numpy.float64))
+        )
+        if p == numpy.inf:
+            return values.max(initial=0)
+        return numpy.sum(values**p) ** (1 / p)
+
+    def normalize(self):
+        """Normalize a floating-point or complex vector in place."""
+        if self.dtype.kind not in "fc":
+            raise TypeError(
+                "In-place normalization requires floating-point or complex storage"
+            )
+        return self._inplace(self.normalized())
+
+    def set_identity(self):
+        """Replace a matrix with an identity of the same (possibly rectangular) shape."""
+        if self.ndim != 2:
+            raise ValueError("Identity requires a matrix")
+        indices = numpy.arange(min(self.shape), dtype=numpy.int32)
+        self._put_coordinates(
+            numpy.ones(len(indices), dtype=self.dtype), (indices, indices)
+        )
+
+    def set_diagonal(self, values, offset=0):
+        """Assign a diagonal without allocating the full matrix."""
+        if self.ndim != 2:
+            raise ValueError("Diagonal assignment requires a matrix")
+        length = max(
+            0, min(self.shape[0] + min(offset, 0), self.shape[1] - max(offset, 0))
+        )
+        rows = numpy.arange(length) + max(-offset, 0)
+        columns = numpy.arange(length) + max(offset, 0)
+        self[rows, columns] = values
+
+    def swap(self, other):
+        """Exchange owned storage in constant time; dtype/order/dimensionality must match."""
+        if (
+            not isinstance(other, SparseArray)
+            or self.dtype != other.dtype
+            or self.order != other.order
+            or self.ndim != other.ndim
+        ):
+            raise ValueError("Swap requires matching dtype, order, and dimensionality")
+        self._array, other._array = other._array, self._array
+        self._shape, other._shape = other._shape, self._shape
+
+    def insert_from_triplets(self, rows, columns, values):
+        """Add triplets to existing entries, summing duplicate contributions."""
+        addition = SparseArray.from_triplets(
+            self.shape, rows, columns, values, dtype=self.dtype, order=self.order
+        )
+        self._array = self._array.add(addition._array)
+
+    def scale_rows(self, values):
+        """Return diag(values) @ self without forming the diagonal matrix."""
+        if self.ndim != 2:
+            raise ValueError("Row scaling requires a matrix")
+        values = numpy.asarray(values)
+        if values.shape != (self.shape[0],):
+            raise ValueError("Expected one scale per row")
+        indices = self.stored_indices()
+        data = self.values() * values[indices[0]]
+        result = SparseArray(self.shape, dtype=data.dtype, order=self.order)
+        result._put_coordinates(data, indices)
+        return result
+
+    def scale_columns(self, values):
+        """Return self @ diag(values) without forming the diagonal matrix."""
+        return self.T.scale_rows(values).T
+
+    def unary(self, function):
+        """Map a NumPy-compatible function, including implicit zeros.
+
+        If function(0) is nonzero, every logical position must be stored.
+        """
+        return self._map_values(function)
+
+    def abs2(self):
+        """Squared magnitudes, with real output for complex input."""
+        return self._map_values(lambda x: numpy.abs(x) ** 2)
+
+    def sqrt(self):
+        return self._map_values(numpy.sqrt)
+
+    def exp(self):
+        return self._map_values(numpy.exp)
+
+    def log(self):
+        return self._map_values(numpy.log)
+
+    def _cwise_extreme(self, other, function):
+        if not isinstance(other, SparseArray):
+            other = SparseArray(numpy.asarray(other))
+        if other.shape != self.shape:
+            raise ValueError("Elementwise operands must have matching shapes")
+        left = dict(zip(zip(*self.stored_indices()), self.values()))
+        right = dict(zip(zip(*other.stored_indices()), other.values()))
+        coordinates = sorted(left.keys() | right.keys())
+        dtype = numpy.result_type(self.dtype, other.dtype)
+        values = numpy.asarray(
+            [function(left.get(i, 0), right.get(i, 0)) for i in coordinates],
+            dtype=dtype,
+        )
+        indices = tuple(
+            numpy.asarray([i[axis] for i in coordinates], dtype=numpy.int32)
+            for axis in range(self.ndim)
+        )
+        result = SparseArray(self.shape, dtype=dtype, order=self.order)
+        result._put_coordinates(values, indices)
+        result.eliminate_zeros()
+        return result
+
+    def minimum(self, other):
+        """Elementwise minimum, including implicit zeros."""
+        return self._cwise_extreme(other, numpy.minimum)
+
+    def maximum(self, other):
+        """Elementwise maximum, including implicit zeros."""
+        return self._cwise_extreme(other, numpy.maximum)
+
+    def squared_norm(self):
+        """Squared Euclidean/Frobenius norm, accumulated in floating point."""
+        values = self.values().astype(numpy.result_type(self.dtype, numpy.float64))
+        return numpy.vdot(values, values).real
+
+    def normalized(self):
+        """Return a vector divided by its Euclidean norm; zero vectors remain zero."""
+        if self.ndim != 1:
+            raise ValueError("Normalization requires a vector")
+        length = numpy.sqrt(self.squared_norm())
+        return self.copy() if length == 0 else self * (1 / length)
+
+    def is_approx(self, other, *, rtol=1e-5, atol=1e-8):
+        """Compare equal-shaped arrays using a Frobenius error bound, without densifying."""
+        if not isinstance(other, SparseArray) or other.shape != self.shape:
+            return False
+        if rtol < 0 or atol < 0 or not numpy.isfinite([rtol, atol]).all():
+            raise ValueError("Tolerances must be nonnegative and finite")
+        return numpy.sqrt((self - other).squared_norm()) <= atol + rtol * numpy.sqrt(
+            other.squared_norm()
+        )
+
+    def is_zero(self, tolerance=0):
+        """Whether all stored values are within an absolute tolerance of zero."""
+        if not numpy.isfinite(tolerance) or tolerance < 0:
+            raise ValueError("Invalid tolerance")
+        return bool((numpy.abs(self.values()) <= tolerance).all())
+
+    def __getstate__(self):
+        return self.shape, self.dtype, self.order, self.stored_indices(), self.values()
+
+    def __setstate__(self, state):
+        shape, dtype, order, indices, values = state
+        self.__init__(shape, dtype=dtype, order=order)
+        self._put_coordinates(values, indices)
+
+    def __repr__(self):
+        return f"SparseArray(shape={self.shape}, dtype={self.dtype}, nnz={self.nnz}, order={self.order!r})"
+
+    def __str__(self):
+        return f"SparseArray dtype:{self.dtype} shape:{self.shape} non-zeros:{self.nnz} order:{self.order}"
+
+    def _indices(self, index, axis):
+        if isinstance(index, slice):
+            return numpy.arange(
+                *index.indices(self.shape[axis]), dtype=numpy.int64
+            ), False
+        scalar = isinstance(index, (int, numpy.integer))
+        values = numpy.asarray(index)
+        if values.dtype.kind == "b":
+            if values.ndim != 1 or len(values) != self.shape[axis]:
+                raise ValueError("Boolean index has the wrong shape")
+            return numpy.flatnonzero(values), False
+        if values.size == 0 and isinstance(index, (list, tuple)):
+            values = values.astype(numpy.int64)
+        if values.dtype.kind not in "iu":
+            raise ValueError("Indices must be integers")
+        if values.size and (
+            (values >= self.shape[axis]).any() or (values < -self.shape[axis]).any()
+        ):
+            raise ValueError("Index out of range")
+        values = numpy.where(values < 0, values + self.shape[axis], values).astype(
+            numpy.int64
+        )
+        return values, scalar
+
+    def _index_tuple(self, key):
+        key = key if isinstance(key, tuple) else (key,)
+        if any(item is Ellipsis for item in key):
+            if sum(item is Ellipsis for item in key) > 1:
+                raise IndexError("Only one ellipsis is allowed")
+            position = next(i for i, item in enumerate(key) if item is Ellipsis)
+            key = (
+                key[:position]
+                + (slice(None),) * (self.ndim - len(key) + 1)
+                + key[position + 1 :]
+            )
+        if len(key) > self.ndim:
+            raise ValueError("Too many indices")
+        return key + (slice(None),) * (self.ndim - len(key))
+
+    def __getitem__(self, key):
+        """Index with integers, slices (including steps), or integer/boolean arrays."""
+        key = self._index_tuple(key)
+        parsed = [self._indices(index, axis) for axis, index in enumerate(key)]
+        if all(scalar for _, scalar in parsed):
+            native = tuple(int(values) for values, _ in parsed)
+            return self._array.coeff(native[0], native[1] if self.ndim == 2 else 0)
+        if self.ndim == 2 and all(not isinstance(index, slice) for index in key):
+            rows, cols = numpy.broadcast_arrays(*(values for values, _ in parsed))
+            result = self._array.gather(
+                numpy.ascontiguousarray(rows.ravel(), dtype=numpy.int32),
+                numpy.ascontiguousarray(cols.ravel(), dtype=numpy.int32),
+            )
+            return result.reshape(rows.shape)
+        selections = [numpy.atleast_1d(values) for values, _ in parsed]
+        if any(values.ndim != 1 for values in selections):
+            raise IndexError("Mixed slicing supports one-dimensional index arrays")
+        shape = tuple(
+            len(values) for values, (_, scalar) in zip(selections, parsed) if not scalar
+        )
+        result = SparseArray(shape, dtype=self.dtype, order=self.order)
+        maps = []
+        for values in selections:
+            mapping = {}
+            for destination, source in enumerate(values):
+                mapping.setdefault(int(source), []).append(destination)
+            maps.append(mapping)
+        from itertools import product
+
+        output_indices = [[] for _ in shape]
+        output_values = []
+        for source, value in zip(zip(*self.stored_indices()), self.values()):
+            destinations = [
+                mapping.get(int(index), ()) for mapping, index in zip(maps, source)
+            ]
+            for destination in product(*destinations):
+                output_values.append(value)
+                target = [
+                    index
+                    for index, (_, scalar) in zip(destination, parsed)
+                    if not scalar
+                ]
+                for indices, index in zip(output_indices, target):
+                    indices.append(index)
+        result._put_coordinates(
+            numpy.asarray(output_values, dtype=self.dtype), output_indices
+        )
+        return result
+
+    def __mul__(self, other):
+        """Multiply elementwise, promoting scalar types as NumPy does."""
+        if isinstance(other, SparseArray):
+            return self.multiply(other)
+        if not numpy.isscalar(other):
+            return self.multiply(SparseArray(numpy.asarray(other)))
+        values = self.values() * other
+        result = SparseArray(self.shape, dtype=values.dtype, order=self.order)
+        result._put_coordinates(values, self.stored_indices())
+        return result
+
+    def __setitem__(self, key, value):
+        """Assign scalars or broadcastable arrays to basic and advanced indices."""
+        key = self._index_tuple(key)
+        parsed = [self._indices(index, axis) for axis, index in enumerate(key)]
+        if all(scalar for _, scalar in parsed):
+            native = tuple(int(values) for values, _ in parsed)
+            self._array.set(
+                native[0], native[1] if self.ndim == 2 else 0, self.dtype.type(value)
+            )
+            return
+        if any(isinstance(index, slice) for index in key):
+            selections = [numpy.atleast_1d(values) for values, _ in parsed]
+            coordinates = numpy.meshgrid(*selections, indexing="ij")
+            shape = tuple(
+                len(values)
+                for values, (_, scalar) in zip(selections, parsed)
+                if not scalar
+            )
+        else:
+            coordinates = numpy.broadcast_arrays(*(values for values, _ in parsed))
+            shape = coordinates[0].shape
+        values = numpy.broadcast_to(value, shape).astype(self.dtype).ravel()
+        self._put_assignment(values, tuple(index.ravel() for index in coordinates))
+
+    def ceil(self):
+        """Apply numpy.ceil elementwise, including implicit zeros."""
+        return self._map_values(numpy.ceil)
+
+    def clip(self, min=None, max=None, out=None, **kwargs):
+        """Clamp values to bounds as NumPy does, including implicit zeros."""
+        if min is None and max is None:
+            raise ValueError("At least one clipping bound is required")
+        result = self._map_values(lambda values: numpy.clip(values, min, max, **kwargs))
+        if out is not None:
+            if not isinstance(out, SparseArray) or out.shape != self.shape:
+                raise ValueError("out must be a sparse array of the same shape")
+            converted = result.astype(out.dtype, order=out.order)
+            out._array = converted._array
+            return out
+        return result
+
+    def cos(self):
+        """Apply numpy.cos elementwise, including implicit zeros."""
+        return self._map_values(numpy.cos)
+
+    def floor(self):
+        """Apply numpy.floor elementwise, including implicit zeros."""
+        return self._map_values(numpy.floor)
+
+    def max(self, axis=None, out=None, keepdims=False):
+        """Maximum including implicit zeros; empty arrays return NaN."""
+        return self._extreme(numpy.maximum, axis, out, keepdims)
+
+    def mean(self, axis=None, dtype=None, out=None, keepdims=False):
+        """Compute means without materializing implicit zeros."""
+        axis = self._normalize_axis(axis)
+        if dtype is None:
+            dtype = (
+                self.dtype if self.dtype.kind in "fc" else numpy.dtype(numpy.float64)
+            )
+        count = self.size if axis is None else self.shape[axis]
+        with numpy.errstate(invalid="ignore", divide="ignore"):
+            result = numpy.asarray(self.sum(axis=axis, dtype=dtype)) / count
+        return self._finish_reduction(result, axis, out, keepdims)
+
+    def min(self, axis=None, out=None, keepdims=False):
+        """Minimum including implicit zeros; empty arrays return NaN."""
+        return self._extreme(numpy.minimum, axis, out, keepdims)
+
+    def power(self, exponent):
+        """Elementwise power; equivalent to ``self ** exponent``."""
+        return self**exponent
+
+    def sign(self):
+        """Apply numpy.sign elementwise, including implicit zeros."""
+        return self._map_values(numpy.sign)
+
+    def sin(self):
+        """Apply numpy.sin elementwise, including implicit zeros."""
+        return self._map_values(numpy.sin)
+
+    def std(self, axis=None, dtype=None, out=None, ddof=0, keepdims=False):
+        """Standard deviation with NumPy-compatible reduction arguments."""
+        result = numpy.sqrt(
+            self.var(axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
+        )
+        if out is not None:
+            numpy.copyto(out, result, casting="same_kind")
+            return out
+        return result
+
+    def sum(self, axis=None, dtype=None, out=None, keepdims=False):
+        """Sum values, including NumPy's axis/dtype/out/keepdims conventions."""
+        axis = self._normalize_axis(axis)
+        values = self.values()
+        if axis is None or self.ndim == 1:
+            result = values.sum(dtype=dtype)
+        else:
+            target = 1 - axis
+            result = numpy.zeros(
+                self.shape[target],
+                dtype=numpy.empty(0, self.dtype).sum(dtype=dtype).dtype,
+            )
+            numpy.add.at(result, self.stored_indices()[target], values)
+        return self._finish_reduction(result, axis, out, keepdims)
+
+    def trace(self, offset=0, axis1=0, axis2=1, dtype=None, out=None):
+        """Sum a diagonal, with NumPy's trace arguments."""
+        return self.diagonal(offset, axis1, axis2).sum(dtype=dtype, out=out)
+
+    def var(self, axis=None, dtype=None, out=None, ddof=0, keepdims=False):
+        """Variance including implicit zeros, using a stable centered sum."""
+        axis = self._normalize_axis(axis)
+        if dtype is None:
+            dtype = (
+                self.dtype if self.dtype.kind in "fc" else numpy.dtype(numpy.float64)
+            )
+        mean_dtype = dtype
+        result_dtype = (
+            numpy.empty((), dtype).real.dtype if self.dtype.kind == "c" else dtype
+        )
+        values = self.values().astype(mean_dtype)
+        mean = self.mean(axis=axis, dtype=mean_dtype)
+        count = self.size if axis is None else self.shape[axis]
+        if axis is None or self.ndim == 1:
+            result = numpy.square(numpy.abs(values - mean)).sum(dtype=result_dtype)
+            result += (count - len(values)) * numpy.square(numpy.abs(mean))
+        else:
+            indices = self.stored_indices()[1 - axis]
+            result = numpy.zeros(self.shape[1 - axis], dtype=result_dtype)
+            numpy.add.at(
+                result, indices, numpy.square(numpy.abs(values - mean[indices]))
+            )
+            result += (
+                count - numpy.bincount(indices, minlength=len(result))
+            ) * numpy.square(numpy.abs(mean))
+        with numpy.errstate(invalid="ignore", divide="ignore"):
+            result = numpy.asarray(result) / max(count - ddof, 0)
+        return self._finish_reduction(result, axis, out, keepdims)
+
+    def _normalize_axis(self, axis):
+        if axis is None:
+            return None
+        if isinstance(axis, tuple):
+            if len(axis) == self.ndim and set(axis) == set(range(self.ndim)):
+                return None
+            if len(axis) != 1:
+                raise ValueError("Expected one axis or all axes")
+            axis = axis[0]
+        if (
+            not isinstance(axis, (int, numpy.integer))
+            or not -self.ndim <= axis < self.ndim
+        ):
+            raise ValueError("Axis out of range")
+        return axis % self.ndim
+
+    def _finish_reduction(self, result, axis, out, keepdims):
+        result = numpy.asarray(result)
+        if keepdims:
+            shape = (
+                [1] * self.ndim
+                if axis is None
+                else [1 if i == axis else n for i, n in enumerate(self.shape)]
+            )
+            result = result.reshape(shape)
+        if out is not None:
+            numpy.copyto(out, result, casting="same_kind")
+            return out
+        return result[()] if result.ndim == 0 else result
+
+    def _extreme(self, operation, axis, out, keepdims):
+        axis = self._normalize_axis(axis)
+        values = self.values()
+        count = self.size if axis is None else self.shape[axis]
+        if count == 0:
+            result = (
+                numpy.nan
+                if axis is None or self.ndim == 1
+                else numpy.full(self.shape[1 - axis], numpy.nan)
+            )
+        elif axis is None or self.ndim == 1:
+            result = operation.reduce(values) if len(values) else self.dtype.type(0)
+            if len(values) < count:
+                result = operation(result, 0)
+        else:
+            identity = numpy.inf if operation is numpy.minimum else -numpy.inf
+            if self.dtype.kind == "i":
+                info = numpy.iinfo(self.dtype)
+                identity = info.max if operation is numpy.minimum else info.min
+            result = numpy.full(self.shape[1 - axis], identity, dtype=self.dtype)
+            indices = self.stored_indices()[1 - axis]
+            operation.at(result, indices, values)
+            mask = numpy.bincount(indices, minlength=len(result)) < count
+            result[mask] = operation(result[mask], 0)
+        return self._finish_reduction(result, axis, out, keepdims)
+
+    def __pow__(self, exponent):
+        if exponent == 0:
+            from sppy.util import ones
+
+            return ones(self.shape, dtype=self.dtype, order=self.order)
+        if exponent < 0:
+            raise ValueError("Negative sparse powers would change implicit zeros")
+        values = self.values() ** exponent
+        result = SparseArray(self.shape, dtype=values.dtype, order=self.order)
+        result._put_coordinates(values, self.stored_indices())
+        return result
+
+    def _map_values(self, operation):
+        values = numpy.asarray(operation(self.values()))
+        zero = numpy.asarray(operation(numpy.zeros(1, dtype=self.dtype)))[0]
+        result = SparseArray(self.shape, dtype=values.dtype, order=self.order)
+        if zero != 0:
+            from sppy.util import ones
+
+            result = ones(self.shape, dtype=values.dtype, order=self.order) * zero
+            result._put_assignment(values, self.stored_indices())
+        else:
+            mask = values != 0
+            result._put_coordinates(
+                values[mask], tuple(index[mask] for index in self.stored_indices())
+            )
+        return result
+
+    def __array__(self, dtype=None, copy=None):
+        """Explicit conversion to a dense NumPy array always allocates."""
+        if copy is False:
+            raise ValueError("Sparse-to-dense conversion requires a copy")
+        result = self.toarray()
+        return result if dtype is None else result.astype(dtype, copy=False)
+
+    def __len__(self):
+        return self.shape[0]
+
+    def diagonal(self, offset=0, axis1=0, axis2=1):
+        """Extract a diagonal as a dense vector, without densifying the matrix."""
+        if self.ndim != 2 or (axis1 % 2, axis2 % 2) not in {(0, 1), (1, 0)}:
+            raise ValueError("diagonal requires two distinct matrix axes")
+        if axis1 % 2 == 1:
+            return self.T.diagonal(offset)
+        length = max(
+            0, min(self.shape[0] + min(offset, 0), self.shape[1] - max(offset, 0))
+        )
+        rows = numpy.arange(length) + max(-offset, 0)
+        cols = numpy.arange(length) + max(offset, 0)
+        return self[rows, cols]
+
+    def subarray(self, row_indices, column_indices=None):
+        """Take the Cartesian product of index vectors, like NumPy's ix_."""
+        if self.ndim == 1:
+            if column_indices is not None:
+                raise ValueError("Vectors have one axis")
+            return self[row_indices]
+        return self[numpy.asarray(row_indices), :][:, numpy.asarray(column_indices)]
+
+    def count_nonzero(self, axis=None):
+        """Count nonzero values, excluding explicitly stored zeros."""
+        axis = self._normalize_axis(axis)
+        mask = self.values() != 0
+        if axis is None or self.ndim == 1:
+            return numpy.count_nonzero(mask)
+        return numpy.bincount(
+            self.stored_indices()[1 - axis][mask], minlength=self.shape[1 - axis]
+        )
+
+    __rmul__ = __mul__

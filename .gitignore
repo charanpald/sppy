@@ -7,16 +7,11 @@ build/
 dist/
 .pytest_cache/
 .ruff_cache/
-sppy/csarray_sub.pyx
-sppy/csarray_sub.pxd
-sppy/csarray1d_sub.pyx
-sppy/csarray1d_sub.pxd
 
 *.o
 *~
 docs/_build/
 /MANIFEST
-/sppy/*.cpp
 vendor/
 
 .venv/

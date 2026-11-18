@@ -26,5 +26,5 @@ jobs:
       - run: uv run --locked pytest
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check sppy tests profiling
-      - run: uv run --locked clang-format --dry-run --Werror sppy/include/*.h tests/native/*.cpp profiling/native/*.cpp
+      - run: uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp profiling/native/*.cpp
       - run: uv build

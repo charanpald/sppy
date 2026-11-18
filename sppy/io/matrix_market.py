@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from sppy import csarray
+from sppy import SparseArray
 
 
 def mmwrite(filename, A, comment="", field=None, precision=None):
@@ -16,7 +16,7 @@ def mmwrite(filename, A, comment="", field=None, precision=None):
         raise ValueError("Matrix Market requires a two-dimensional array")
     scipy_mmwrite(
         filename,
-        A.toScipyCsc(),
+        A.to_scipy_csc(),
         comment=comment,
         field=field,
         precision=precision,
@@ -24,16 +24,20 @@ def mmwrite(filename, A, comment="", field=None, precision=None):
     )
 
 
-def mmread(filename, storagetype="col"):
+def mmread(filename, *, order="C"):
     """Read a Matrix Market file into a sparse array.
 
     SciPy is required. Symmetric files, comments, and compressed files are
-    handled by SciPy. Only real and integer values are supported by csarray.
+    handled by SciPy. Real, integer, and complex files are supported.
     """
     from scipy.io import mmread as scipy_mmread
 
     matrix = scipy_mmread(filename, spmatrix=False)
-    if matrix.dtype.kind not in "iuf":
+    if matrix.dtype.kind not in "iufc":
         raise ValueError(f"Unsupported Matrix Market dtype: {matrix.dtype}")
-    dtype = np.int64 if matrix.dtype.kind in "iu" else np.float64
-    return csarray(matrix, dtype=dtype, storagetype=storagetype)
+    dtype = (
+        np.int64
+        if matrix.dtype.kind in "iu"
+        else (np.complex128 if matrix.dtype.kind == "c" else np.float64)
+    )
+    return SparseArray(matrix, dtype=dtype, order=order)

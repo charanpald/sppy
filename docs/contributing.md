@@ -38,12 +38,12 @@ With the default development environment:
 uv run --locked pytest
 uv run --locked ruff check .
 uv run --locked ruff format --check sppy tests profiling
-uv run --locked clang-format --dry-run --Werror sppy/include/*.h tests/native/*.cpp profiling/native/*.cpp
+uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp profiling/native/*.cpp
 uv build
 ```
 
 `uv build` writes the source distribution and wheel to `dist/`. Native
-binding generation runs in the build directory. `setup.py` and `MANIFEST.in`
+bindings are compiled from `sppy/native/` using pybind11 and Eigen. `setup.py` and `MANIFEST.in`
 are no longer needed; package and archive settings live in `pyproject.toml`.
 
 After editing dependency declarations, run `uv lock` and commit the lockfile.
@@ -72,10 +72,9 @@ run serially.
 The pytest suite lives in the repository's top-level `tests/` directory.
 Tests use Arrange–Act–Assert sections, parametrized cases, isolated temporary
 files, and local random generators. Run a focused subset with, for example,
-`uv run pytest tests/test_numpy_compatibility.py`. Native C++ tests are run by
-pytest when a GCC/Clang compiler and Eigen headers are available; select them
-with `uv run pytest -m native`. Missing native prerequisites are reported as
-skips.
+`uv run pytest tests/test_numpy_compatibility.py`. Tests of the actual native extension boundary run with
+`uv run pytest -m native`; no second compiler invocation is needed.
+Numerical solver and storage contracts are in `tests/test_eigen_features.py`.
 
 `sppy.test()` locates checkout tests and does not search installed packages.
 Runtime wheels do not include tests or profiling tools; source archives do.
@@ -91,3 +90,8 @@ uv run python -m profiling.benchmark --operation dot --size 1000
 
 See the [profiling guide](https://github.com/charanpald/sppy/blob/master/profiling/README.md) for workload settings, profile files, and benchmark
 output. Importing these modules performs no profiling or input generation.
+
+The native build directory is reused to speed incremental builds. To switch
+an existing OpenMP build off, explicitly rebuild with `SPPY_OPENMP=0`.
+Do not mutate a sparse array concurrently with a native operation on that same
+array. Reusable direct factorization methods serialize access to their state.

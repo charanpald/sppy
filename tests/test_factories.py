@@ -75,39 +75,3 @@ def test_rand_rejects_invalid_density(density):
     # Act / Assert
     with pytest.raises(ValueError):
         sppy.rand(shape, density)
-
-
-def test_legacy_constructor_alias():
-    # Arrange
-    constructor = sppy.csarray
-
-    # Act
-    result = constructor((2, 3))
-
-    # Assert
-    assert constructor is sppy.SparseArray
-    assert isinstance(result, sppy.SparseArray)
-
-
-@pytest.mark.parametrize("factory", ["ones", "zeros"])
-def test_legacy_storage_keyword(factory):
-    # Arrange
-    constructor = getattr(sppy, factory)
-
-    # Act
-    result = constructor((2, 3), storageType="col")
-
-    # Assert
-    assert result.order == "F"
-
-
-def test_legacy_eye_dtype_argument():
-    # Arrange
-    expected = np.eye(3, dtype=np.int64)
-
-    # Act
-    result = sppy.eye(3, np.int64)
-
-    # Assert
-    assert result.dtype == expected.dtype
-    np.testing.assert_array_equal(result.toarray(), expected)

@@ -5,7 +5,7 @@ import pytest
 from scipy.sparse.linalg import eigsh
 
 import sppy
-from sppy.linalg import GeneralLinearOperator, biCGSTAB, bicgstab, norm, rsvd
+from sppy.linalg import GeneralLinearOperator, bicgstab, norm, rsvd
 
 
 @pytest.mark.parametrize("parallel", [False, True])
@@ -85,21 +85,15 @@ def test_linear_operator_sum_rejects_shape_mismatch():
         GeneralLinearOperator.as_linear_operator_sum(left, right)
 
 
-@pytest.mark.parametrize("legacy", [False, True])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
-def test_bicgstab_solves_known_system(legacy, dtype, order):
+def test_bicgstab_solves_known_system(dtype, order):
     # Arrange
     dense = np.diag(np.array([2, 3, 4, 5], dtype=dtype))
     array = sppy.asarray(dense, order=order)
     expected = np.array([1, -2, 3, -4], dtype=dtype)
     rhs = dense @ expected
-    solve = biCGSTAB if legacy else bicgstab
-    options = (
-        {"maxIter": 100, "tol": 1e-6} if legacy else {"maxiter": 100, "rtol": 1e-6}
-    )
-
     # Act
-    result, status = solve(array, rhs, **options)
+    result, status = bicgstab(array, rhs, maxiter=100, rtol=1e-6)
 
     # Assert
     assert status == 0
@@ -128,15 +122,14 @@ def test_bicgstab_rejects_invalid_options(options):
         bicgstab(array, rhs, **options)
 
 
-@pytest.mark.parametrize("solver", [biCGSTAB, bicgstab])
-def test_integer_solver_rejected(solver):
+def test_integer_solver_rejected():
     # Arrange
     array = sppy.eye(2, dtype=np.int64)
     rhs = np.ones(2, dtype=np.int64)
 
     # Act / Assert
     with pytest.raises(ValueError):
-        solver(array, rhs)
+        bicgstab(array, rhs)
 
 
 @pytest.mark.parametrize("storage", ["dense", "sparse", "operator"])
@@ -206,15 +199,33 @@ def test_sparse_norm_matches_numpy(order, rng):
     assert result == pytest.approx(expected)
 
 
-def test_legacy_linear_operator_alias():
-    # Arrange
-    array = sppy.eye(3)
-    vector = np.ones(3)
-    constructor = GeneralLinearOperator.asLinearOperator
+def test_builtin_solvers_do_not_import_scipy():
+    import subprocess
+    import sys
+    import textwrap
 
-    # Act
-    operator = constructor(array)
-    result = operator.matvec(vector)
+    script = textwrap.dedent("""
+        import importlib.abc
+        import sys
+        import numpy as np
 
-    # Assert
-    np.testing.assert_array_equal(result, vector)
+        class BlockScipy(importlib.abc.MetaPathFinder):
+            def find_spec(self, fullname, path=None, target=None):
+                if fullname == "scipy" or fullname.startswith("scipy."):
+                    raise ModuleNotFoundError("SciPy deliberately unavailable")
+
+        sys.meta_path.insert(0, BlockScipy())
+        import sppy
+        from sppy.linalg import SparseLU, SparseQR, SimplicialLLT, cg, Preconditioner
+
+        a = sppy.asarray([[4., 1.], [1., 3.]])
+        for solver in (SparseLU, SparseQR, SimplicialLLT):
+            np.testing.assert_allclose(a @ solver(a).solve([1., 2.]), [1., 2.])
+        np.testing.assert_allclose(a @ cg(a, [1., 2.]).solution, [1., 2.])
+        np.testing.assert_array_equal(Preconditioner(sppy.eye(2)).solve([1., 2.]), [1., 2.])
+        assert not any(name == "scipy" or name.startswith("scipy.") for name in sys.modules)
+    """)
+    result = subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True, timeout=30
+    )
+    assert result.returncode == 0, result.stderr

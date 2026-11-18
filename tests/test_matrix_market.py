@@ -9,7 +9,7 @@ import sppy
 from sppy.io import mmread, mmwrite
 
 
-@pytest.mark.parametrize("dtype", [np.float64, np.int64])
+@pytest.mark.parametrize("dtype", [np.float64, np.int64, np.complex128])
 @pytest.mark.parametrize("use_stream", [False, True])
 def test_roundtrip(dtype, use_stream, order, tmp_path):
     # Arrange
@@ -21,7 +21,7 @@ def test_roundtrip(dtype, use_stream, order, tmp_path):
     mmwrite(destination, array)
     if use_stream:
         destination.seek(0)
-    result = mmread(destination, storagetype="row" if order == "C" else "col")
+    result = mmread(destination, order=order)
 
     # Assert
     assert result.dtype == dense.dtype
@@ -58,15 +58,17 @@ def test_read_symmetric_file():
     np.testing.assert_array_equal(result.toarray(), expected)
 
 
-def test_read_rejects_complex_values():
+def test_read_complex_values():
     # Arrange
     source = io.BytesIO(
         b"%%MatrixMarket matrix coordinate complex general\n1 1 1\n1 1 2 3\n"
     )
 
-    # Act / Assert
-    with pytest.raises(ValueError, match="dtype"):
-        mmread(source)
+    # Act
+    result = mmread(source)
+
+    # Assert
+    np.testing.assert_array_equal(result.toarray(), [[2 + 3j]])
 
 
 def test_write_rejects_vector(tmp_path):

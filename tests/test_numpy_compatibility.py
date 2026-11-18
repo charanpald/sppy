@@ -380,29 +380,3 @@ def test_vector_reductions_include_implicit_zeros(operation, values):
 
     # Assert
     np.testing.assert_allclose(result, expected)
-
-
-@pytest.mark.parametrize(
-    "alias,preferred",
-    [
-        ("toScipyCsr", "to_scipy_csr"),
-        ("toScipyCsc", "to_scipy_csc"),
-        ("rowInds", "row_indices"),
-        ("colInds", "column_indices"),
-        ("subArray", "subarray"),
-        ("nonzeroRowsList", "nonzero_rows_list"),
-        ("nonzeroRowsPtr", "nonzero_rows_ptr"),
-        ("pdot", "parallel_dot"),
-        ("hadamard", "multiply"),
-    ],
-)
-def test_legacy_method_aliases(alias, preferred):
-    # Arrange
-    array = sppy.eye(2)
-
-    # Act
-    legacy_method = getattr(array, alias)
-    preferred_method = getattr(array, preferred)
-
-    # Assert
-    assert legacy_method == preferred_method

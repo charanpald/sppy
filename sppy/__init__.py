@@ -1,13 +1,16 @@
 """NumPy-style sparse arrays backed by Eigen."""
 
-from sppy.csarray import SparseArray, csarray
+from sppy.sparse_array import SparseArray
+from sppy._native import get_num_threads, set_num_threads, openmp_enabled
 from sppy.util import asarray, diag, eye, rand, ones, zeros
 from sppy.version import __version__
 
 __all__ = [
     "SparseArray",
     "asarray",
-    "csarray",
+    "get_num_threads",
+    "set_num_threads",
+    "openmp_enabled",
     "diag",
     "eye",
     "rand",

@@ -28,7 +28,7 @@ class GeneralLinearOperator(object):
     @staticmethod
     def as_linear_operator(X, parallel=False):
         """
-        Make a general linear operator from csarray X.
+        Make a general linear operator from SparseArray X.
         """
         if not parallel:
 
@@ -36,29 +36,29 @@ class GeneralLinearOperator(object):
                 return X.dot(v)
 
             def rmatvec(v):
-                return X.T.dot(v)
+                return (X.H if hasattr(X, "H") else X.conj().T).dot(v)
 
             def matmat(V):
                 return X.dot(V)
 
             def rmatmat(V):
-                return X.T.dot(V)
+                return (X.H if hasattr(X, "H") else X.conj().T).dot(V)
 
             def add(V):
                 return X + V
         else:
 
             def matvec(v):
-                return X.pdot(v)
+                return X.parallel_dot(v)
 
             def rmatvec(v):
-                return X.T.pdot(v)
+                return X.H.parallel_dot(v)
 
             def matmat(V):
-                return X.pdot(V)
+                return X.parallel_dot(V)
 
             def rmatmat(V):
-                return X.T.pdot(V)
+                return X.H.parallel_dot(V)
 
             def add(V):
                 return X + V
@@ -96,6 +96,3 @@ class GeneralLinearOperator(object):
         return GeneralLinearOperator(
             X.shape, matvec, rmatvec, matmat, rmatmat, add, X.dtype
         )
-
-    asLinearOperator = as_linear_operator
-    asLinearOperatorSum = as_linear_operator_sum

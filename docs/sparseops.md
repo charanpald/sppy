@@ -17,7 +17,7 @@ columns = sppy.asarray([[0., 2.], [3., 0.]], order="F")
 Use `asarray` for data, including tuples. In `SparseArray((5, 7))`, the tuple
 specifies a shape instead of values. `asarray` infers the input dtype.
 `zeros`, `ones`, and `eye` default to row storage (`order="C"`). The direct
-`SparseArray` constructor and `rand` retain the legacy column-storage default.
+`SparseArray` constructor and `rand` also default to row storage.
 Choose `order="F"` for column storage and `order="C"` for row storage.
 
 `rand` samples coordinates with replacement, so the resulting density may be
@@ -91,7 +91,7 @@ reductions. Empty min/max retain the historical NaN result.
 
 `a.nnz` counts stored entries, including stored zeros. `a.count_nonzero()`
 counts nonzero values. `a.eliminate_zeros()` removes exact zeros in place;
-`a.prune()` removes entries using a tolerance.
+`a.prune(tolerance=...)` removes entries using an absolute magnitude threshold.
 
 !!! warning "Operations that can fill an array"
     `a.toarray()` and `np.asarray(a)` allocate dense storage. `ones`, `cos`,
@@ -102,3 +102,35 @@ counts nonzero values. `a.eliminate_zeros()` removes exact zeros in place;
 Prefer sparse methods when memory matters. [NumPy interoperability](interoperability.md)
 explains the conversion boundaries, and the [API reference](csarray.md)
 lists the available methods.
+
+## Eigen storage and structured operations
+
+Assemble unsorted entries with `SparseArray.from_triplets(shape, rows, columns,
+values)`. Duplicate contributions are summed. `insert_from_triplets` adds
+contributions to existing entries. Import CSR/CSC arrays with `from_compressed`
+and export independent `(values, indices, indptr)` copies with `compressed_arrays`.
+
+`is_compressed`, `inner_size`, and `outer_size` describe the native layout.
+`reserve` accepts total capacity or a vector of capacities per outer row/column.
+`uncompress` enables insertion storage; `compress` restores compressed storage;
+`squeeze` also frees unused entry capacity. `resize(shape, preserve=True)` retains
+in-bounds entries; the default discards data. `swap` exchanges matching storage
+objects in constant time.
+
+`triangular(lower=..., unit_diagonal=...)` materializes a triangle.
+`selfadjoint(lower=...)` reconstructs a Hermitian matrix from one triangle.
+`T` transposes and `H` conjugate-transposes. `real`, `imag`, `conjugate`, and
+`abs2` support complex coefficients. `scale_rows`/`scale_columns` multiply by
+diagonal scales without forming a diagonal matrix.
+
+Use `stored_indices()` when pairing coordinates with `values()`; `nonzero()`
+excludes explicitly stored zeros. `minimum`/`maximum` compare sparse arrays
+including implicit zeros. `unary(function)` applies a NumPy-compatible function
+to all values, including implicit zeros. A nonzero result at zero fills every
+position, as with `exp` or `log`.
+
+Scalar `/` and in-place arithmetic (`+=`, `-=`, `*=`, `/=`) are supported.
+In-place arithmetic keeps object identity and rejects dtype changes that cannot
+be cast with NumPy's same-kind rule. `vdot` conjugates the first sparse vector;
+`dot` and `outer` do not. `lp_norm` computes an entrywise norm and `normalize`
+normalizes a floating-point or complex vector in place.

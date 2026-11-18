@@ -24,7 +24,7 @@ def test_empty_constructor_metadata(shape, dtype, order):
     assert result.size == np.prod(expected_shape)
     assert result.dtype == dtype
     assert result.order == order
-    assert result.nnz == result.getnnz() == 0
+    assert result.nnz == 0
 
 
 def test_dense_constructor_preserves_values(dense, dtype, order):
@@ -73,8 +73,6 @@ def test_constructor_rejects_invalid_shapes(source):
     "kwargs",
     [
         {"order": "X"},
-        {"storagetype": "invalid"},
-        {"dtype": np.complex128},
         {"dtype": np.uint64},
     ],
 )

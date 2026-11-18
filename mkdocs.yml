@@ -2,6 +2,7 @@ site_name: SpPy
 site_description: NumPy-style sparse arrays backed by Eigen
 repo_url: https://github.com/charanpald/sppy
 edit_uri: edit/master/docs/
+site_url: https://charanpald.github.io/sppy/
 strict: true
 theme:
   name: mkdocs

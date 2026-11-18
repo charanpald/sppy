@@ -66,15 +66,26 @@ class SparseArray:
         if dtype not in _DTYPES:
             raise ValueError(f"Unsupported dtype: {dtype}")
         self._dtype, self._order, self._shape = dtype, order, shape
+        if isinstance(source, SparseArray):
+            self._array = source.astype(dtype, order=order, copy=True)._array
+            return
+        if len(shape) == 2 and getattr(source, "format", None) in {"csr", "csc"}:
+            source_order = "C" if source.format == "csr" else "F"
+            converted = self.from_compressed(
+                shape,
+                source.data,
+                source.indices,
+                source.indptr,
+                dtype=dtype,
+                order=source_order,
+            )
+            self._array = converted.astype(dtype, order=order, copy=False)._array
+            return
         backend = getattr(
             _native, f"{_DTYPES[dtype]}_{order if len(shape) == 2 else 'F'}"
         )
         self._array = backend(shape[0], shape[1] if len(shape) == 2 else 1)
-        if isinstance(source, SparseArray):
-            self._put_coordinates(
-                source.values().astype(dtype), source.stored_indices()
-            )
-        elif hasattr(source, "tocoo"):
+        if hasattr(source, "tocoo"):
             coo = source.tocoo(copy=True)
             if coo.ndim == 1:
                 self._put_coordinates(coo.data.astype(dtype), coo.coords)
@@ -111,7 +122,7 @@ class SparseArray:
 
     @property
     def size(self):
-        return int(numpy.prod(self.shape, dtype=numpy.int64))
+        return self.shape[0] if self.ndim == 1 else self.shape[0] * self.shape[1]
 
     @property
     def order(self):
@@ -243,27 +254,39 @@ class SparseArray:
             or len(indptr) != outer + 1
         ):
             raise ValueError("Invalid compressed array lengths")
-        if (
-            indptr.dtype.kind not in "iu"
-            or indptr[0] != 0
-            or indptr[-1] != len(values)
-            or (indptr[1:] < indptr[:-1]).any()
-            or (indptr > len(values)).any()
+        dtype = values.dtype
+        if dtype not in _DTYPES:
+            raise ValueError(f"Unsupported dtype: {dtype}")
+        # Native validation avoids repeated NumPy scans for the usual SciPy
+        # int32 buffers. Validate wider indices before narrowing them.
+        if indices.dtype != numpy.dtype(numpy.int32) or indptr.dtype != numpy.dtype(
+            numpy.int32
         ):
-            raise ValueError("Invalid compressed pointers")
-        if indices.size and (
-            indices.dtype.kind not in "iu"
-            or (indices < 0).any()
-            or (indices >= inner).any()
-        ):
-            raise ValueError("Invalid compressed inner indices")
-        outer_indices = numpy.repeat(
-            numpy.arange(outer), numpy.diff(indptr.astype(numpy.int64))
+            if (
+                indptr.dtype.kind not in "iu"
+                or indptr[0] != 0
+                or indptr[-1] != len(values)
+                or (indptr[1:] < indptr[:-1]).any()
+                or (indptr > len(values)).any()
+            ):
+                raise ValueError("Invalid compressed pointers")
+            if indices.size and (
+                indices.dtype.kind not in "iu"
+                or (indices < 0).any()
+                or (indices >= inner).any()
+            ):
+                raise ValueError("Invalid compressed inner indices")
+            if len(values) > numpy.iinfo(numpy.int32).max:
+                raise ValueError("Too many stored entries")
+            indices = numpy.asarray(indices, dtype=numpy.int32)
+            indptr = numpy.asarray(indptr, dtype=numpy.int32)
+        backend = getattr(_native, f"{_DTYPES[dtype]}_{order}")
+        return cls._from_backend(
+            backend.from_compressed(*shape, values, indices, indptr),
+            dtype,
+            order,
+            shape,
         )
-        rows, columns = (
-            (outer_indices, indices) if order == "C" else (indices, outer_indices)
-        )
-        return cls.from_triplets(shape, rows, columns, values, order=order)
 
     def compressed_arrays(self):
         """Return independent (values, indices, indptr) copies in CSR/CSC order."""
@@ -283,7 +306,9 @@ class SparseArray:
 
         if self.ndim != 2:
             raise ValueError("SciPy matrices require two dimensions")
-        data, indices, indptr = self.copy(order="C").compressed_arrays()
+        data, indices, indptr = self.astype(
+            self.dtype, order="C", copy=False
+        ).compressed_arrays()
         return csr_matrix((data, indices, indptr), shape=self.shape)
 
     def to_scipy_csc(self):
@@ -292,7 +317,9 @@ class SparseArray:
 
         if self.ndim != 2:
             raise ValueError("SciPy matrices require two dimensions")
-        data, indices, indptr = self.copy(order="F").compressed_arrays()
+        data, indices, indptr = self.astype(
+            self.dtype, order="F", copy=False
+        ).compressed_arrays()
         return csc_matrix((data, indices, indptr), shape=self.shape)
 
     def copy(self, order="K"):
@@ -313,6 +340,16 @@ class SparseArray:
         order = self.order if order in {"K", "A"} else order
         if not copy and dtype == self.dtype and order == self.order:
             return self
+        if dtype == self.dtype:
+            if order == self.order or self.ndim == 1:
+                backend = self._array.copy()
+            else:
+                backend = (
+                    self._array.to_row_major()
+                    if order == "C"
+                    else self._array.to_column_major()
+                )
+            return self._from_backend(backend, dtype, order, self.shape)
         result = SparseArray(self.shape, dtype=dtype, order=order)
         result._put_coordinates(
             self.values().astype(dtype, casting=casting), self.stored_indices()
@@ -374,14 +411,12 @@ class SparseArray:
                         other[indices].toarray().astype(dtype),
                     )
                 return other.T.dot(self)
-            # Column storage gives vectors O(nnz) entry storage and one outer
-            # pointer, independent of their logical C/F order metadata.
-            left = self.astype(dtype, order="F", copy=False)
-            right = other.astype(dtype, order="F", copy=False)
+            storage = "F" if other.ndim == 1 else self.order
+            left = self.astype(dtype, order=storage, copy=False)
+            right = other.astype(dtype, order=storage, copy=False)
             backend = left._array.matmul(right._array)
             shape = (self.shape[0],) if other.ndim == 1 else tuple(backend.shape)
-            result = self._from_backend(backend, dtype, "F", shape)
-            return result.astype(dtype, order=self.order, copy=False)
+            return self._from_backend(backend, dtype, self.order, shape)
         dense = numpy.asarray(other)
         if dense.ndim not in {1, 2} or self.shape[-1] != dense.shape[0]:
             raise ValueError("Product shape mismatch")
@@ -559,7 +594,9 @@ class SparseArray:
         return [self.row_indices(i) for i in range(self.shape[0])]
 
     def nonzero_rows_ptr(self):
-        _, indices, indptr = self.copy(order="C").compressed_arrays()
+        _, indices, indptr = self.astype(
+            self.dtype, order="C", copy=False
+        ).compressed_arrays()
         return indptr, indices
 
     def submatrix(self, start_row, start_column, rows, columns):
@@ -828,6 +865,45 @@ class SparseArray:
     def __getitem__(self, key):
         """Index with integers, slices (including steps), or integer/boolean arrays."""
         key = self._index_tuple(key)
+        if all(
+            isinstance(index, slice)
+            or (
+                isinstance(index, (int, numpy.integer))
+                and not isinstance(index, (bool, numpy.bool_))
+            )
+            for index in key
+        ):
+            axes, shape, dropped = [], [], []
+            for axis, index in enumerate(key):
+                size = self.shape[axis]
+                if isinstance(index, slice):
+                    start, stop, step = index.indices(size)
+                    count = len(range(start, stop, step))
+                    # A step larger than the axis can select at most one value.
+                    # Keep descriptors representable in signed native arithmetic.
+                    step = max(-size - 1, min(size + 1, step))
+                    axes.append((start, step, count))
+                    shape.append(count)
+                    dropped.append(False)
+                else:
+                    index = operator.index(index)
+                    if index < 0:
+                        index += size
+                    if not 0 <= index < size:
+                        raise ValueError("Index out of range")
+                    axes.append((index, 1, 1))
+                    dropped.append(True)
+            if not shape:
+                return self._array.coeff(
+                    axes[0][0], axes[1][0] if self.ndim == 2 else 0
+                )
+            if self.ndim == 1:
+                axes.append((0, 1, 1))
+                mode = 1
+            else:
+                mode = 2 if dropped[0] else 1 if dropped[1] else 0
+            backend = self._array.slice_basic(*axes[0], *axes[1], mode)
+            return self._from_backend(backend, self.dtype, self.order, tuple(shape))
         parsed = [self._indices(index, axis) for axis, index in enumerate(key)]
         if all(scalar for _, scalar in parsed):
             native = tuple(int(values) for values, _ in parsed)

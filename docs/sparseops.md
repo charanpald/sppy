@@ -134,3 +134,9 @@ In-place arithmetic keeps object identity and rejects dtype changes that cannot
 be cast with NumPy's same-kind rule. `vdot` conjugates the first sparse vector;
 `dot` and `outer` do not. `lp_norm` computes an entrywise norm and `normalize`
 normalizes a floating-point or complex vector in place.
+
+Basic integer/slice selections run in native sparse code without allocating
+full-axis index grids. Same-dtype copies and storage-order changes use direct
+native storage operations. Canonical compressed buffers are validated and copied
+directly; unsorted or duplicate compressed entries use the summing assembly path.
+Copies retain the source compression state when storage order is unchanged.

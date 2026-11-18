@@ -1,0 +1,3529 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "recorded_at_utc": "2026-11-18T20:17:09.850397+00:00",
+    "python": "3.14.3",
+    "numpy": "2.5.5",
+    "scipy": "1.18.1",
+    "sppy": "1.0.0",
+    "platform": "Linux-6.8.0-149-generic-x86_64-with-glibc2.44",
+    "cpu": "AMD Ryzen 5 5600X 6-Core Processor",
+    "available_cpus": 12,
+    "openmp_enabled": true,
+    "eigen_threads": 1,
+    "threadpools": [
+      {
+        "user_api": "openmp",
+        "internal_api": "openmp",
+        "num_threads": 1,
+        "prefix": "libgomp",
+        "version": null,
+        "library": "libgomp.so.1.0.0"
+      },
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "version": "0.3.34.237.2",
+        "threading_layer": "pthreads",
+        "architecture": "Haswell",
+        "library": "libscipy_openblas64_-4b78795a.so"
+      },
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "version": "0.3.31.dev",
+        "threading_layer": "pthreads",
+        "architecture": "Haswell",
+        "library": "libscipy_openblas-5f890258.so"
+      }
+    ],
+    "git_revision": "a72bb1a37787bcd8b4ee97b20a599e1e0a184a4d",
+    "git_dirty": true
+  },
+  "configuration": {
+    "size": 10000,
+    "entries": 5000,
+    "pattern": "banded",
+    "bandwidth": 2,
+    "dtype": "float64",
+    "columns": 8,
+    "repeats": 7,
+    "warmups": 1,
+    "seed": 21,
+    "threads": 1,
+    "rtol": 1e-08,
+    "maxiter": 1000,
+    "operations": [
+      "construct-triplets",
+      "construct-compressed",
+      "copy",
+      "copy-assign",
+      "gather",
+      "slice",
+      "transpose",
+      "adjoint",
+      "add",
+      "multiply",
+      "matvec",
+      "matmat",
+      "sparse-matmul",
+      "sum",
+      "column-sum",
+      "mean",
+      "norm",
+      "compressed-export",
+      "copy-prune",
+      "lu-factor",
+      "lu-solve",
+      "cg",
+      "bicgstab",
+      "triangular-solve"
+    ],
+    "min_time": 0.01,
+    "max_batch": 4096
+  },
+  "input": {
+    "shape": [
+      10000,
+      10000
+    ],
+    "nnz": 49994,
+    "sampled_triplets": 49994,
+    "index_dtype": "int32",
+    "sha256": "11e25fb8736abd2c270d1c82efaef171720cb0e3515a4ed5de55dcb728229e47"
+  },
+  "benchmarks": [
+    {
+      "operation": "construct-triplets",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0007020930000483835,
+          "min_seconds": 0.0006462069989841742,
+          "max_seconds": 0.0007687163330653372,
+          "p25_seconds": 0.000657280333446882,
+          "p75_seconds": 0.0007611096668066845,
+          "samples_seconds": [
+            0.0007687163330653372,
+            0.0007020930000483835,
+            0.000661910333292326,
+            0.0007605896668489246,
+            0.0007616296667644443,
+            0.0006526503336014381,
+            0.0006462069989841742
+          ],
+          "calls_per_sample": 3,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.00042664063651252286,
+          "min_seconds": 0.0003595455455069896,
+          "max_seconds": 0.0004935666362474545,
+          "p25_seconds": 0.0004231770453770878,
+          "p75_seconds": 0.0004645359089904973,
+          "samples_seconds": [
+            0.0003595455455069896,
+            0.0004935666362474545,
+            0.00042295518175127324,
+            0.00042664063651252286,
+            0.00046187590884404597,
+            0.0004671959091369486,
+            0.0004233989090029023
+          ],
+          "calls_per_sample": 11,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.00016183243543867233,
+          "min_seconds": 0.00015913874191145653,
+          "max_seconds": 0.0001685846612916418,
+          "p25_seconds": 0.0001606895402801456,
+          "p75_seconds": 0.00016637691935043663,
+          "samples_seconds": [
+            0.00016183243543867233,
+            0.00015968164511685892,
+            0.00015913874191145653,
+            0.00016169743544343227,
+            0.0001685846612916418,
+            0.00016547530644710342,
+            0.00016727853225376982
+          ],
+          "calls_per_sample": 62,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0003280820303850553,
+          "min_seconds": 0.00031087784847124675,
+          "max_seconds": 0.00033729806069238816,
+          "p25_seconds": 0.00032298706063363966,
+          "p75_seconds": 0.00033098869701489366,
+          "samples_seconds": [
+            0.0003271668788467209,
+            0.0003313790000516526,
+            0.00033729806069238816,
+            0.0003280820303850553,
+            0.00033059839397813477,
+            0.00031880724242055845,
+            0.00031087784847124675
+          ],
+          "calls_per_sample": 33,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.230499998472453,
+        "csc_over_F": 0.7689891733400912
+      }
+    },
+    {
+      "operation": "construct-compressed",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0005448328888127839,
+          "min_seconds": 0.0005386362220936766,
+          "max_seconds": 0.0008969366669286197,
+          "p25_seconds": 0.000542178500028159,
+          "p75_seconds": 0.0008783862776908791,
+          "samples_seconds": [
+            0.0008969366669286197,
+            0.0005447940000319957,
+            0.0005448328888127839,
+            0.0008848601108992524,
+            0.0005386362220936766,
+            0.0005395630000243222,
+            0.0008719124444825058
+          ],
+          "calls_per_sample": 9,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0004918539545377081,
+          "min_seconds": 0.00048768622731255493,
+          "max_seconds": 0.000525142454617625,
+          "p25_seconds": 0.0004907418863447012,
+          "p75_seconds": 0.0005023218635952535,
+          "samples_seconds": [
+            0.0005064011364249217,
+            0.00048768622731255493,
+            0.0004904379999392073,
+            0.0004910457727501952,
+            0.000525142454617625,
+            0.0004918539545377081,
+            0.0004982425907655852
+          ],
+          "calls_per_sample": 22,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        },
+        "scipy_csr": {
+          "median_seconds": 2.383105428764663e-05,
+          "min_seconds": 2.294277428258543e-05,
+          "max_seconds": 2.4594308571457596e-05,
+          "p25_seconds": 2.3731184290746956e-05,
+          "p75_seconds": 2.40186257152735e-05,
+          "samples_seconds": [
+            2.379919715167489e-05,
+            2.3875797144553092e-05,
+            2.4594308571457596e-05,
+            2.383105428764663e-05,
+            2.4161454285993905e-05,
+            2.294277428258543e-05,
+            2.3663171429819027e-05
+          ],
+          "calls_per_sample": 350,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        },
+        "scipy_csc": {
+          "median_seconds": 2.3900077914212098e-05,
+          "min_seconds": 2.313089286175242e-05,
+          "max_seconds": 2.515490908896121e-05,
+          "p25_seconds": 2.3497482141158197e-05,
+          "p75_seconds": 2.4131066553521818e-05,
+          "samples_seconds": [
+            2.4018389603361948e-05,
+            2.3862902589944377e-05,
+            2.313089286175242e-05,
+            2.515490908896121e-05,
+            2.4243743503681692e-05,
+            2.3132061692372014e-05,
+            2.3900077914212098e-05
+          ],
+          "calls_per_sample": 308,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.04374011697343676,
+        "csc_over_F": 0.04859181814788031
+      }
+    },
+    {
+      "operation": "copy",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0008901669998522266,
+          "min_seconds": 0.0005522261249097937,
+          "max_seconds": 0.0009621178751331172,
+          "p25_seconds": 0.0005680578124156455,
+          "p75_seconds": 0.000895893750112009,
+          "samples_seconds": [
+            0.0008901669998522266,
+            0.0008984868750303576,
+            0.0009621178751331172,
+            0.0005747308750869706,
+            0.0005522261249097937,
+            0.0005613847497443203,
+            0.0008933006251936604
+          ],
+          "calls_per_sample": 8,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0005650833001709544,
+          "min_seconds": 0.00047568560003128366,
+          "max_seconds": 0.0006525168002553983,
+          "p25_seconds": 0.0005546258000322269,
+          "p75_seconds": 0.0005725746499592788,
+          "samples_seconds": [
+            0.0005650833001709544,
+            0.00047568560003128366,
+            0.0006525168002553983,
+            0.0005793260999780614,
+            0.0005521913000848145,
+            0.0005570602999796393,
+            0.0005658231999404961
+          ],
+          "calls_per_sample": 10,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 2.4844146502603907e-05,
+          "min_seconds": 2.454284076752426e-05,
+          "max_seconds": 2.5743566876389296e-05,
+          "p25_seconds": 2.4745436302550466e-05,
+          "p75_seconds": 2.5473888541501723e-05,
+          "samples_seconds": [
+            2.5743566876389296e-05,
+            2.4844146502603907e-05,
+            2.454284076752426e-05,
+            2.5219270708962568e-05,
+            2.4801439481544915e-05,
+            2.572850637404088e-05,
+            2.468943312355602e-05
+          ],
+          "calls_per_sample": 314,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 2.493563754835187e-05,
+          "min_seconds": 2.4271983808998326e-05,
+          "max_seconds": 2.5931912620135952e-05,
+          "p25_seconds": 2.4503423950043778e-05,
+          "p75_seconds": 2.5018760525228904e-05,
+          "samples_seconds": [
+            2.5931912620135952e-05,
+            2.463263107055322e-05,
+            2.493563754835187e-05,
+            2.501343690248095e-05,
+            2.4374216829534336e-05,
+            2.5024084147976855e-05,
+            2.4271983808998326e-05
+          ],
+          "calls_per_sample": 309,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.027909534398296267,
+        "csc_over_F": 0.04412736589598048
+      }
+    },
+    {
+      "operation": "copy-assign",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0006273457646089167,
+          "min_seconds": 0.0005899694117354503,
+          "max_seconds": 0.0008755627647641471,
+          "p25_seconds": 0.0005936285880820566,
+          "p75_seconds": 0.000728288470674991,
+          "samples_seconds": [
+            0.0005899941763131852,
+            0.000826423000141992,
+            0.0005899694117354503,
+            0.00063015394120799,
+            0.0008755627647641471,
+            0.000597262999850928,
+            0.0006273457646089167
+          ],
+          "calls_per_sample": 17,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes a copy plus assignment to existing entries; source stays unchanged."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0006463118747888075,
+          "min_seconds": 0.0005465323752105178,
+          "max_seconds": 0.0006823928747508035,
+          "p25_seconds": 0.0006330856876957114,
+          "p75_seconds": 0.0006667605625807482,
+          "samples_seconds": [
+            0.0006234457500795543,
+            0.0006463118747888075,
+            0.0006572956249328854,
+            0.0006823928747508035,
+            0.0005465323752105178,
+            0.000676225500228611,
+            0.0006427256253118685
+          ],
+          "calls_per_sample": 8,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes a copy plus assignment to existing entries; source stays unchanged."
+        },
+        "scipy_csr": {
+          "median_seconds": 6.708181482045566e-05,
+          "min_seconds": 6.589767406155631e-05,
+          "max_seconds": 6.81474444583593e-05,
+          "p25_seconds": 6.652515926193532e-05,
+          "p75_seconds": 6.739748150047726e-05,
+          "samples_seconds": [
+            6.751277779349712e-05,
+            6.675419259678435e-05,
+            6.62961259270863e-05,
+            6.81474444583593e-05,
+            6.728218520745739e-05,
+            6.589767406155631e-05,
+            6.708181482045566e-05
+          ],
+          "calls_per_sample": 135,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes a copy plus assignment to existing entries; source stays unchanged."
+        },
+        "scipy_csc": {
+          "median_seconds": 6.74056666698393e-05,
+          "min_seconds": 6.380717036167711e-05,
+          "max_seconds": 7.01303185013347e-05,
+          "p25_seconds": 6.72270407381735e-05,
+          "p75_seconds": 6.801414814684972e-05,
+          "samples_seconds": [
+            6.756545184611308e-05,
+            6.708930369414803e-05,
+            6.846284444758634e-05,
+            6.380717036167711e-05,
+            6.736477778219894e-05,
+            6.74056666698393e-05,
+            7.01303185013347e-05
+          ],
+          "calls_per_sample": 135,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes a copy plus assignment to existing entries; source stays unchanged."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.10692957313942181,
+        "csc_over_F": 0.10429278696428895
+      }
+    },
+    {
+      "operation": "gather",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 1.8637961660189676e-05,
+          "min_seconds": 1.846218289480171e-05,
+          "max_seconds": 1.9674976404833917e-05,
+          "p25_seconds": 1.8585041302457523e-05,
+          "p75_seconds": 1.938458112106936e-05,
+          "samples_seconds": [
+            1.862309439980719e-05,
+            1.8546988205107857e-05,
+            1.9256926247620663e-05,
+            1.9674976404833917e-05,
+            1.9512235994518055e-05,
+            1.846218289480171e-05,
+            1.8637961660189676e-05
+          ],
+          "calls_per_sample": 339,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 1.8616753177712587e-05,
+          "min_seconds": 1.833609414702215e-05,
+          "max_seconds": 1.8886422392815642e-05,
+          "p25_seconds": 1.8557237917983917e-05,
+          "p75_seconds": 1.8700035626067824e-05,
+          "samples_seconds": [
+            1.8571666669578624e-05,
+            1.866667684614623e-05,
+            1.854280916638921e-05,
+            1.8886422392815642e-05,
+            1.8733394405989417e-05,
+            1.833609414702215e-05,
+            1.8616753177712587e-05
+          ],
+          "calls_per_sample": 393,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 1.2354736280240184e-05,
+          "min_seconds": 1.1900739821057306e-05,
+          "max_seconds": 1.270683894121393e-05,
+          "p25_seconds": 1.2039861059618858e-05,
+          "p75_seconds": 1.2439381416456411e-05,
+          "samples_seconds": [
+            1.2421053098937069e-05,
+            1.2457709733975754e-05,
+            1.270683894121393e-05,
+            1.2354736280240184e-05,
+            1.1945782299874663e-05,
+            1.2133939819363053e-05,
+            1.1900739821057306e-05
+          ],
+          "calls_per_sample": 565,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 1.206851712095568e-05,
+          "min_seconds": 1.1906030625608323e-05,
+          "max_seconds": 1.2387488285648041e-05,
+          "p25_seconds": 1.2027147749904544e-05,
+          "p75_seconds": 1.2269102703325811e-05,
+          "samples_seconds": [
+            1.2068354958869718e-05,
+            1.2387488285648041e-05,
+            1.206851712095568e-05,
+            1.2212463066994993e-05,
+            1.1906030625608323e-05,
+            1.232574233965663e-05,
+            1.1985940540939368e-05
+          ],
+          "calls_per_sample": 555,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.6628802282939373,
+        "csc_over_F": 0.6482611122224977
+      }
+    },
+    {
+      "operation": "slice",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.030875578999257414,
+          "min_seconds": 0.030035733001568587,
+          "max_seconds": 0.03166371500265086,
+          "p25_seconds": 0.030692699498104048,
+          "p75_seconds": 0.031295382001189864,
+          "samples_seconds": [
+            0.03114571799960686,
+            0.03144504600277287,
+            0.030875578999257414,
+            0.03166371500265086,
+            0.030035733001568587,
+            0.030603299997892464,
+            0.030782098998315632
+          ],
+          "calls_per_sample": 1,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.03179460400133394,
+          "min_seconds": 0.030448110999714117,
+          "max_seconds": 0.03255400099806138,
+          "p25_seconds": 0.030933033496694406,
+          "p75_seconds": 0.03212064299987105,
+          "samples_seconds": [
+            0.030606859996623825,
+            0.030448110999714117,
+            0.03255400099806138,
+            0.03125920699676499,
+            0.03211319299953175,
+            0.032128093000210356,
+            0.03179460400133394
+          ],
+          "calls_per_sample": 1,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0001307244999874716,
+          "min_seconds": 0.00012964078570283684,
+          "max_seconds": 0.00013366577144811995,
+          "p25_seconds": 0.0001301693714464948,
+          "p75_seconds": 0.00013231670717297155,
+          "samples_seconds": [
+            0.0001307244999874716,
+            0.00012982451428667575,
+            0.00013337120004247742,
+            0.0001312622143034657,
+            0.00013366577144811995,
+            0.00013051422860631387,
+            0.00012964078570283684
+          ],
+          "calls_per_sample": 70,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0001328068903778131,
+          "min_seconds": 0.0001308020958912157,
+          "max_seconds": 0.0001367957807964907,
+          "p25_seconds": 0.0001321138013437333,
+          "p75_seconds": 0.00013360421231382505,
+          "samples_seconds": [
+            0.0001324804383429718,
+            0.00013362826027569347,
+            0.0001308020958912157,
+            0.0001367957807964907,
+            0.00013358016435195666,
+            0.0001317471643444948,
+            0.0001328068903778131
+          ],
+          "calls_per_sample": 73,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.004233912503814605,
+        "csc_over_F": 0.004177026088207962
+      }
+    },
+    {
+      "operation": "transpose",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 9.135515887396862e-05,
+          "min_seconds": 9.097824298567792e-05,
+          "max_seconds": 9.364085046875848e-05,
+          "p25_seconds": 9.120292056182718e-05,
+          "p75_seconds": 9.236641588392908e-05,
+          "samples_seconds": [
+            9.135515887396862e-05,
+            9.108825233682259e-05,
+            9.364085046875848e-05,
+            9.131758878683176e-05,
+            9.259683177664998e-05,
+            9.097824298567792e-05,
+            9.213599999120816e-05
+          ],
+          "calls_per_sample": 107,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned transpose in the input storage order, rather than a SciPy view."
+        },
+        "sppy_F": {
+          "median_seconds": 8.982224998935298e-05,
+          "min_seconds": 8.921326850584053e-05,
+          "max_seconds": 9.257121295107666e-05,
+          "p25_seconds": 8.962396294817963e-05,
+          "p75_seconds": 9.08977499757721e-05,
+          "samples_seconds": [
+            9.056344441449726e-05,
+            8.982224998935298e-05,
+            8.952512036086302e-05,
+            8.972280553549624e-05,
+            9.123205553704692e-05,
+            8.921326850584053e-05,
+            9.257121295107666e-05
+          ],
+          "calls_per_sample": 108,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned transpose in the input storage order, rather than a SciPy view."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.00014223791665952175,
+          "min_seconds": 0.00013798320833302569,
+          "max_seconds": 0.00014504511111428856,
+          "p25_seconds": 0.00014073931250398647,
+          "p75_seconds": 0.00014276575691635825,
+          "samples_seconds": [
+            0.00014231680552256876,
+            0.00013798320833302569,
+            0.00014504511111428856,
+            0.00014321470831014772,
+            0.00014085140279955036,
+            0.00014223791665952175,
+            0.0001406272222084226
+          ],
+          "calls_per_sample": 72,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned transpose in the input storage order, rather than a SciPy view."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.00013963487501516484,
+          "min_seconds": 0.0001379390416534281,
+          "max_seconds": 0.00014509831943440885,
+          "p25_seconds": 0.00013924071527071646,
+          "p75_seconds": 0.00014231694444788445,
+          "samples_seconds": [
+            0.00013963487501516484,
+            0.00014509831943440885,
+            0.00014476581943906948,
+            0.00013903961108654685,
+            0.00013986806945669942,
+            0.0001379390416534281,
+            0.00013944181945488608
+          ],
+          "calls_per_sample": 72,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned transpose in the input storage order, rather than a SciPy view."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 1.5569773881708175,
+        "csc_over_F": 1.5545688850114128
+      }
+    },
+    {
+      "operation": "adjoint",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 9.18439091037726e-05,
+          "min_seconds": 9.042974548223852e-05,
+          "max_seconds": 9.316845455693758e-05,
+          "p25_seconds": 9.142250453971263e-05,
+          "p75_seconds": 9.199304544877536e-05,
+          "samples_seconds": [
+            9.316845455693758e-05,
+            9.17596363499549e-05,
+            9.19589090864809e-05,
+            9.042974548223852e-05,
+            9.202718181106981e-05,
+            9.108537272947036e-05,
+            9.18439091037726e-05
+          ],
+          "calls_per_sample": 110,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned conjugate transpose in the input storage order."
+        },
+        "sppy_F": {
+          "median_seconds": 8.91647410493793e-05,
+          "min_seconds": 8.889250891895375e-05,
+          "max_seconds": 9.953272323010813e-05,
+          "p25_seconds": 8.90293884075228e-05,
+          "p75_seconds": 9.312361161002107e-05,
+          "samples_seconds": [
+            8.932135714141103e-05,
+            8.896750893784753e-05,
+            8.889250891895375e-05,
+            9.953272323010813e-05,
+            9.692586607863112e-05,
+            8.909126787719808e-05,
+            8.91647410493793e-05
+          ],
+          "calls_per_sample": 112,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned conjugate transpose in the input storage order."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0001739920624762211,
+          "min_seconds": 0.00017010770837562936,
+          "max_seconds": 0.0001749851874895588,
+          "p25_seconds": 0.0001723020833424016,
+          "p75_seconds": 0.00017468050001904584,
+          "samples_seconds": [
+            0.0001749851874895588,
+            0.0001747906042055547,
+            0.0001716631250019418,
+            0.0001739920624762211,
+            0.0001729410416828614,
+            0.00017457039583253695,
+            0.00017010770837562936
+          ],
+          "calls_per_sample": 48,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned conjugate transpose in the input storage order."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.00017318393177199388,
+          "min_seconds": 0.000169382795485779,
+          "max_seconds": 0.00017997459086803826,
+          "p25_seconds": 0.00017130087503987437,
+          "p75_seconds": 0.00017775311363782913,
+          "samples_seconds": [
+            0.00017997459086803826,
+            0.00017174075004401277,
+            0.00017318393177199388,
+            0.000170861000035736,
+            0.00017886413636667632,
+            0.000169382795485779,
+            0.00017664209090898194
+          ],
+          "calls_per_sample": 44,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Owned conjugate transpose in the input storage order."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 1.894432240243944,
+        "csc_over_F": 1.942291647278882
+      }
+    },
+    {
+      "operation": "add",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.000170235034476781,
+          "min_seconds": 0.0001694819310896805,
+          "max_seconds": 0.00017110382759710774,
+          "p25_seconds": 0.00016973218103446234,
+          "p75_seconds": 0.0001706971810374947,
+          "samples_seconds": [
+            0.0001694819310896805,
+            0.000170235034476781,
+            0.0001706186379531824,
+            0.00016951312073646915,
+            0.000170775724121807,
+            0.00017110382759710774,
+            0.00016995124133245554
+          ],
+          "calls_per_sample": 58,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0001977296274608485,
+          "min_seconds": 0.0001968623725463426,
+          "max_seconds": 0.0001983927450412154,
+          "p25_seconds": 0.0001973241274647401,
+          "p75_seconds": 0.00019791226469690219,
+          "samples_seconds": [
+            0.0001968623725463426,
+            0.00019704178432185276,
+            0.00019805960783189365,
+            0.0001983927450412154,
+            0.0001977296274608485,
+            0.00019760647060762743,
+            0.00019776492156191073
+          ],
+          "calls_per_sample": 51,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0001139567931026793,
+          "min_seconds": 0.00011224611494228533,
+          "max_seconds": 0.00011555380458059057,
+          "p25_seconds": 0.00011320836207211879,
+          "p75_seconds": 0.00011451932757687434,
+          "samples_seconds": [
+            0.00011224611494228533,
+            0.00011456598850213334,
+            0.0001139567931026793,
+            0.00011555380458059057,
+            0.00011366990807361836,
+            0.00011274681607061922,
+            0.00011447266665161534
+          ],
+          "calls_per_sample": 87,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.00011255637176733356,
+          "min_seconds": 0.00011098035900384928,
+          "max_seconds": 0.00011438944873076159,
+          "p25_seconds": 0.0001116562564045755,
+          "p75_seconds": 0.00011322399997227013,
+          "samples_seconds": [
+            0.00011291149997141941,
+            0.00011098035900384928,
+            0.00011148612816797163,
+            0.00011182638464117936,
+            0.00011438944873076159,
+            0.00011255637176733356,
+            0.00011353649997312087
+          ],
+          "calls_per_sample": 78,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.6694085823927289,
+        "csc_over_F": 0.5692438367114221
+      }
+    },
+    {
+      "operation": "multiply",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.00023587304649693176,
+          "min_seconds": 0.0002350618837395856,
+          "max_seconds": 0.00023639744185222596,
+          "p25_seconds": 0.00023523966283814948,
+          "p75_seconds": 0.00023602744189448396,
+          "samples_seconds": [
+            0.00023639744185222596,
+            0.0002350618837395856,
+            0.00023513932564826466,
+            0.00023534000002803433,
+            0.00023587304649693176,
+            0.00023609883722857313,
+            0.00023595604656039478
+          ],
+          "calls_per_sample": 43,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.00023599325580763372,
+          "min_seconds": 0.0002354825581193815,
+          "max_seconds": 0.0002370218837398191,
+          "p25_seconds": 0.00023564012790725533,
+          "p75_seconds": 0.00023648126744076363,
+          "samples_seconds": [
+            0.00023567744185214016,
+            0.0002370218837398191,
+            0.0002360527906539785,
+            0.00023599325580763372,
+            0.00023690974422754872,
+            0.0002354825581193815,
+            0.0002356028139623705
+          ],
+          "calls_per_sample": 43,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.00011299457141181588,
+          "min_seconds": 0.00011151766665577833,
+          "max_seconds": 0.00011434242857094865,
+          "p25_seconds": 0.00011288986310579015,
+          "p75_seconds": 0.0001136834345223698,
+          "samples_seconds": [
+            0.00011284373812529902,
+            0.0001129359880862813,
+            0.00011310897618733136,
+            0.00011151766665577833,
+            0.00011299457141181588,
+            0.00011434242857094865,
+            0.00011425789285740826
+          ],
+          "calls_per_sample": 84,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0001138536896470977,
+          "min_seconds": 0.00011286312643466678,
+          "max_seconds": 0.00011451841381695603,
+          "p25_seconds": 0.00011369059194848156,
+          "p75_seconds": 0.00011431702873308276,
+          "samples_seconds": [
+            0.0001138536896470977,
+            0.00011433232183422325,
+            0.00011286312643466678,
+            0.00011361818391817687,
+            0.00011451841381695603,
+            0.00011376299997878624,
+            0.00011430173563194226
+          ],
+          "calls_per_sample": 87,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.4790482553642928,
+        "csc_over_F": 0.4824446751982768
+      }
+    },
+    {
+      "operation": "matvec",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 4.0431679159761795e-05,
+          "min_seconds": 4.024055416872822e-05,
+          "max_seconds": 4.0666804155383335e-05,
+          "p25_seconds": 4.0283364584562756e-05,
+          "p75_seconds": 4.053025833551752e-05,
+          "samples_seconds": [
+            4.0249220834690887e-05,
+            4.0450466667607546e-05,
+            4.0666804155383335e-05,
+            4.0610050003427505e-05,
+            4.031750833443463e-05,
+            4.0431679159761795e-05,
+            4.024055416872822e-05
+          ],
+          "calls_per_sample": 240,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 4.1339799993337415e-05,
+          "min_seconds": 4.10206695644023e-05,
+          "max_seconds": 4.157723043412577e-05,
+          "p25_seconds": 4.1307534775114616e-05,
+          "p75_seconds": 4.1365906524689585e-05,
+          "samples_seconds": [
+            4.135758260773677e-05,
+            4.10206695644023e-05,
+            4.1291969556250086e-05,
+            4.157723043412577e-05,
+            4.132309999397915e-05,
+            4.1339799993337415e-05,
+            4.13742304416424e-05
+          ],
+          "calls_per_sample": 230,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 2.6375721448310585e-05,
+          "min_seconds": 2.6184359324520745e-05,
+          "max_seconds": 2.6614130927398307e-05,
+          "p25_seconds": 2.618866016536051e-05,
+          "p75_seconds": 2.6442433148160418e-05,
+          "samples_seconds": [
+            2.650786350931308e-05,
+            2.618856266955521e-05,
+            2.6614130927398307e-05,
+            2.6375721448310585e-05,
+            2.6377002787007755e-05,
+            2.618875766116581e-05,
+            2.6184359324520745e-05
+          ],
+          "calls_per_sample": 359,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 3.549038147967723e-05,
+          "min_seconds": 3.489042222402834e-05,
+          "max_seconds": 3.558808518088578e-05,
+          "p25_seconds": 3.5356122228862385e-05,
+          "p75_seconds": 3.555450925718847e-05,
+          "samples_seconds": [
+            3.489042222402834e-05,
+            3.527104815509153e-05,
+            3.558808518088578e-05,
+            3.555545185076038e-05,
+            3.549038147967723e-05,
+            3.5553566663616546e-05,
+            3.544119630263325e-05
+          ],
+          "calls_per_sample": 270,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.6523528578689379,
+        "csc_over_F": 0.8585039474162207
+      }
+    },
+    {
+      "operation": "matmat",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.00032341712909739374,
+          "min_seconds": 0.00031864974199936934,
+          "max_seconds": 0.00033438738718095625,
+          "p25_seconds": 0.00032247469355371,
+          "p75_seconds": 0.0003266901774388257,
+          "samples_seconds": [
+            0.00033438738718095625,
+            0.0003227112903269083,
+            0.00032739809678112636,
+            0.0003259822580965251,
+            0.0003222380967805117,
+            0.00032341712909739374,
+            0.00031864974199936934
+          ],
+          "calls_per_sample": 31,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.00036822520014538894,
+          "min_seconds": 0.0003226283999538282,
+          "max_seconds": 0.00040245399977720806,
+          "p25_seconds": 0.00036759569993591865,
+          "p75_seconds": 0.00038127114985400115,
+          "samples_seconds": [
+            0.00040245399977720806,
+            0.00039050909981597215,
+            0.00036799819972657135,
+            0.0003226283999538282,
+            0.000367193200145266,
+            0.0003720331998920301,
+            0.00036822520014538894
+          ],
+          "calls_per_sample": 10,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.00012658362497859345,
+          "min_seconds": 0.00012518339999587625,
+          "max_seconds": 0.00013019436246395344,
+          "p25_seconds": 0.00012562538749989472,
+          "p75_seconds": 0.00012727693749639001,
+          "samples_seconds": [
+            0.00013019436246395344,
+            0.00012732837499243032,
+            0.00012658362497859345,
+            0.00012562326251099875,
+            0.00012562751248879067,
+            0.0001272255000003497,
+            0.00012518339999587625
+          ],
+          "calls_per_sample": 80,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0001121504555259081,
+          "min_seconds": 0.00011115423334962947,
+          "max_seconds": 0.00011966042224634698,
+          "p25_seconds": 0.00011162172777403611,
+          "p75_seconds": 0.00011219995554306984,
+          "samples_seconds": [
+            0.00011966042224634698,
+            0.00011178455554020021,
+            0.00011145890000787201,
+            0.00011115423334962947,
+            0.0001121504555259081,
+            0.00011221967777398984,
+            0.00011218023331214985
+          ],
+          "calls_per_sample": 90,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.3913943127621855,
+        "csc_over_F": 0.3045702887299048
+      }
+    },
+    {
+      "operation": "sparse-matmul",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.00337181699918195,
+          "min_seconds": 0.0031244450001395307,
+          "max_seconds": 0.0037990746665551947,
+          "p25_seconds": 0.003246412500933123,
+          "p75_seconds": 0.003459374833861754,
+          "samples_seconds": [
+            0.003272817334315429,
+            0.0034468500004246985,
+            0.003471899667298809,
+            0.00337181699918195,
+            0.003220007667550817,
+            0.0031244450001395307,
+            0.0037990746665551947
+          ],
+          "calls_per_sample": 3,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0008870823330653366,
+          "min_seconds": 0.0008339259168982002,
+          "max_seconds": 0.0009099271668067862,
+          "p25_seconds": 0.0008431942499858753,
+          "p75_seconds": 0.0008962768750582957,
+          "samples_seconds": [
+            0.0008397950832659262,
+            0.0008870823330653366,
+            0.000901558916666545,
+            0.0008339259168982002,
+            0.0009099271668067862,
+            0.0008909948334500465,
+            0.0008465934167058246
+          ],
+          "calls_per_sample": 12,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0005427852631424015,
+          "min_seconds": 0.0005414947368798925,
+          "max_seconds": 0.0005514825262300866,
+          "p25_seconds": 0.0005419892105764072,
+          "p75_seconds": 0.0005467431315321989,
+          "samples_seconds": [
+            0.0005440257894071309,
+            0.0005427852631424015,
+            0.0005421621053277416,
+            0.0005414947368798925,
+            0.000549460473657267,
+            0.0005418163158250728,
+            0.0005514825262300866
+          ],
+          "calls_per_sample": 19,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0005418236316089812,
+          "min_seconds": 0.0005398857894378077,
+          "max_seconds": 0.0005466025789868773,
+          "p25_seconds": 0.0005407978946765837,
+          "p75_seconds": 0.0005429452368461122,
+          "samples_seconds": [
+            0.0005466025789868773,
+            0.0005398857894378077,
+            0.0005433836315779971,
+            0.000540784210515037,
+            0.0005425068421142274,
+            0.0005408115788381302,
+            0.0005418236316089812
+          ],
+          "calls_per_sample": 19,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.1609770824674319,
+        "csc_over_F": 0.6107929460580004
+      }
+    },
+    {
+      "operation": "sum",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 3.135444728632312e-05,
+          "min_seconds": 3.1234670925372916e-05,
+          "max_seconds": 3.161093290503205e-05,
+          "p25_seconds": 3.1283329072073266e-05,
+          "p75_seconds": 3.140147603694357e-05,
+          "samples_seconds": [
+            3.138093291108642e-05,
+            3.1284607031264346e-05,
+            3.1282051112882186e-05,
+            3.135444728632312e-05,
+            3.161093290503205e-05,
+            3.1234670925372916e-05,
+            3.142201916280072e-05
+          ],
+          "calls_per_sample": 313,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 3.12789934229697e-05,
+          "min_seconds": 3.1109746702752185e-05,
+          "max_seconds": 3.145307236033994e-05,
+          "p25_seconds": 3.123501151573069e-05,
+          "p75_seconds": 3.1326360200230406e-05,
+          "samples_seconds": [
+            3.1109746702752185e-05,
+            3.12165592085397e-05,
+            3.132053618508891e-05,
+            3.125346382292168e-05,
+            3.145307236033994e-05,
+            3.12789934229697e-05,
+            3.1332184215371904e-05
+          ],
+          "calls_per_sample": 304,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 1.0472112469754266e-05,
+          "min_seconds": 1.0438848410398314e-05,
+          "max_seconds": 1.057606112755736e-05,
+          "p25_seconds": 1.0448139363530941e-05,
+          "p75_seconds": 1.0523169925706068e-05,
+          "samples_seconds": [
+            1.0472112469754266e-05,
+            1.0446134472520871e-05,
+            1.0520083129596396e-05,
+            1.052625672181574e-05,
+            1.0438848410398314e-05,
+            1.057606112755736e-05,
+            1.0450144254541011e-05
+          ],
+          "calls_per_sample": 818,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 1.045277055090099e-05,
+          "min_seconds": 1.0383261350359184e-05,
+          "max_seconds": 1.053970306754638e-05,
+          "p25_seconds": 1.040192515251121e-05,
+          "p75_seconds": 1.0469991412368014e-05,
+          "samples_seconds": [
+            1.0477531290837376e-05,
+            1.0383261350359184e-05,
+            1.0409557053989279e-05,
+            1.0394293251033141e-05,
+            1.0462451533898654e-05,
+            1.053970306754638e-05,
+            1.045277055090099e-05
+          ],
+          "calls_per_sample": 815,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.3339912955289831,
+        "csc_over_F": 0.33417861021144646
+      }
+    },
+    {
+      "operation": "column-sum",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0001362775277710979,
+          "min_seconds": 0.00013578461110025982,
+          "max_seconds": 0.00013719168055104092,
+          "p25_seconds": 0.00013619836110794696,
+          "p75_seconds": 0.00013671690276674376,
+          "samples_seconds": [
+            0.0001368753055430716,
+            0.0001362775277710979,
+            0.00013614474998272877,
+            0.00013655849999041593,
+            0.00013578461110025982,
+            0.00013625197223316517,
+            0.00013719168055104092
+          ],
+          "calls_per_sample": 72,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.00014683080299812102,
+          "min_seconds": 0.0001466976060659032,
+          "max_seconds": 0.0001473545757052665,
+          "p25_seconds": 0.00014677829544366847,
+          "p75_seconds": 0.00014698927272106766,
+          "samples_seconds": [
+            0.0001468756363465218,
+            0.00014710290909561357,
+            0.0001468145908967761,
+            0.00014683080299812102,
+            0.0001473545757052665,
+            0.0001466976060659032,
+            0.0001467419999905608
+          ],
+          "calls_per_sample": 66,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 6.380814082943506e-05,
+          "min_seconds": 6.34499013960496e-05,
+          "max_seconds": 6.464249999623115e-05,
+          "p25_seconds": 6.357113378611065e-05,
+          "p75_seconds": 6.433767605774617e-05,
+          "samples_seconds": [
+            6.464249999623115e-05,
+            6.380814082943506e-05,
+            6.351130983782408e-05,
+            6.429073944442715e-05,
+            6.438461267106517e-05,
+            6.34499013960496e-05,
+            6.363095773439723e-05
+          ],
+          "calls_per_sample": 142,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.00012536079488293183,
+          "min_seconds": 0.00012486234612506218,
+          "max_seconds": 0.00012642451278784743,
+          "p25_seconds": 0.00012514944871956966,
+          "p75_seconds": 0.0001257605448793187,
+          "samples_seconds": [
+            0.00012579015385246096,
+            0.00012642451278784743,
+            0.00012573093590617646,
+            0.00012486234612506218,
+            0.00012524643590530523,
+            0.00012536079488293183,
+            0.00012505246153383408
+          ],
+          "calls_per_sample": 78,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.468222030976465,
+        "csc_over_F": 0.8537772206049712
+      }
+    },
+    {
+      "operation": "mean",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 3.746334509296324e-05,
+          "min_seconds": 3.706605490936222e-05,
+          "max_seconds": 3.7739462748183595e-05,
+          "p25_seconds": 3.730421177512171e-05,
+          "p75_seconds": 3.749967843617139e-05,
+          "samples_seconds": [
+            3.706605490936222e-05,
+            3.725260392849461e-05,
+            3.735581962174882e-05,
+            3.749275686762606e-05,
+            3.7506600004716724e-05,
+            3.7739462748183595e-05,
+            3.746334509296324e-05
+          ],
+          "calls_per_sample": 255,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 3.70070408187493e-05,
+          "min_seconds": 3.690137143296722e-05,
+          "max_seconds": 3.807161223708785e-05,
+          "p25_seconds": 3.694161632851394e-05,
+          "p75_seconds": 3.717426939425534e-05,
+          "samples_seconds": [
+            3.807161223708785e-05,
+            3.696365714933229e-05,
+            3.718749387783702e-05,
+            3.691957550769558e-05,
+            3.70070408187493e-05,
+            3.716104491067366e-05,
+            3.690137143296722e-05
+          ],
+          "calls_per_sample": 245,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 6.698318247799762e-05,
+          "min_seconds": 6.546091241485874e-05,
+          "max_seconds": 6.825929927388138e-05,
+          "p25_seconds": 6.644325182678851e-05,
+          "p75_seconds": 6.724470437344599e-05,
+          "samples_seconds": [
+            6.682529196718429e-05,
+            6.606121168639273e-05,
+            6.698318247799762e-05,
+            6.546091241485874e-05,
+            6.825929927388138e-05,
+            6.748827735776164e-05,
+            6.700113138913035e-05
+          ],
+          "calls_per_sample": 137,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 6.750643382581663e-05,
+          "min_seconds": 6.619636764405775e-05,
+          "max_seconds": 6.828922794417903e-05,
+          "p25_seconds": 6.695257720553747e-05,
+          "p75_seconds": 6.758374999716419e-05,
+          "samples_seconds": [
+            6.689805144667523e-05,
+            6.828922794417903e-05,
+            6.756621322732398e-05,
+            6.700710296439972e-05,
+            6.750643382581663e-05,
+            6.619636764405775e-05,
+            6.76012867670044e-05
+          ],
+          "calls_per_sample": 136,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 1.787965872021906,
+        "csc_over_F": 1.8241510894222885
+      }
+    },
+    {
+      "operation": "norm",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 3.290027152555717e-05,
+          "min_seconds": 3.285159270688876e-05,
+          "max_seconds": 3.297010264922217e-05,
+          "p25_seconds": 3.287561920788355e-05,
+          "p75_seconds": 3.2922983445319274e-05,
+          "samples_seconds": [
+            3.288937748960275e-05,
+            3.2925764902973616e-05,
+            3.285159270688876e-05,
+            3.297010264922217e-05,
+            3.286186092616435e-05,
+            3.292020198766494e-05,
+            3.290027152555717e-05
+          ],
+          "calls_per_sample": 302,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "sppy_F": {
+          "median_seconds": 3.280397333583096e-05,
+          "min_seconds": 3.278730334083472e-05,
+          "max_seconds": 3.2824839994039694e-05,
+          "p25_seconds": 3.280217166320653e-05,
+          "p75_seconds": 3.281350666535824e-05,
+          "samples_seconds": [
+            3.278730334083472e-05,
+            3.280843999770392e-05,
+            3.2824839994039694e-05,
+            3.280153666613236e-05,
+            3.2802806660280716e-05,
+            3.280397333583096e-05,
+            3.281857333301256e-05
+          ],
+          "calls_per_sample": 300,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csr": {
+          "median_seconds": 6.492446107050898e-06,
+          "min_seconds": 6.4395507481601305e-06,
+          "max_seconds": 6.523225019231803e-06,
+          "p25_seconds": 6.462434696768726e-06,
+          "p75_seconds": 6.5091974824404294e-06,
+          "samples_seconds": [
+            6.492446107050898e-06,
+            6.495774980738135e-06,
+            6.522619984142723e-06,
+            6.452493311440349e-06,
+            6.4395507481601305e-06,
+            6.472376082097103e-06,
+            6.523225019231803e-06
+          ],
+          "calls_per_sample": 1271,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        },
+        "scipy_csc": {
+          "median_seconds": 7.800522132778992e-06,
+          "min_seconds": 7.77554471346919e-06,
+          "max_seconds": 7.84793857250753e-06,
+          "p25_seconds": 7.79254516918345e-06,
+          "p75_seconds": 7.819239387499331e-06,
+          "samples_seconds": [
+            7.84793857250753e-06,
+            7.789862693843533e-06,
+            7.795227644523368e-06,
+            7.819176153380798e-06,
+            7.77554471346919e-06,
+            7.819302621617865e-06,
+            7.800522132778992e-06
+          ],
+          "calls_per_sample": 1107,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Preparation and validation excluded; public API allocation/conversion included."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.1973371588136444,
+        "csc_over_F": 0.23779199101648693
+      }
+    },
+    {
+      "operation": "compressed-export",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 2.4551495675098886e-05,
+          "min_seconds": 2.4207112387256155e-05,
+          "max_seconds": 2.596506340494943e-05,
+          "p25_seconds": 2.4426407778738954e-05,
+          "p75_seconds": 2.4832789627221206e-05,
+          "samples_seconds": [
+            2.4754172915684044e-05,
+            2.4379706048803883e-05,
+            2.491140633875837e-05,
+            2.596506340494943e-05,
+            2.4207112387256155e-05,
+            2.4551495675098886e-05,
+            2.4473109508674024e-05
+          ],
+          "calls_per_sample": 347,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Independent value/index/pointer copies in matching CSR/CSC order."
+        },
+        "sppy_F": {
+          "median_seconds": 2.4350272733343453e-05,
+          "min_seconds": 2.3989660935479283e-05,
+          "max_seconds": 2.63145380898428e-05,
+          "p25_seconds": 2.4277031938415262e-05,
+          "p75_seconds": 2.477801105470759e-05,
+          "samples_seconds": [
+            2.422491891546454e-05,
+            2.4784941033386403e-05,
+            2.477108107602878e-05,
+            2.4350272733343453e-05,
+            2.3989660935479283e-05,
+            2.432914496136598e-05,
+            2.63145380898428e-05
+          ],
+          "calls_per_sample": 407,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Independent value/index/pointer copies in matching CSR/CSC order."
+        },
+        "scipy_csr": {
+          "median_seconds": 1.3359384881534543e-05,
+          "min_seconds": 1.2785213056526105e-05,
+          "max_seconds": 1.4043195874036587e-05,
+          "p25_seconds": 1.29685541241841e-05,
+          "p75_seconds": 1.3458963915603867e-05,
+          "samples_seconds": [
+            1.3359384881534543e-05,
+            1.310393986152365e-05,
+            1.2785213056526105e-05,
+            1.3359900343126242e-05,
+            1.3558027488081492e-05,
+            1.283316838684455e-05,
+            1.4043195874036587e-05
+          ],
+          "calls_per_sample": 582,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Independent value/index/pointer copies in matching CSR/CSC order."
+        },
+        "scipy_csc": {
+          "median_seconds": 1.2811034440922097e-05,
+          "min_seconds": 1.2553279336260653e-05,
+          "max_seconds": 1.4001346935587282e-05,
+          "p25_seconds": 1.2699765304613703e-05,
+          "p75_seconds": 1.292060586616126e-05,
+          "samples_seconds": [
+            1.2709950253189832e-05,
+            1.2901033159676221e-05,
+            1.2553279336260653e-05,
+            1.4001346935587282e-05,
+            1.2811034440922097e-05,
+            1.2689580356037572e-05,
+            1.2940178572646299e-05
+          ],
+          "calls_per_sample": 784,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Independent value/index/pointer copies in matching CSR/CSC order."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.544137312786372,
+        "csc_over_F": 0.5261146181487988
+      }
+    },
+    {
+      "operation": "copy-prune",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0005935541427918776,
+          "min_seconds": 0.0005819101430201304,
+          "max_seconds": 0.0007175821426374439,
+          "p25_seconds": 0.0005913549999344728,
+          "p75_seconds": 0.0005998599286353315,
+          "samples_seconds": [
+            0.000589381428393868,
+            0.0005935541427918776,
+            0.0007175821426374439,
+            0.0005933285714750777,
+            0.0006011270000141979,
+            0.0005819101430201304,
+            0.0005985928572564651
+          ],
+          "calls_per_sample": 7,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes copy and exact-zero removal; explicit zeros prepared outside timing."
+        },
+        "sppy_F": {
+          "median_seconds": 0.000520498449986917,
+          "min_seconds": 0.0005058184999143123,
+          "max_seconds": 0.0005952960998911294,
+          "p25_seconds": 0.0005084800000076939,
+          "p75_seconds": 0.0005558162749366602,
+          "samples_seconds": [
+            0.000520498449986917,
+            0.0005952960998911294,
+            0.0005058184999143123,
+            0.0005108395000206656,
+            0.0005610092499409802,
+            0.0005061204999947222,
+            0.0005506232999323401
+          ],
+          "calls_per_sample": 20,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes copy and exact-zero removal; explicit zeros prepared outside timing."
+        },
+        "scipy_csr": {
+          "median_seconds": 5.827235849976903e-05,
+          "min_seconds": 5.763362263587052e-05,
+          "max_seconds": 5.974989936195765e-05,
+          "p25_seconds": 5.776147799390301e-05,
+          "p75_seconds": 5.8845402510893834e-05,
+          "samples_seconds": [
+            5.7813050313237704e-05,
+            5.974989936195765e-05,
+            5.9357880489862635e-05,
+            5.763362263587052e-05,
+            5.770990567456831e-05,
+            5.827235849976903e-05,
+            5.8332924531925026e-05
+          ],
+          "calls_per_sample": 159,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes copy and exact-zero removal; explicit zeros prepared outside timing."
+        },
+        "scipy_csc": {
+          "median_seconds": 5.839046541310015e-05,
+          "min_seconds": 5.729550943466829e-05,
+          "max_seconds": 6.0562339630387955e-05,
+          "p25_seconds": 5.7670317601036204e-05,
+          "p75_seconds": 5.944590250823834e-05,
+          "samples_seconds": [
+            5.7313056596234127e-05,
+            5.839046541310015e-05,
+            5.8652855343853105e-05,
+            5.8027578605838276e-05,
+            6.0238949672623575e-05,
+            5.729550943466829e-05,
+            6.0562339630387955e-05
+          ],
+          "calls_per_sample": 159,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Includes copy and exact-zero removal; explicit zeros prepared outside timing."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.098175304152837,
+        "csc_over_F": 0.11218182381632036
+      }
+    },
+    {
+      "operation": "lu-factor",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.004292642332681377,
+          "min_seconds": 0.004188866000428486,
+          "max_seconds": 0.004636477333406219,
+          "p25_seconds": 0.0042559991670714226,
+          "p75_seconds": 0.004489961499833347,
+          "samples_seconds": [
+            0.004292642332681377,
+            0.004280999000911834,
+            0.0044143853325901245,
+            0.004565537667076569,
+            0.004188866000428486,
+            0.004636477333406219,
+            0.004230999333231011
+          ],
+          "calls_per_sample": 3,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8789403267415347e-16
+          },
+          "scope": "COLAMD, pivot threshold 1; SciPy CSR-to-CSC conversion is included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.004725343666602082,
+          "min_seconds": 0.0043444453343302785,
+          "max_seconds": 0.005156157999105441,
+          "p25_seconds": 0.004504451166819004,
+          "p75_seconds": 0.004814816499977799,
+          "samples_seconds": [
+            0.004358348667058938,
+            0.004725343666602082,
+            0.0047829299995404044,
+            0.004650553666579071,
+            0.004846703000415194,
+            0.005156157999105441,
+            0.0043444453343302785
+          ],
+          "calls_per_sample": 3,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8789403267415347e-16
+          },
+          "scope": "COLAMD, pivot threshold 1; SciPy CSR-to-CSC conversion is included."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.00284167849986261,
+          "min_seconds": 0.002706149250116141,
+          "max_seconds": 0.0038844959999551065,
+          "p25_seconds": 0.0027545766247385473,
+          "p75_seconds": 0.003187654500379722,
+          "samples_seconds": [
+            0.002706149250116141,
+            0.003284641500613361,
+            0.0038844959999551065,
+            0.0030906675001460826,
+            0.00284167849986261,
+            0.002744534250268771,
+            0.0027646189992083237
+          ],
+          "calls_per_sample": 4,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8786592544830426e-16
+          },
+          "scope": "COLAMD, pivot threshold 1; SciPy CSR-to-CSC conversion is included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0028413819993147625,
+          "min_seconds": 0.002473525799723575,
+          "max_seconds": 0.003441819400177337,
+          "p25_seconds": 0.002744649599844706,
+          "p75_seconds": 0.0033552615997905376,
+          "samples_seconds": [
+            0.0033251458000449928,
+            0.002473525799723575,
+            0.0033853773995360823,
+            0.0028413819993147625,
+            0.003441819400177337,
+            0.0026627330000337677,
+            0.0028265661996556444
+          ],
+          "calls_per_sample": 5,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8786592544830426e-16
+          },
+          "scope": "COLAMD, pivot threshold 1; SciPy CSR-to-CSC conversion is included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.661988183415125,
+        "csc_over_F": 0.6013069524227758
+      }
+    },
+    {
+      "operation": "lu-solve",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0007232507144051072,
+          "min_seconds": 0.0007210036427360526,
+          "max_seconds": 0.0007610270001480655,
+          "p25_seconds": 0.0007223261071495862,
+          "p75_seconds": 0.0007319585713828149,
+          "samples_seconds": [
+            0.0007610270001480655,
+            0.0007335214283687362,
+            0.0007303957143968935,
+            0.0007219192858818653,
+            0.000722732928417307,
+            0.0007232507144051072,
+            0.0007210036427360526
+          ],
+          "calls_per_sample": 14,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8911366576102142e-16
+          },
+          "scope": "Reused LU factor, multiple dense RHS; factorization excluded."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0007362800001179234,
+          "min_seconds": 0.0007308071430348459,
+          "max_seconds": 0.0007606148571669889,
+          "p25_seconds": 0.0007335332142507209,
+          "p75_seconds": 0.0007465927500171737,
+          "samples_seconds": [
+            0.0007539984284708875,
+            0.0007606148571669889,
+            0.0007391870715634598,
+            0.0007343607142372223,
+            0.0007308071430348459,
+            0.0007327057142642193,
+            0.0007362800001179234
+          ],
+          "calls_per_sample": 14,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8911366576102142e-16
+          },
+          "scope": "Reused LU factor, multiple dense RHS; factorization excluded."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0005036655498770415,
+          "min_seconds": 0.0004984330500519718,
+          "max_seconds": 0.0005121019999933196,
+          "p25_seconds": 0.0005018715250116656,
+          "p75_seconds": 0.000505076000081317,
+          "samples_seconds": [
+            0.0005121019999933196,
+            0.0005063860000518617,
+            0.000503243549974286,
+            0.0005036655498770415,
+            0.0004984330500519718,
+            0.0005004995000490453,
+            0.0005037660001107724
+          ],
+          "calls_per_sample": 20,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8909504542425259e-16
+          },
+          "scope": "Reused LU factor, multiple dense RHS; factorization excluded."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0004997695999918505,
+          "min_seconds": 0.0004960740998285473,
+          "max_seconds": 0.0005164594500456588,
+          "p25_seconds": 0.0004983183249350987,
+          "p75_seconds": 0.0005081713000436138,
+          "samples_seconds": [
+            0.0005164594500456588,
+            0.0005103265501020359,
+            0.0005060160499851917,
+            0.0004960740998285473,
+            0.0004976550499122823,
+            0.0004989815999579151,
+            0.0004997695999918505
+          ],
+          "calls_per_sample": 20,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.8909504542425259e-16
+          },
+          "scope": "Reused LU factor, multiple dense RHS; factorization excluded."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.6963913617303783,
+        "csc_over_F": 0.678776552278762
+      }
+    },
+    {
+      "operation": "cg",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0013805507501274406,
+          "min_seconds": 0.0013794931246593478,
+          "max_seconds": 0.0013929968749835098,
+          "p25_seconds": 0.001380447625024317,
+          "p75_seconds": 0.0013866756248717138,
+          "samples_seconds": [
+            0.0013929968749835098,
+            0.001380483250159159,
+            0.0013891068747398094,
+            0.0013794931246593478,
+            0.0013842443750036182,
+            0.0013805507501274406,
+            0.0013804119998894748
+          ],
+          "calls_per_sample": 8,
+          "validation": {
+            "passed": true,
+            "relative_residual": 6.193274778570822e-09
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0014071002858275148,
+          "min_seconds": 0.00140216171400555,
+          "max_seconds": 0.0014152672857952503,
+          "p25_seconds": 0.0014054852142310536,
+          "p75_seconds": 0.0014108617145081681,
+          "samples_seconds": [
+            0.0014152672857952503,
+            0.0014048630000615958,
+            0.0014121531431945705,
+            0.00140216171400555,
+            0.0014071002858275148,
+            0.0014061074284005112,
+            0.001409570285821766
+          ],
+          "calls_per_sample": 7,
+          "validation": {
+            "passed": true,
+            "relative_residual": 6.193274778570822e-09
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0013202873751652078,
+          "min_seconds": 0.001300741125305649,
+          "max_seconds": 0.001331732250037021,
+          "p25_seconds": 0.0013136210625361855,
+          "p75_seconds": 0.0013252547498723288,
+          "samples_seconds": [
+            0.001331732250037021,
+            0.0013202873751652078,
+            0.0013088109999443986,
+            0.0013184311251279723,
+            0.00132546224995167,
+            0.001300741125305649,
+            0.0013250472497929877
+          ],
+          "calls_per_sample": 8,
+          "validation": {
+            "passed": true,
+            "relative_residual": 6.193274774693762e-09
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0015179025711924104,
+          "min_seconds": 0.0015101811425535874,
+          "max_seconds": 0.0015354695715359412,
+          "p25_seconds": 0.0015152004286522113,
+          "p75_seconds": 0.0015281603570786373,
+          "samples_seconds": [
+            0.0015354695715359412,
+            0.0015214911431290343,
+            0.001517393999945073,
+            0.0015130068573593494,
+            0.0015101811425535874,
+            0.00153482957102824,
+            0.0015179025711924104
+          ],
+          "calls_per_sample": 7,
+          "validation": {
+            "passed": true,
+            "relative_residual": 6.193274774693762e-09
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.956348308849443,
+        "csc_over_F": 1.0787451232018852
+      }
+    },
+    {
+      "operation": "bicgstab",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.002217987200128846,
+          "min_seconds": 0.002198463199601974,
+          "max_seconds": 0.00222694300027797,
+          "p25_seconds": 0.0022023741999873895,
+          "p75_seconds": 0.002223714200226823,
+          "samples_seconds": [
+            0.002198463199601974,
+            0.0022254752002481837,
+            0.0022000251999998,
+            0.002221953200205462,
+            0.002217987200128846,
+            0.0022047231999749784,
+            0.00222694300027797
+          ],
+          "calls_per_sample": 5,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.818033078713984e-11
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0022394630002963824,
+          "min_seconds": 0.0022215429999050684,
+          "max_seconds": 0.0022603288001846523,
+          "p25_seconds": 0.002232168000045931,
+          "p75_seconds": 0.002241855999818654,
+          "samples_seconds": [
+            0.002238529000169365,
+            0.002225806999922497,
+            0.0022603288001846523,
+            0.0022394630002963824,
+            0.0022421449997636956,
+            0.0022215429999050684,
+            0.0022415669998736122
+          ],
+          "calls_per_sample": 5,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.818033078713984e-11
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0017688030002318555,
+          "min_seconds": 0.0017552648338702663,
+          "max_seconds": 0.0017977046663872898,
+          "p25_seconds": 0.0017641589168609548,
+          "p75_seconds": 0.00178187958348038,
+          "samples_seconds": [
+            0.001793907833416597,
+            0.0017684446672016445,
+            0.0017977046663872898,
+            0.0017552648338702663,
+            0.001759873166520265,
+            0.0017688030002318555,
+            0.0017698513335441628
+          ],
+          "calls_per_sample": 6,
+          "validation": {
+            "passed": true,
+            "relative_residual": 8.251425341159396e-09
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0020261562000086996,
+          "min_seconds": 0.001990546199522214,
+          "max_seconds": 0.0020743337998283097,
+          "p25_seconds": 0.0019971811994764724,
+          "p75_seconds": 0.0020373201001348206,
+          "samples_seconds": [
+            0.001990546199522214,
+            0.0020261562000086996,
+            0.001998232199548511,
+            0.0020450222000363283,
+            0.0020743337998283097,
+            0.002029618000233313,
+            0.0019961301994044335
+          ],
+          "calls_per_sample": 5,
+          "validation": {
+            "passed": true,
+            "relative_residual": 8.251425341159396e-09
+          },
+          "scope": "Hermitian SPD input; includes diagonal preconditioner setup; zero initial guess, atol=0."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csc",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_C",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.7974811577492887,
+        "csc_over_F": 0.9047509156170687
+      }
+    },
+    {
+      "operation": "triangular-solve",
+      "shape": [
+        10000,
+        10000
+      ],
+      "nnz": 49994,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.00042013791668675066,
+          "min_seconds": 0.00041504004154073,
+          "max_seconds": 0.0004231445833890272,
+          "p25_seconds": 0.0004166642083115827,
+          "p75_seconds": 0.00042135504168072657,
+          "samples_seconds": [
+            0.0004231445833890272,
+            0.00042013791668675066,
+            0.00042237420833165135,
+            0.00041504004154073,
+            0.000416208791648387,
+            0.00041711962497477845,
+            0.0004203358750298018
+          ],
+          "calls_per_sample": 24,
+          "validation": {
+            "passed": true,
+            "relative_residual": 7.844480446301972e-17
+          },
+          "scope": "Lower triangle prepared outside timing; public triangular solve included."
+        },
+        "sppy_F": {
+          "median_seconds": 0.00043164287505229976,
+          "min_seconds": 0.00042982583333165775,
+          "max_seconds": 0.00043443704165232094,
+          "p25_seconds": 0.00043099583331240865,
+          "p75_seconds": 0.0004334972708572119,
+          "samples_seconds": [
+            0.00042982583333165775,
+            0.00043164287505229976,
+            0.0004326316666265484,
+            0.0004312399999738166,
+            0.00043436287508787547,
+            0.00043443704165232094,
+            0.0004307516666510007
+          ],
+          "calls_per_sample": 24,
+          "validation": {
+            "passed": true,
+            "relative_residual": 7.844480446301972e-17
+          },
+          "scope": "Lower triangle prepared outside timing; public triangular solve included."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.0007770723845729103,
+          "min_seconds": 0.0007728423846016924,
+          "max_seconds": 0.0007830469229912313,
+          "p25_seconds": 0.0007734916153612386,
+          "p75_seconds": 0.0007793007691641552,
+          "samples_seconds": [
+            0.0007830469229912313,
+            0.0007739700768769791,
+            0.0007728423846016924,
+            0.0007770723845729103,
+            0.0007730131538454981,
+            0.0007789061536851267,
+            0.0007796953846431839
+          ],
+          "calls_per_sample": 13,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.0146059559401155e-16
+          },
+          "scope": "Lower triangle prepared outside timing; public triangular solve included."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.0005967100001084071,
+          "min_seconds": 0.0005852289413108819,
+          "max_seconds": 0.0006044323529161321,
+          "p25_seconds": 0.000593897970568779,
+          "p75_seconds": 0.0005994414706733283,
+          "samples_seconds": [
+            0.0006044323529161321,
+            0.0006013494117616895,
+            0.0005967100001084071,
+            0.0005928041175459785,
+            0.0005949918235915795,
+            0.0005852289413108819,
+            0.0005975335295849672
+          ],
+          "calls_per_sample": 17,
+          "validation": {
+            "passed": true,
+            "relative_residual": 1.077897655449551e-16
+          },
+          "scope": "Lower triangle prepared outside timing; public triangular solve included."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csr",
+          "sppy_F",
+          "scipy_csc",
+          "sppy_C"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "sppy_C",
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 1.8495649968966863,
+        "csc_over_F": 1.3824159614266933
+      }
+    }
+  ]
+}

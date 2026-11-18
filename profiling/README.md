@@ -106,3 +106,5 @@ machine-dependent performance thresholds. Tests/profiling ship in source
 archives and are excluded from runtime wheels.
 
 See [recorded measurements](results/README.md) for an example run and its limits.
+
+See the [paired optimization results](results/optimization/README.md) for native-copy, basic-slice, and product improvements against the preserved baseline.

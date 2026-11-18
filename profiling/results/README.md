@@ -1,4 +1,7 @@
-# Recorded SciPy comparisons
+# Baseline SciPy comparisons
+
+These are the original unoptimized measurements. See the
+[paired optimization follow-up](optimization/README.md) for subsequent code changes and results.
 
 Recorded on **18 November 2026**, on an AMD Ryzen 5 5600X, Linux x86-64,
 Python 3.14.3, NumPy 2.5.5, SciPy 1.18.1, and SpPy 1.0.0. The SpPy extension

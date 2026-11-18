@@ -17,6 +17,8 @@ scipy = ["scipy>=1.14"]
 test = ["pytest>=8", "scipy>=1.14"]
 
 [dependency-groups]
+# mkdocstrings 0.30 is incompatible with the pymdown Highlight API in 12+.
+docs = ["mkdocs>=1.6,<2", "mkdocstrings[python]>=0.30,<1", "pymdown-extensions>=10,<12"]
 dev = ["pytest>=8", "scipy>=1.14", "ruff>=0.9", "clang-format>=18"]
 
 [tool.scikit-build]

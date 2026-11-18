@@ -20,3 +20,5 @@ docs/_build/
 vendor/
 
 .venv/
+
+/site/

@@ -31,13 +31,15 @@ import numpy
 class SparseArray:
     def __init__(self, S, dtype=None, storagetype="col", *, order=None):
         """
-        Create a new empty 2d or 1d csarray with the given shape.
+        Create a sparse vector or matrix from a shape or existing data.
 
-        :param S: A tuple representing the shape of the matrix or a numpy array or scipy matrix
+        :param S: A shape (integer or tuple), dense array, SciPy sparse object, or SparseArray.
 
-        :param dtype: A numpy dtype for the elements
+        :param dtype: A supported NumPy dtype; inferred from data or float64 for a shape.
 
-        :param storagetype: One of "row" or "col".
+        :param storagetype: One of "row" or "col"; defaults to column storage.
+
+        :param order: "C" for row or "F" for column storage; overrides storagetype.
         """
         if order is not None:
             if order not in {"C", "F"}:
@@ -485,7 +487,7 @@ class SparseArray:
 
     def getnnz(self):
         """
-        Return the number of non-zero elements in the array
+        Return the number of stored entries, including explicit zeros.
         """
         return self._array.getnnz()
 
@@ -600,7 +602,7 @@ class SparseArray:
         A[row_indices[i], colInds[i]] = data[i]/data. Notice that this is faster if init=True
         but this setting is to be used only if the matrix has just been created.
 
-        :param vals: A scalar or numpy array with the same dimension as rowsInds and colInds
+        :param data: Values to assign at the paired row and column indices.
 
         :param row_indices: A 1d numpy array of row indices.
 

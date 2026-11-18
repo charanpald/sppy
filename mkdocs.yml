@@ -1,0 +1,48 @@
+site_name: SpPy
+site_description: NumPy-style sparse arrays backed by Eigen
+repo_url: https://github.com/charanpald/sppy
+edit_uri: edit/master/docs/
+strict: true
+theme:
+  name: mkdocs
+  color_mode: auto
+  navigation_depth: 3
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: install.md
+      - Quick start: quickstart.md
+  - User guide:
+      - Sparse arrays: sparseops.md
+      - NumPy and SciPy: interoperability.md
+      - Migration to 0.7: migration.md
+  - API reference:
+      - Arrays and constructors: csarray.md
+      - Linear algebra: linalg.md
+      - Matrix Market IO: io.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [ . ]
+          options:
+            allow_inspection: false
+            docstring_style: sphinx
+            show_root_heading: true
+            show_signature_annotations: true
+            separate_signature: false
+            show_source: false
+            members_order: source
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    anchors: warn
+    unrecognized_links: warn

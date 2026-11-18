@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://charanpald.github.io/sppy/csarray/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Arrays and constructors - SpPy</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" disabled>
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">SpPy</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../install/" class="dropdown-item">Installation</a>
+</li>
+                                    
+<li>
+    <a href="../quickstart/" class="dropdown-item">Quick start</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">User guide</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../sparseops/" class="dropdown-item">Sparse arrays</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">NumPy and SciPy</a>
+</li>
+                                    
+<li>
+    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Arrays and constructors</a>
+</li>
+                                    
+<li>
+    <a href="../linalg/" class="dropdown-item">Linear algebra</a>
+</li>
+                                    
+<li>
+    <a href="../io/" class="dropdown-item">Matrix Market IO</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../contributing/" class="nav-link">Contributing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../migration/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../linalg/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/charanpald/sppy/edit/master/docs/csarray.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#arrays-and-constructors" class="nav-link">Arrays and constructors</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#constructors" class="nav-link">Constructors</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sppy.util" class="nav-link">util</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.util.asarray" class="nav-link">asarray</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.util.zeros" class="nav-link">zeros</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.util.ones" class="nav-link">ones</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.util.eye" class="nav-link">eye</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.util.diag" class="nav-link">diag</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.util.rand" class="nav-link">rand</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sparsearray" class="nav-link">SparseArray</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sppy.csarray.SparseArray" class="nav-link">SparseArray</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.order" class="nav-link">order</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.ceil" class="nav-link">ceil</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.clip" class="nav-link">clip</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.compress" class="nav-link">compress</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.copy" class="nav-link">copy</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.cos" class="nav-link">cos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.diag" class="nav-link">diag</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.dot" class="nav-link">dot</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.floor" class="nav-link">floor</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.getnnz" class="nav-link">getnnz</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.multiply" class="nav-link">multiply</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.max" class="nav-link">max</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.mean" class="nav-link">mean</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.min" class="nav-link">min</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.nonzero" class="nav-link">nonzero</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.nonzero_rows_list" class="nav-link">nonzero_rows_list</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.nonzero_rows_ptr" class="nav-link">nonzero_rows_ptr</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.pdot" class="nav-link">pdot</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.power" class="nav-link">power</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.prune" class="nav-link">prune</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.put" class="nav-link">put</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.reserve" class="nav-link">reserve</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.row_indices" class="nav-link">row_indices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.sign" class="nav-link">sign</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.sin" class="nav-link">sin</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.std" class="nav-link">std</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.submatrix" class="nav-link">submatrix</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.sum" class="nav-link">sum</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.toarray" class="nav-link">toarray</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.to_scipy_csc" class="nav-link">to_scipy_csc</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.to_scipy_csr" class="nav-link">to_scipy_csr</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.trace" class="nav-link">trace</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.transpose" class="nav-link">transpose</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.values" class="nav-link">values</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.var" class="nav-link">var</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.astype" class="nav-link">astype</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.diagonal" class="nav-link">diagonal</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.subarray" class="nav-link">subarray</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.eliminate_zeros" class="nav-link">eliminate_zeros</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.column_indices" class="nav-link">column_indices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.csarray.SparseArray.count_nonzero" class="nav-link">count_nonzero</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="arrays-and-constructors">Arrays and constructors<a class="headerlink" href="#arrays-and-constructors" title="Permanent link">&para;</a></h1>
+<p>For examples and storage behavior, see the <a href="../sparseops/">sparse array guide</a>.
+<code>SparseArray</code> is the preferred name; <code>csarray</code> remains a compatibility alias.</p>
+<h2 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="sppy.util" class="doc doc-heading">
+            <code>sppy.util</code>
+
+
+<a href="#sppy.util" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>NumPy-style constructors for Eigen sparse arrays.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.util.asarray" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#sppy.util.asarray" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convert to a sparse array, reusing compatible sparse input when possible.</p>
+<p>Dense input is copied into Eigen storage. Supported dtypes are signed
+integers (8/16/32/64 bits) and float32/float64.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.util.zeros" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">storage_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">'C'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+<a href="#sppy.util.zeros" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create an empty sparse array; order selects row or column storage.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.util.ones" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">storage_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">'C'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+<a href="#sppy.util.ones" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create an array of ones (every element is stored explicitly).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.util.eye" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">'C'</span><span class="p">)</span></code>
+
+<a href="#sppy.util.eye" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Create a sparse identity, optionally rectangular or offset by k.</p>
+<p>The old <code>eye(n, dtype)</code> positional spelling is also accepted.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.util.diag" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">diag</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">'C'</span><span class="p">,</span> <span class="n">storagetype</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#sppy.util.diag" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Construct an offset diagonal, or extract one from a matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.util.rand" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">storagetype</span><span class="o">=</span><span class="s1">'col'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#sppy.util.rand" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Sample sparse values; pass a NumPy Generator for reproducible new code.</p>
+<p>Coordinates are sampled with replacement, so actual density may be lower
+than the requested density. The legacy global NumPy RNG remains supported.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="sparsearray">SparseArray<a class="headerlink" href="#sparsearray" title="Permanent link">&para;</a></h2>
+<p>The constructor accepts a shape or existing data. A tuple is interpreted as a
+shape; use <code>sppy.asarray</code> to treat a tuple as values. The constructor defaults
+to column storage; <code>order="C"</code> or <code>order="F"</code> explicitly selects storage.</p>
+<p>Properties include <code>shape</code>, <code>ndim</code>, <code>size</code>, <code>dtype</code>, <code>order</code>, <code>nnz</code>, and <code>T</code>.
+<code>nnz</code> counts stored entries; use <code>count_nonzero</code> for nonzero values.
+<code>parallel_dot</code> aliases <code>pdot</code>; OpenMP builds can run its kernels in parallel.
+Without OpenMP, the kernels run serially.</p>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="sppy.csarray.SparseArray" class="doc doc-heading">
+              <code class="highlight language-python"><span class="n">sppy</span><span class="o">.</span><span class="n">csarray</span><span class="o">.</span><span class="n">SparseArray</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">storagetype</span><span class="o">=</span><span class="s1">'col'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Create a sparse vector or matrix from a shape or existing data.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>S</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A shape (integer or tuple), dense array, SciPy sparse object, or SparseArray.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dtype</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A supported NumPy dtype; inferred from data or float64 for a shape.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>storagetype</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>One of "row" or "col"; defaults to column storage.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;col&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>order</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>"C" for row or "F" for column storage; overrides storagetype.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="sppy.csarray.SparseArray.order" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">order</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#sppy.csarray.SparseArray.order" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Sparse storage traversal order: 'C' for rows, 'F' for columns.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.ceil" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">ceil</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.ceil" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply numpy.ceil elementwise, including implicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.clip" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.clip" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Clamp values to bounds as NumPy does, including implicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.compress" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">compress</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.compress" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Turn this matrix into compressed sparse format by freeing extra memory
+space in the buffer.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.copy" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">copy</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">'K'</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.copy" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return an independent copy, optionally changing sparse storage order.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.cos" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">cos</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.cos" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply numpy.cos elementwise, including implicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.diag" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">diag</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.diag" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a numpy array containing the diagonal entries of this matrix. If
+the matrix is non-square then the diagonal array is the same size as the
+smallest dimension.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.dot" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">dot</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.dot" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Matrix/vector product; equivalent to <code>self @ other</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.floor" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">floor</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.floor" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply numpy.floor elementwise, including implicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.getnnz" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">getnnz</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.getnnz" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the number of stored entries, including explicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.multiply" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">multiply</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.multiply" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return an elementwise sparse product of equally shaped arrays.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.max" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.max" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Maximum including implicit zeros; empty legacy arrays return NaN.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.mean" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.mean" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute means without materializing implicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.min" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.min" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Minimum including implicit zeros; empty legacy arrays return NaN.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.nonzero" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">nonzero</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.nonzero" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a tuple of arrays corresponding to nonzero elements.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.nonzero_rows_list" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">nonzero_rows_list</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.nonzero_rows_list" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a list such that the ith element is an array of nonzero elements
+in the ith row of this matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.nonzero_rows_ptr" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">nonzero_rows_ptr</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.nonzero_rows_ptr" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns two arrays indPtr, colInds, such that colInds[indPtr[i]:indPtr[i+1]]
+is the set of nonzero elements in the ith row of this matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.pdot" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pdot</span><span class="p">(</span><span class="n">A</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.pdot" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute the dot product between this and either a csarray or numpy array
+using multithreading.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>A</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input numpy array or csarray.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.power" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">power</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.power" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Elementwise power; equivalent to <code>self ** exponent</code>.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.prune" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">prune</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">20</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.prune" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Suppresses all nonzeros which are much smaller in magnitude than eps under
+the tolerence precision.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.put" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">put</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">row_indices</span><span class="p">,</span> <span class="n">colInds</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.put" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Put some values into this matrix into the corresponding row_indices and colInds. We have
+A[row_indices[i], colInds[i]] = data[i]/data. Notice that this is faster if init=True
+but this setting is to be used only if the matrix has just been created.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Values to assign at the paired row and column indices.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>row_indices</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A 1d numpy array of row indices.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>colInds</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A 1d numpy array of column indices.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.reserve" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">reserve</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.reserve" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Reserve n nonzero entries and turns the matrix into uncompressed mode.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>n</code>
+            </td>
+            <td>
+                  <code>`int`</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of elements of space to reserve.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.row_indices" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">row_indices</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.row_indices" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns the non zero indices for the ith row.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>i</code>
+            </td>
+            <td>
+                  <code>`int`</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The index of the row of the array.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.sign" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">sign</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.sign" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply numpy.sign elementwise, including implicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.sin" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">sin</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.sin" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply numpy.sin elementwise, including implicit zeros.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.std" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.std" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Standard deviation with NumPy-compatible reduction arguments.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.submatrix" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">submatrix</span><span class="p">(</span><span class="n">startRow</span><span class="p">,</span> <span class="n">startCol</span><span class="p">,</span> <span class="n">blockRows</span><span class="p">,</span> <span class="n">blockCols</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.submatrix" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a submatrix of the matrix given by A[startRow:startRows+blockRows, startCol:startCol+blockCols]
+in an efficient manner.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>startRow</code>
+            </td>
+            <td>
+                  <code>`int`</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The starting row index</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>startCol</code>
+            </td>
+            <td>
+                  <code>`int`</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The starting column index</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>blockRows</code>
+            </td>
+            <td>
+                  <code>`int`</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of rows to take.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>blockCols</code>
+            </td>
+            <td>
+                  <code>`int`</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of columns to take.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.sum" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.sum" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Sum values, including NumPy's axis/dtype/out/keepdims conventions.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.toarray" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">toarray</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.toarray" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convert this sparse array into a numpy array.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.to_scipy_csc" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">to_scipy_csc</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.to_scipy_csc" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convert this matrix to a scipy sparse matrix. Returns a copy of the data in
+csc_matrix form.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.to_scipy_csr" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">to_scipy_csr</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.to_scipy_csr" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Convert this matrix to a scipy sparse matrix. Returns a copy of the data in
+csr_matrix form.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.trace" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">trace</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.trace" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Sum a diagonal, with NumPy's trace arguments.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.transpose" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">transpose</span><span class="p">(</span><span class="o">*</span><span class="n">axes</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.transpose" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a copy with axes reversed, following NumPy's transpose convention.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.values" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">values</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.values" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the values of this object according to the elements returned
+using nonzero.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.var" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.var" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Variance including implicit zeros, using a stable centered sum.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.astype" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">'K'</span><span class="p">,</span> <span class="n">casting</span><span class="o">=</span><span class="s1">'unsafe'</span><span class="p">,</span> <span class="n">subok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.astype" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Cast stored values without allocating a dense array.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.diagonal" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">diagonal</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis2</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.diagonal" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Extract a diagonal as a dense vector, without densifying the matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.subarray" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">subarray</span><span class="p">(</span><span class="n">row_indices</span><span class="p">,</span> <span class="n">column_indices</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.subarray" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Take the Cartesian product of index vectors, like NumPy's ix_.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.eliminate_zeros" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">eliminate_zeros</span><span class="p">()</span></code>
+
+<a href="#sppy.csarray.SparseArray.eliminate_zeros" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Remove explicitly stored zeros in place, retaining all nonzero values.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.column_indices" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">column_indices</span><span class="p">(</span><span class="n">column</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.column_indices" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return stored row indices in a matrix column.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.csarray.SparseArray.count_nonzero" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">count_nonzero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#sppy.csarray.SparseArray.count_nonzero" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Count nonzero values, excluding explicitly stored zeros.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

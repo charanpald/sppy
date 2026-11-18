@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://charanpald.github.io/sppy/interoperability/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>NumPy and SciPy - SpPy</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" disabled>
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">SpPy</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../install/" class="dropdown-item">Installation</a>
+</li>
+                                    
+<li>
+    <a href="../quickstart/" class="dropdown-item">Quick start</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">User guide</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../sparseops/" class="dropdown-item">Sparse arrays</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">NumPy and SciPy</a>
+</li>
+                                    
+<li>
+    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../csarray/" class="dropdown-item">Arrays and constructors</a>
+</li>
+                                    
+<li>
+    <a href="../linalg/" class="dropdown-item">Linear algebra</a>
+</li>
+                                    
+<li>
+    <a href="../io/" class="dropdown-item">Matrix Market IO</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../contributing/" class="nav-link">Contributing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../sparseops/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../migration/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/charanpald/sppy/edit/master/docs/interoperability.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#numpy-and-scipy-interoperability" class="nav-link">NumPy and SciPy interoperability</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#numpy" class="nav-link">NumPy</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#scipy-sparse-arrays-and-matrices" class="nav-link">SciPy sparse arrays and matrices</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#matrix-market-files" class="nav-link">Matrix Market files</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="numpy-and-scipy-interoperability">NumPy and SciPy interoperability<a class="headerlink" href="#numpy-and-scipy-interoperability" title="Permanent link">&para;</a></h1>
+<h2 id="numpy">NumPy<a class="headerlink" href="#numpy" title="Permanent link">&para;</a></h2>
+<p>SpPy follows common NumPy naming and indexing conventions, but does not
+implement the complete array-function or ufunc dispatch protocols. Prefer
+methods such as <code>a.sum(axis=0)</code> and operators such as <code>a @ b</code> to keep the
+conversion boundary explicit.</p>
+<pre><code class="language-python">import numpy as np
+import sppy
+
+a = sppy.asarray([[0, 2], [3, 0]], dtype=np.int64)
+dense = np.asarray(a)
+assert dense.dtype == np.int64
+assert a.sum() == 5
+</code></pre>
+<p>Dense conversion preserves the stored dtype, including exact <code>int64</code> values.
+<code>np.asarray(a)</code> always allocates dense storage. Other NumPy functions may also
+coerce to dense arrays; do not assume they preserve sparsity.</p>
+<p>Supported storage dtypes are signed 8/16/32/64-bit integers and 32/64-bit floats.
+Boolean, unsigned, and complex storage are unsupported. Arrays have one or two
+dimensions. Individual dimensions and stored-entry indices use signed 32-bit
+limits. General arithmetic broadcasting, whole-array boolean masks, new-axis
+indexing, and the full set of NumPy reduction keywords are unsupported.</p>
+<h2 id="scipy-sparse-arrays-and-matrices">SciPy sparse arrays and matrices<a class="headerlink" href="#scipy-sparse-arrays-and-matrices" title="Permanent link">&para;</a></h2>
+<p>Install the <code>scipy</code> extra as described in <a href="../install/">installation</a>.
+The default development environment already includes SciPy.</p>
+<pre><code class="language-python">from scipy import sparse
+import sppy
+
+source = sparse.csr_array([[0., 2.], [3., 0.]])
+a = sppy.asarray(source)
+csr = a.to_scipy_csr()
+csc = a.to_scipy_csc()
+</code></pre>
+<p>Use the constructor or <code>asarray</code> for conversion into SpPy. There is no
+<code>fromScipySparse</code> method. Conversion allocates new storage.</p>
+<h2 id="matrix-market-files">Matrix Market files<a class="headerlink" href="#matrix-market-files" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">from tempfile import TemporaryDirectory
+from pathlib import Path
+import sppy
+from sppy.io import mmread, mmwrite
+
+with TemporaryDirectory() as directory:
+    path = Path(directory) / &quot;matrix.mtx&quot;
+    mmwrite(path, sppy.eye(3), comment=&quot;Example identity matrix&quot;)
+    restored = mmread(path)
+    assert restored.shape == (3, 3)
+</code></pre>
+<p>Matrix Market IO requires two-dimensional arrays and SciPy. The reader supports
+comments, symmetry, and compressed input through SciPy. Integer files are loaded
+as <code>int64</code>, real files as <code>float64</code>; complex values are rejected.
+See the <a href="../io/">IO reference</a> for arguments and storage selection.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

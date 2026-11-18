@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://charanpald.github.io/sppy/sparseops/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Sparse arrays - SpPy</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" disabled>
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">SpPy</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../install/" class="dropdown-item">Installation</a>
+</li>
+                                    
+<li>
+    <a href="../quickstart/" class="dropdown-item">Quick start</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">User guide</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="./" class="dropdown-item active" aria-current="page">Sparse arrays</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">NumPy and SciPy</a>
+</li>
+                                    
+<li>
+    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../csarray/" class="dropdown-item">Arrays and constructors</a>
+</li>
+                                    
+<li>
+    <a href="../linalg/" class="dropdown-item">Linear algebra</a>
+</li>
+                                    
+<li>
+    <a href="../io/" class="dropdown-item">Matrix Market IO</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../contributing/" class="nav-link">Contributing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../quickstart/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../interoperability/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/charanpald/sppy/edit/master/docs/sparseops.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#sparse-arrays" class="nav-link">Sparse arrays</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#construction-dtypes-and-storage" class="nav-link">Construction, dtypes, and storage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#indexing-and-assignment" class="nav-link">Indexing and assignment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#assemble-a-matrix" class="nav-link">Assemble a matrix</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#arithmetic-and-reductions" class="nav-link">Arithmetic and reductions</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#stored-zeros-and-memory" class="nav-link">Stored zeros and memory</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="sparse-arrays">Sparse arrays<a class="headerlink" href="#sparse-arrays" title="Permanent link">&para;</a></h1>
+<h2 id="construction-dtypes-and-storage">Construction, dtypes, and storage<a class="headerlink" href="#construction-dtypes-and-storage" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">import numpy as np
+import sppy
+
+empty = sppy.zeros((5, 7), dtype=np.float32)
+vector = sppy.zeros(5, dtype=np.int64)
+identity = sppy.eye(5)
+diagonal = sppy.diag(np.array([1., 2., 3.]))
+random = sppy.rand((5, 7), 0.1, rng=np.random.default_rng(21))
+columns = sppy.asarray([[0., 2.], [3., 0.]], order=&quot;F&quot;)
+</code></pre>
+<p>Use <code>asarray</code> for data, including tuples. In <code>SparseArray((5, 7))</code>, the tuple
+specifies a shape instead of values. <code>asarray</code> infers the input dtype.
+<code>zeros</code>, <code>ones</code>, and <code>eye</code> default to row storage (<code>order="C"</code>). The direct
+<code>SparseArray</code> constructor and <code>rand</code> retain the legacy column-storage default.
+Choose <code>order="F"</code> for column storage and <code>order="C"</code> for row storage.</p>
+<p><code>rand</code> samples coordinates with replacement, so the resulting density may be
+lower than requested. Pass a NumPy <code>Generator</code> for reproducible inputs.
+Integer dtypes cast the random values, which can produce stored zeros.
+<code>ones</code> stores every element explicitly.</p>
+<p><code>asarray(a)</code> may reuse a compatible sparse array. Request <code>copy=True</code> for an
+independent object; <code>copy=False</code> raises if conversion requires allocation.
+Dense inputs always require a copy into Eigen storage. <code>a.copy()</code> and
+<code>a.astype(np.float32)</code> provide explicit copying and dtype conversion.</p>
+<h2 id="indexing-and-assignment">Indexing and assignment<a class="headerlink" href="#indexing-and-assignment" title="Permanent link">&para;</a></h2>
+<p>Integer indices drop an axis; slices preserve it. Negative indices,
+reversed or stepped slices, per-axis boolean masks, and paired array indices
+are supported. A slice is a copy, including a basic slice.</p>
+<pre><code class="language-python">a = sppy.asarray([[0., 2., 0.], [3., 0., 4.]])
+row = a[0]                       # Shape (3,)
+rows = a[:1]                     # Shape (1, 3)
+reversed_rows = a[::-1]
+masked = a[np.array([True, False]), :]
+paired = a[[0, 1], [1, 2]]        # Select (0, 1) and (1, 2)
+cartesian = a.subarray([0, 1], [1, 2])  # Select a 2 by 2 submatrix
+
+a[[0, 1], [0, 1]] = [5., 6.]
+a[:, 2] = 1.
+</code></pre>
+<p>Paired indices select coordinate pairs; <code>subarray</code> selects the Cartesian
+product of row and column indices. Whole-array boolean masks and <code>None</code>
+(new-axis) indexing are unsupported.</p>
+<h2 id="assemble-a-matrix">Assemble a matrix<a class="headerlink" href="#assemble-a-matrix" title="Permanent link">&para;</a></h2>
+<p>Reserve space when the approximate entry count is known, insert entries,
+then compress to release spare buffer capacity.</p>
+<pre><code class="language-python">a = sppy.zeros((1000, 1000))
+a.reserve(3)
+a[[1, 2, 3], [4, 5, 6]] = [0.1, 0.2, 0.4]
+a.compress()
+</code></pre>
+<h2 id="arithmetic-and-reductions">Arithmetic and reductions<a class="headerlink" href="#arithmetic-and-reductions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Operation</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a + b</code>, <code>a - b</code></td>
+<td>Same-shape sparse arithmetic</td>
+<td>Sparse array</td>
+</tr>
+<tr>
+<td><code>a * b</code>, <code>a.multiply(b)</code></td>
+<td>Same-shape elementwise product</td>
+<td>Sparse array</td>
+</tr>
+<tr>
+<td><code>a * 2</code>, <code>-a</code>, <code>abs(a)</code></td>
+<td>Scalar multiplication, negation, absolute value</td>
+<td>Sparse array</td>
+</tr>
+<tr>
+<td><code>a @ b</code>, <code>a.dot(b)</code></td>
+<td>Matrix product of sparse matrices</td>
+<td>Sparse array</td>
+</tr>
+<tr>
+<td><code>a @ dense_vector</code></td>
+<td>Matrix-vector product</td>
+<td>Dense array</td>
+</tr>
+<tr>
+<td><code>a.T</code></td>
+<td>Transpose</td>
+<td>Sparse array</td>
+</tr>
+<tr>
+<td><code>a.sum(axis=0)</code></td>
+<td>Column sums</td>
+<td>Dense array</td>
+</tr>
+<tr>
+<td><code>a.diagonal()</code></td>
+<td>Main diagonal</td>
+<td>Dense array</td>
+</tr>
+</tbody>
+</table>
+<p>A sparse vector dotted with another sparse vector returns a scalar.
+Sparse arithmetic promotes dtypes. General arithmetic broadcasting is
+unsupported, and nonzero scalar addition raises <code>NotImplementedError</code>.</p>
+<p><code>sum</code>, <code>mean</code>, <code>min</code>, <code>max</code>, <code>var</code>, and <code>std</code> accept <code>axis</code>, <code>out</code>, and
+<code>keepdims</code>. Sum, mean, variance, and standard deviation also accept <code>dtype</code>;
+variance and standard deviation accept <code>ddof</code>. Implicit zeros participate in
+reductions. Empty min/max retain the historical NaN result.</p>
+<h2 id="stored-zeros-and-memory">Stored zeros and memory<a class="headerlink" href="#stored-zeros-and-memory" title="Permanent link">&para;</a></h2>
+<p><code>a.nnz</code> counts stored entries, including stored zeros. <code>a.count_nonzero()</code>
+counts nonzero values. <code>a.eliminate_zeros()</code> removes exact zeros in place;
+<code>a.prune()</code> removes entries using a tolerance.</p>
+<div class="admonition warning">
+<p class="admonition-title">Operations that can fill an array</p>
+<p><code>a.toarray()</code> and <code>np.asarray(a)</code> allocate dense storage. <code>ones</code>, <code>cos</code>,
+clipping to a positive lower bound, and other operations that map zero to
+a nonzero value can store every position. Estimate the full array size
+before applying these operations to large shapes.</p>
+</div>
+<p>Prefer sparse methods when memory matters. <a href="../interoperability/">NumPy interoperability</a>
+explains the conversion boundaries, and the <a href="../csarray/">API reference</a>
+lists the available methods.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

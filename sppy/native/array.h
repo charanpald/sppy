@@ -134,6 +134,13 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
                      block = block && all_finite(x.a) && input.allFinite();
                  if (block) {
                      py::gil_scoped_release release;
+                     if constexpr (Eigen::NumTraits<T>::IsComplex) {
+                         if (x.a.isCompressed() &&
+                             complex_sparse_block(x.a.rows(), x.a.cols(), O == Eigen::RowMajor,
+                                                  x.a.valuePtr(), x.a.innerIndexPtr(),
+                                                  x.a.outerIndexPtr(), input_data, output_data))
+                             return output;
+                     }
                      if constexpr (Eigen::NumTraits<T>::IsComplex && O == Eigen::RowMajor) {
                          complex_row_block<8>(x.a, input_data, output_data);
                      } else {
@@ -142,6 +149,19 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
                      return output;
                  }
                  if (columns == 1) {
+                     if constexpr (Eigen::NumTraits<T>::IsComplex && O == Eigen::RowMajor) {
+                         if (x.a.isCompressed() && panel_simd_available()) {
+                             bool complete;
+                             {
+                                 py::gil_scoped_release release;
+                                 complete = complex_csr_vector(
+                                     x.a.rows(), x.a.valuePtr(), x.a.innerIndexPtr(),
+                                     x.a.outerIndexPtr(), input_data, output_data);
+                             }
+                             if (complete)
+                                 return output;
+                         }
+                     }
                      if constexpr (std::is_floating_point_v<T> && O == Eigen::RowMajor) {
                          if (narrow_vector_rows(x.a)) {
                              py::gil_scoped_release release;
@@ -149,12 +169,9 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
                              return output;
                          }
                      }
-                     using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
-                     Eigen::Map<const Vector> vector(input_data, y.shape(0));
-                     Eigen::Map<Vector> destination(output_data, x.a.rows());
                      {
                          py::gil_scoped_release release;
-                         destination.noalias() = x.a * vector;
+                         mapped_vector_product(x.a, input_data, output_data);
                      }
                      return output;
                  }

@@ -1,5 +1,8 @@
 # Baseline SciPy comparisons
 
+See the [remaining-gap follow-up](remaining-gaps/README.md) for the newest results
+and CPU-dispatch/convergence details.
+
 See the [full 24-operation optimization audit](all-operations/README.md) for the
 latest complete before/after results, first-solve checks and remaining gaps.
 

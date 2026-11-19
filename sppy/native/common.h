@@ -1,4 +1,5 @@
 #pragma once
+#include "eigen_kernels.h"
 #include <Eigen/Sparse>
 #include <complex>
 #include <limits>

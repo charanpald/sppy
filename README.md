@@ -63,6 +63,38 @@ uv run --locked --only-group docs mkdocs serve
 uv run --locked --only-group docs mkdocs build --strict
 ```
 
+## Performance versus SciPy sparse
+
+Local synthetic benchmarks compare all **24 workloads** in C/CSR and F/CSC
+storage. Selected **SpPy C versus SciPy CSR** medians are below; speedup is
+SciPy time / SpPy time, so **above 1× favors SpPy**.
+
+| Input | Operation | SpPy C | SciPy CSR | SpPy speedup |
+| --- | --- | ---: | ---: | ---: |
+| Random 1,000 float64 | gather | 5.38 µs | 12.66 µs | 2.35× |
+| Random 10,000 float64 | construct-compressed | 30.32 µs | 23.11 µs | 0.76× |
+| Random 10,000 float64 | column-sum | 59.45 µs | 86.04 µs | 1.45× |
+| Random 10,000 float64 | sparse-matmul | 2.25 ms | 2.57 ms | 1.14× |
+| Banded 10,000 float64 | sparse-matmul | 481.96 µs | 575.98 µs | 1.20× |
+| Random 1,000 complex128 | matvec | 6.13 µs | 7.11 µs | 1.16× |
+| Random 1,000 complex128 | matmat | 20.64 µs | 40.58 µs | 1.97× |
+| Random 1,000 complex128 | lu-factor | 99.31 ms | 80.12 ms | 0.81× |
+| Random 1,000 complex128 | lu-solve | 2.98 ms | 3.11 ms | 1.04× |
+| Random 1,000 complex128 | bicgstab | 629.08 µs | 675.26 µs | 1.07× |
+
+Measured on 19 November 2026 on a Ryzen 5 5600X, with one numerical thread,
+seven samples, Python 3.14.3, NumPy 2.5.5, SciPy 1.18.1 and Eigen 5.0.1.
+Runtime AVX2/FMA was enabled on this CPU; portable fallbacks remain available.
+Array inputs have about five stored entries per row. Solver inputs are derived
+Hermitian positive definite systems; LU solves reuse prepared factors.
+
+SpPy still trails SciPy in some workloads, including validated large imports
+and complex LU factorization. Sparse output contracts and algorithms differ,
+and these timings are not portable performance guarantees. See the
+[complete results, F/CSC comparisons and remaining gaps](profiling/results/remaining-gaps/README.md)
+and [benchmark methodology/reproduction](profiling/README.md) for raw samples,
+validation and commands to measure your own inputs.
+
 ## Development
 
 ```sh

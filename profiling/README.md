@@ -118,3 +118,8 @@ To check first-call costs separately from reused-factor timings, use
 Each first solve receives a fresh LU factorization prepared outside timing. The
 tool then measures repeated solves and validates both, with the same input/thread
 controls as the main benchmark. Solve warmups/batching are not used.
+
+The [remaining-gap follow-up](results/remaining-gaps/README.md) records the latest
+paired results and runtime SIMD path. Set `SPPY_DISABLE_SIMD=1` before Python
+starts to measure the generic CPU path. BiCGSTAB now applies the requested
+relative tolerance per RHS instead of using Eigen 5's internal absolute threshold.

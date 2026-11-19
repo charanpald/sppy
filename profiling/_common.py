@@ -171,6 +171,7 @@ def environment():
         if hasattr(os, "sched_getaffinity")
         else os.cpu_count(),
         "openmp_enabled": sppy.openmp_enabled,
+        "runtime_simd": getattr(sppy._native, "runtime_simd", "baseline"),
         "eigen_threads": sppy.get_num_threads(),
         "threadpools": [
             {

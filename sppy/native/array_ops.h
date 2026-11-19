@@ -15,6 +15,7 @@ S assemble_triplets(int rows, int cols, Array<int> ri, Array<int> ci, Array<T> v
     require(values.size() <= std::numeric_limits<int>::max(), "Too many stored entries");
     const int count = int(values.size());
     unsigned invalid = 0, unsorted = 0;
+    int outer_runs = 0;
     const int *rows_data = ri.data(), *cols_data = ci.data();
     for (int k = 0; k < count; ++k)
         invalid |=
@@ -25,11 +26,12 @@ S assemble_triplets(int rows, int cols, Array<int> ri, Array<int> ci, Array<T> v
         const int previous_outer = S::IsRowMajor ? rows_data[k - 1] : cols_data[k - 1];
         const int inner = S::IsRowMajor ? cols_data[k] : rows_data[k];
         const int previous_inner = S::IsRowMajor ? cols_data[k - 1] : rows_data[k - 1];
+        outer_runs += outer < previous_outer;
         unsorted |= outer < previous_outer || (outer == previous_outer && inner < previous_inner);
     }
     if (unsorted) {
-        auto ordered =
-            ordered_triplet_scatter<S>(rows, cols, rows_data, cols_data, values.data(), count);
+        auto ordered = ordered_triplet_scatter<S>(rows, cols, rows_data, cols_data, values.data(),
+                                                  count, outer_runs);
         if (ordered)
             return std::move(*ordered);
     }
@@ -92,27 +94,32 @@ S import_compressed(int rows, int cols, Array<T> values, Array<int> indices, Arr
         bad_pointers |= pointers[j] > pointers[j + 1];
     }
     require(bad_pointers == 0, "Invalid compressed pointers");
+    S result(rows, cols);
+    result.resizeNonZeros(count);
+    int *copied_indices = result.innerIndexPtr();
     unsigned bad_indices = 0;
-    for (int k = 0; k < count; ++k)
-        bad_indices |= unsigned(inner_indices[k]) >= unsigned(inner);
-    require(bad_indices == 0, "Invalid compressed inner indices");
-    // Count descending/equal adjacent indices in one vectorizable scan, then
-    // exclude the transitions between nonempty outer segments. Empty segments
-    // can repeat pointers, so subtract each distinct boundary only once.
     int noncanonical = 0;
-    for (int k = 1; k < count; ++k)
-        noncanonical += inner_indices[k] <= inner_indices[k - 1];
+    if (count) {
+        copied_indices[0] = inner_indices[0];
+        bad_indices |= unsigned(inner_indices[0]) >= unsigned(inner);
+    }
+    // Copy, bounds-check and count order violations in one streaming scan.
+    // The copied indices are never used as offsets until validation succeeds.
+    for (int k = 1; k < count; ++k) {
+        const int index = inner_indices[k];
+        copied_indices[k] = index;
+        bad_indices |= unsigned(index) >= unsigned(inner);
+        noncanonical += index <= inner_indices[k - 1];
+    }
+    require(bad_indices == 0, "Invalid compressed inner indices");
     for (int j = 1; j < outer; ++j) {
         const int boundary = pointers[j];
         if (boundary != pointers[j - 1] && boundary > 0 && boundary < count)
             noncanonical -= inner_indices[boundary] <= inner_indices[boundary - 1];
     }
     const bool canonical = noncanonical == 0;
-    S result(rows, cols);
     if (canonical) {
-        result.resizeNonZeros(values.size());
         std::copy_n(indptr.data(), int64_t(outer) + 1, result.outerIndexPtr());
-        std::copy_n(indices.data(), values.size(), result.innerIndexPtr());
         std::copy_n(values.data(), values.size(), result.valuePtr());
     } else {
         std::vector<Eigen::Triplet<T>> entries;

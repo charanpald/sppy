@@ -75,3 +75,11 @@ compiler and Eigen headers as development builds.
 
 For checks, OpenMP builds, release artifacts, and documentation previews,
 see [contributing](contributing.md).
+
+## Runtime SIMD
+
+Supported x86 GCC/Clang builds detect AVX2 and FMA at runtime for selected
+real/complex panel and sparse-product kernels. Other CPUs use the generic Eigen
+paths; the build does not require a native-CPU instruction set. To reproduce
+results with those runtime kernels disabled, set `SPPY_DISABLE_SIMD=1` before
+starting Python. Benchmark JSON records the active path as `runtime_simd`.

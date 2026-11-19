@@ -24,6 +24,17 @@ template <class T> T contiguous_norm(const T *v, Eigen::Index size) {
         total += v[k] * v[k];
     return std::sqrt(total);
 }
+// Keep the generic vector evaluator out of the larger block-dispatch lambda:
+// it gives the compiler a small, focused loop on the fallback path.
+template <class S>
+EIGEN_DONT_INLINE void mapped_vector_product(const S &a, const typename S::Scalar *input,
+                                             typename S::Scalar *output) {
+    using T = typename S::Scalar;
+    using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+    Eigen::Map<const Vector> rhs(input, a.cols());
+    Eigen::Map<Vector> result(output, a.rows());
+    result.noalias() = a * rhs;
+}
 template <class S> bool narrow_vector_rows(const S &a) {
     for (int row = 0; row < std::min<int>(16, int(a.rows())); ++row) {
         int first = -1, last = -1;

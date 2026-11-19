@@ -2,6 +2,10 @@
 
 ## 1.0.0
 
+- Generate sorted sparse products with hierarchical occupancy bits, avoiding sorting and conversion copies; fuse compressed-index copying with validation.
+- Add runtime-selected SIMD panel/complex-product kernels with portable fallbacks and smaller LU workspace for narrow-band inputs.
+- Correct BiCGSTAB's per-RHS relative-tolerance scaling and diagnostics, including tiny/zero RHS and iteration limits.
+
 - Add native promoted reductions and paired gather, equal-pattern arithmetic, and faster real/complex dense products and norms.
 - Pass owned storage snapshots directly to direct and iterative solvers; combine symbolic/numeric setup and solve dense LU RHS blocks directly from supernodal factors.
 - Adapt sparse-product assembly to output ordering and avoid temporary triplet objects during construction.

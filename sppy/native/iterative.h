@@ -9,6 +9,8 @@ py::tuple run_iterative(const S &a, const ColDense<T> &b, const ColDense<T> &gue
     solver.setMaxIterations(maxiter);
     solver.setTolerance(tolerance);
     using P = typename Solver::Preconditioner;
+    using R = typename Eigen::NumTraits<T>::Real;
+    constexpr bool bicgstab = std::is_same_v<Solver, Eigen::BiCGSTAB<S, P>>;
     if constexpr (std::is_same_v<P, Eigen::IncompleteLUT<T>>) {
         solver.preconditioner().setDroptol(drop);
         solver.preconditioner().setFillfactor(fill);
@@ -26,10 +28,34 @@ py::tuple run_iterative(const S &a, const ColDense<T> &b, const ColDense<T> &gue
         if (status == Eigen::Success) {
             x.resize(a.cols(), b.cols());
             for (int j = 0; j < b.cols(); ++j) {
+                if constexpr (bicgstab) {
+                    const R rhs_norm = b.col(j).stableNorm();
+                    if (rhs_norm == R(0)) {
+                        x.col(j).setZero();
+                        continue;
+                    }
+                    // Eigen 5's BiCGSTAB compares an absolute residual in its
+                    // loop, but returns a relative error. Adapt our public
+                    // rtol per RHS, then classify convergence using rtol.
+                    const long double target = static_cast<long double>(tolerance) * rhs_norm;
+                    R absolute = R(std::min<long double>(target, std::numeric_limits<R>::max()));
+                    if (static_cast<long double>(absolute) > target)
+                        absolute = std::nextafter(absolute, R(0));
+                    solver.setTolerance(absolute);
+                }
                 x.col(j) = solver.solveWithGuess(b.col(j), guess.col(j));
-                status = std::max(status, int(solver.info()));
+                const double column_error = double(solver.error());
+                int column_status = int(solver.info());
+                if constexpr (bicgstab)
+                    if (column_status == Eigen::Success || column_status == Eigen::NoConvergence)
+                        column_status = std::isfinite(column_error) && column_error <= tolerance
+                                            ? Eigen::Success
+                                            : Eigen::NoConvergence;
+                status = std::max(status, column_status);
                 iterations = std::max(iterations, solver.iterations());
-                error = std::max(error, double(solver.error()));
+                error = std::max(error, std::isfinite(column_error)
+                                            ? column_error
+                                            : std::numeric_limits<double>::infinity());
             }
         }
     }
@@ -97,34 +123,6 @@ py::tuple iterate(int r, int c, Array<int> ri, Array<int> ci, Array<T> values, A
     return iterate_storage<T>(sparse_copy<T>(r, c, ri, ci, values), rhs, initial, method,
                               preconditioner, maxiter, tolerance, drop, fill, shift);
 }
-template <class T, class S>
-auto triangular_solve_storage(const S &a, Array<T> rhs, bool lower, bool unit) {
-    const auto r = a.rows(), c = a.cols();
-    auto b = dense_copy<T>(rhs);
-    require(r == c && r == b.rows(), "Invalid triangular system dimensions");
-    require(b.allFinite(), "Right-hand side must be finite");
-    for (int j = 0; j < a.nonZeros(); ++j)
-        require(Eigen::numext::isfinite(a.valuePtr()[j]), "Matrix contains nonfinite values");
-    if (!unit)
-        for (int i = 0; i < r; ++i)
-            require(a.coeff(i, i) != T(0), "Singular triangular diagonal");
-    ColDense<T> x;
-    {
-        py::gil_scoped_release release;
-        if (lower) {
-            if (unit)
-                x = a.template triangularView<Eigen::UnitLower>().solve(b);
-            else
-                x = a.template triangularView<Eigen::Lower>().solve(b);
-        } else {
-            if (unit)
-                x = a.template triangularView<Eigen::UnitUpper>().solve(b);
-            else
-                x = a.template triangularView<Eigen::Upper>().solve(b);
-        }
-    }
-    return array_copy(x);
-}
 template <class T> void bind_iterative(py::module_ &m, const char *name) {
     m.def((std::string("iterate_") + name).c_str(), &iterate<T>);
     m.def((std::string("iterate_matrix_") + name).c_str(),
@@ -134,17 +132,6 @@ template <class T> void bind_iterative(py::module_ &m, const char *name) {
               return iterate_storage<T>(solver_matrix<T, Eigen::RowMajor>(backend), rhs, initial,
                                         method, preconditioner, maxiter, tolerance, drop, fill,
                                         shift);
-          });
-    m.def((std::string("triangular_solve_matrix_") + name).c_str(),
-          [](py::handle backend, Array<T> rhs, bool lower, bool unit) {
-              return triangular_solve_storage<T>(solver_matrix<T, Eigen::RowMajor>(backend), rhs,
-                                                 lower, unit);
-          });
-    m.def((std::string("triangular_solve_") + name).c_str(),
-          [](int r, int c, Array<int> ri, Array<int> ci, Array<T> values, Array<T> rhs, bool lower,
-             bool unit) {
-              return triangular_solve_storage<T>(sparse_copy<T>(r, c, ri, ci, values), rhs, lower,
-                                                 unit);
           });
 }
 } // namespace sppy

@@ -1,5 +1,5 @@
 #pragma once
-#include "product_scatter.h"
+#include "bitset_product.h"
 #include "scalar_arithmetic.h"
 #include <Eigen/SparseCore>
 #include <algorithm>
@@ -24,13 +24,8 @@ template <class S> S sparse_product(const S &left, const S &right) {
     const S &outer = S::IsRowMajor ? left : right;
     const S &inner = S::IsRowMajor ? right : left;
     const Eigen::Index width = result.innerSize();
-    if constexpr (std::is_floating_point_v<T>) {
-        if (width >= 2048 && width <= (1 << 20) &&
-            int64_t(left.nonZeros()) * right.nonZeros() / std::max<Eigen::Index>(1, left.cols()) >
-                width * 8 &&
-            product_needs_sorting(outer, inner, int(width)))
-            return product_scatter(left, right);
-    }
+    if (width >= 64 && width <= (1 << 20))
+        return bitset_product(left, right);
     const int64_t estimate = std::min<int64_t>(int64_t(left.nonZeros()) * right.nonZeros() /
                                                        std::max<Eigen::Index>(1, left.cols()) +
                                                    std::min(left.rows(), right.cols()),

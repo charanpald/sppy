@@ -5,33 +5,16 @@
 #include <vector>
 namespace sppy {
 // Diagonal/run-based COO input is often already monotone within every output
-// outer vector, even though the input as a whole is unsorted. Probe one vector
-// before attempting a count/scatter; verify every vector before accepting it.
+// outer vector, even though the input as a whole is unsorted. A few monotone
+// outer runs select count/scatter; every output vector is still validated.
 template <class S, class T>
 std::optional<S> ordered_triplet_scatter(int rows, int columns, const int *ri, const int *ci,
-                                         const T *values, int count) {
+                                         const T *values, int count, int outer_runs) {
     const int outer_size = S::IsRowMajor ? rows : columns;
-    if (count < 20000 || outer_size < 2048)
+    if (count < 20000 || outer_size < 2048 || outer_runs == 0 || outer_runs > 32)
         return std::nullopt;
     const int *outer = S::IsRowMajor ? ri : ci;
     const int *inner = S::IsRowMajor ? ci : ri;
-    const int sample = outer[count / 2];
-    int last = -1, found = 0;
-    bool ascending = true, descending = true;
-    for (int k = 0; k < count; ++k) {
-        if (outer[k] != sample)
-            continue;
-        if (found) {
-            ascending &= inner[k] > last;
-            descending &= inner[k] < last;
-        }
-        last = inner[k];
-        ++found;
-        if (!ascending && !descending)
-            return std::nullopt;
-    }
-    if (found < 4)
-        return std::nullopt;
     S result(rows, columns);
     int *pointers = result.outerIndexPtr();
     for (int k = 0; k < count; ++k)

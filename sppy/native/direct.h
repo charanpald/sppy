@@ -6,6 +6,24 @@
 #include <Eigen/SparseLU>
 #include <Eigen/SparseQR>
 namespace sppy {
+// Narrow-band inputs have little dense panel work. Halve Eigen's panel
+// workspace there while retaining its default blocking for general matrices.
+template <class S, class Ordering> class PanelSparseLU : public Eigen::SparseLU<S, Ordering> {
+    using Base = Eigen::SparseLU<S, Ordering>;
+
+  public:
+    void analyzePattern(const S &a) {
+        bool narrow = a.rows() >= 256;
+        for (int col = 0; narrow && col < a.cols(); ++col)
+            for (typename S::InnerIterator it(a, col); it; ++it)
+                if (std::abs(it.row() - it.col()) > 32) {
+                    narrow = false;
+                    break;
+                }
+        this->m_perfv.panel_size = narrow ? 8 : 16;
+        Base::analyzePattern(a);
+    }
+};
 template <class T> struct DirectBase {
     virtual ~DirectBase() = default;
     virtual void analyze(const Sparse<T> &) = 0;
@@ -145,7 +163,7 @@ template <class T> class Factor {
                 DirectModel<T, Eigen::SimplicialLDLT<Sparse<T>, Eigen::Lower, Ordering>, 1>>(
                 offset, scale, pivot);
         else if (method == "lu")
-            solver = std::make_unique<DirectModel<T, Eigen::SparseLU<Sparse<T>, Ordering>, 2>>(
+            solver = std::make_unique<DirectModel<T, PanelSparseLU<Sparse<T>, Ordering>, 2>>(
                 offset, scale, pivot);
         else if (method == "qr")
             solver = std::make_unique<DirectModel<T, Eigen::SparseQR<Sparse<T>, Ordering>, 3>>(

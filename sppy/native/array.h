@@ -1,5 +1,6 @@
 #pragma once
 #include "array_ops.h"
+#include "sparse_product.h"
 #include <type_traits>
 namespace sppy {
 template <class T, int Order> struct Matrix {
@@ -126,7 +127,7 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
         .def("matmul",
              [](const M &x, const M &y) {
                  require(x.a.cols() == y.a.rows(), "Product shape mismatch");
-                 return M(S(x.a * y.a));
+                 return M(sparse_product(x.a, y.a));
              })
         .def("dense_matmul",
              [](const M &x, Array<T> y) {

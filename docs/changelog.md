@@ -4,6 +4,9 @@
 
 - Accelerate owned copies, canonical compressed imports, basic slicing, contiguous reductions, and sparse/dense products; preserve dtype, stored zeros, and independent results.
 
+- Vectorize compressed-buffer validation and build sparse products directly in CSR/CSC order, retaining canonical indices and explicit zeros with bounded workspace for large sparse axes.
+- Define sparse integer matrix products with NumPy-compatible fixed-width overflow.
+
 - Replace generated Cython classes with typed pybind11/Eigen bindings.
 - Add complex64/128 arrays, adjoint products, and complex Matrix Market IO.
 - Add Eigen LLT/LDLT, LU, and QR sparse factorizations with symbolic reuse.

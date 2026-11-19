@@ -108,3 +108,5 @@ archives and are excluded from runtime wheels.
 See [recorded measurements](results/README.md) for an example run and its limits.
 
 See the [paired optimization results](results/optimization/README.md) for native-copy, basic-slice, and product improvements against the preserved baseline.
+
+See the [compressed-import and sparse-product results](results/import-product/README.md) for the latest paired measurements and remaining SciPy gaps.

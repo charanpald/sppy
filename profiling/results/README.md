@@ -1,5 +1,8 @@
 # Baseline SciPy comparisons
 
+See the [compressed-import and sparse-product follow-up](import-product/README.md)
+for the latest targeted optimization measurements.
+
 These are the original unoptimized measurements. See the
 [paired optimization follow-up](optimization/README.md) for subsequent code changes and results.
 

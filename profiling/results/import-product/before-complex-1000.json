@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "recorded_at_utc": "2026-11-19T08:32:50.582229+00:00",
+    "python": "3.14.3",
+    "numpy": "2.5.5",
+    "scipy": "1.18.1",
+    "sppy": "1.0.0",
+    "platform": "Linux-6.8.0-149-generic-x86_64-with-glibc2.44",
+    "cpu": "AMD Ryzen 5 5600X 6-Core Processor",
+    "available_cpus": 12,
+    "openmp_enabled": true,
+    "eigen_threads": 1,
+    "threadpools": [
+      {
+        "user_api": "openmp",
+        "internal_api": "openmp",
+        "num_threads": 1,
+        "prefix": "libgomp",
+        "version": null,
+        "library": "libgomp.so.1.0.0"
+      },
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "version": "0.3.34.237.2",
+        "threading_layer": "pthreads",
+        "architecture": "Haswell",
+        "library": "libscipy_openblas64_-4b78795a.so"
+      },
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "version": "0.3.31.dev",
+        "threading_layer": "pthreads",
+        "architecture": "Haswell",
+        "library": "libscipy_openblas-5f890258.so"
+      }
+    ],
+    "git_revision": "1baf1eb504bef725037c88da5504e744a0349310",
+    "git_dirty": true
+  },
+  "configuration": {
+    "size": 1000,
+    "entries": 5000,
+    "pattern": "random",
+    "bandwidth": 2,
+    "dtype": "complex128",
+    "columns": 8,
+    "repeats": 9,
+    "warmups": 1,
+    "seed": 21,
+    "threads": 1,
+    "rtol": 1e-08,
+    "maxiter": 1000,
+    "operations": [
+      "construct-compressed",
+      "sparse-matmul"
+    ],
+    "min_time": 0.02,
+    "max_batch": 4096
+  },
+  "input": {
+    "shape": [
+      1000,
+      1000
+    ],
+    "nnz": 4993,
+    "sampled_triplets": 5000,
+    "index_dtype": "int32",
+    "sha256": "8420a54daa6fb92f349b5d9067474dca3e070322439cb9173ee86effa941354a"
+  },
+  "benchmarks": [
+    {
+      "operation": "construct-compressed",
+      "shape": [
+        1000,
+        1000
+      ],
+      "nnz": 4993,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 9.84230846764574e-06,
+          "min_seconds": 9.757549395225573e-06,
+          "max_seconds": 1.1182901209895502e-05,
+          "p25_seconds": 9.808024193645334e-06,
+          "p75_seconds": 9.861521169383533e-06,
+          "samples_seconds": [
+            1.1182901209895502e-05,
+            9.861521169383533e-06,
+            9.848920363021036e-06,
+            9.968728830569357e-06,
+            9.757549395225573e-06,
+            9.829868951504566e-06,
+            9.808024193645334e-06,
+            9.768902217850214e-06,
+            9.84230846764574e-06
+          ],
+          "calls_per_sample": 992,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        },
+        "sppy_F": {
+          "median_seconds": 1.0155243445664832e-05,
+          "min_seconds": 9.929572097343146e-06,
+          "max_seconds": 1.7548938202144336e-05,
+          "p25_seconds": 1.0100263108604387e-05,
+          "p75_seconds": 1.0163062734179053e-05,
+          "samples_seconds": [
+            1.7548938202144336e-05,
+            1.0145038389468987e-05,
+            9.929572097343146e-06,
+            1.0163062734179053e-05,
+            1.0013626404607896e-05,
+            1.0155243445664832e-05,
+            1.0100263108604387e-05,
+            1.0163305243532476e-05,
+            1.0161704119837758e-05
+          ],
+          "calls_per_sample": 1068,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        },
+        "scipy_csr": {
+          "median_seconds": 1.0812121268588217e-05,
+          "min_seconds": 1.0635845149208627e-05,
+          "max_seconds": 1.093747481355191e-05,
+          "p25_seconds": 1.0764836753578289e-05,
+          "p75_seconds": 1.090941604468468e-05,
+          "samples_seconds": [
+            1.0805722947696864e-05,
+            1.093747481355191e-05,
+            1.0812121268588217e-05,
+            1.0925796641755817e-05,
+            1.0745928171654193e-05,
+            1.0895964552293744e-05,
+            1.090941604468468e-05,
+            1.0764836753578289e-05,
+            1.0635845149208627e-05
+          ],
+          "calls_per_sample": 1072,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        },
+        "scipy_csc": {
+          "median_seconds": 1.0791010251497128e-05,
+          "min_seconds": 1.0707190121268095e-05,
+          "max_seconds": 1.0852063373808838e-05,
+          "p25_seconds": 1.0743527493023549e-05,
+          "p75_seconds": 1.0839780055799838e-05,
+          "samples_seconds": [
+            1.0769939422167677e-05,
+            1.0830629077381817e-05,
+            1.0743527493023549e-05,
+            1.0791010251497128e-05,
+            1.084365703633742e-05,
+            1.0852063373808838e-05,
+            1.0839780055799838e-05,
+            1.0713900279515927e-05,
+            1.0707190121268095e-05
+          ],
+          "calls_per_sample": 1073,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Copy from matching CSR/CSC buffers; buffer preparation excluded."
+        }
+      },
+      "round_order": [
+        [
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 1.0985350951080741,
+        "csc_over_F": 1.062604782370205
+      }
+    },
+    {
+      "operation": "sparse-matmul",
+      "shape": [
+        1000,
+        1000
+      ],
+      "nnz": 4993,
+      "backends": {
+        "sppy_C": {
+          "median_seconds": 0.0002759636811597243,
+          "min_seconds": 0.0002661415797095854,
+          "max_seconds": 0.00028091913043391435,
+          "p25_seconds": 0.00027175253623115,
+          "p75_seconds": 0.00027877986956585687,
+          "samples_seconds": [
+            0.00027877986956585687,
+            0.00028091913043391435,
+            0.0002715503913027467,
+            0.00028060595652106343,
+            0.0002770084492758674,
+            0.00027175253623115,
+            0.0002661415797095854,
+            0.0002739141304336163,
+            0.0002759636811597243
+          ],
+          "calls_per_sample": 69,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        },
+        "sppy_F": {
+          "median_seconds": 0.0003336874262279961,
+          "min_seconds": 0.00031965918032867313,
+          "max_seconds": 0.0004541287377057907,
+          "p25_seconds": 0.0003288794262285502,
+          "p75_seconds": 0.0003368557541001732,
+          "samples_seconds": [
+            0.00045343642623116526,
+            0.00032858222951171097,
+            0.0003368557541001732,
+            0.0003288794262285502,
+            0.00032969713114668043,
+            0.00033539199999782406,
+            0.00031965918032867313,
+            0.0003336874262279961,
+            0.0004541287377057907
+          ],
+          "calls_per_sample": 61,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        },
+        "scipy_csr": {
+          "median_seconds": 0.00022836520930352065,
+          "min_seconds": 0.00022585674418657386,
+          "max_seconds": 0.00023092496511771757,
+          "p25_seconds": 0.00022777788372021078,
+          "p75_seconds": 0.00022983054651207525,
+          "samples_seconds": [
+            0.000226563023256118,
+            0.00022923358139535614,
+            0.00022836520930352065,
+            0.00022983054651207525,
+            0.00022585674418657386,
+            0.00023092496511771757,
+            0.0002304561279066378,
+            0.00022777788372021078,
+            0.00022796568604526116
+          ],
+          "calls_per_sample": 86,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        },
+        "scipy_csc": {
+          "median_seconds": 0.00022743977646956303,
+          "min_seconds": 0.00022493756470580326,
+          "max_seconds": 0.00022855658823359322,
+          "p25_seconds": 0.00022629590588193799,
+          "p75_seconds": 0.00022763094117609023,
+          "samples_seconds": [
+            0.0002264709647052394,
+            0.00022756071764567476,
+            0.00022493756470580326,
+            0.0002280201176477824,
+            0.00022743977646956303,
+            0.00022629590588193799,
+            0.00022566168235083322,
+            0.00022855658823359322,
+            0.00022763094117609023
+          ],
+          "calls_per_sample": 85,
+          "validation": {
+            "passed": true
+          },
+          "scope": "Sparse A @ A.H; adjoint preparation excluded."
+        }
+      },
+      "round_order": [
+        [
+          "scipy_csr",
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csr"
+        ],
+        [
+          "scipy_csc",
+          "scipy_csr",
+          "sppy_C",
+          "sppy_F"
+        ],
+        [
+          "scipy_csr",
+          "sppy_F",
+          "sppy_C",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csr",
+          "scipy_csc",
+          "sppy_F",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "sppy_F",
+          "scipy_csr",
+          "scipy_csc"
+        ],
+        [
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr",
+          "sppy_C"
+        ],
+        [
+          "sppy_C",
+          "scipy_csc",
+          "sppy_F",
+          "scipy_csr"
+        ]
+      ],
+      "scipy_over_sppy": {
+        "csr_over_C": 0.8275190718714387,
+        "csc_over_F": 0.6815952852660441
+      }
+    }
+  ]
+}

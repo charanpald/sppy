@@ -38,18 +38,31 @@ S import_compressed(int rows, int cols, Array<T> values, Array<int> indices, Arr
     require(values.size() <= std::numeric_limits<int>::max(), "Too many stored entries");
     require(indptr.data()[0] == 0 && indptr.data()[outer] == values.size(),
             "Invalid compressed pointers");
-    bool canonical = true;
+    const int count = int(values.size());
+    const int *pointers = indptr.data();
+    const int *inner_indices = indices.data();
+    // Validate pointers before using them as offsets. Accumulated error flags
+    // let the compiler vectorize the scans without a branch/exception per entry.
+    unsigned bad_pointers = 0;
     for (int j = 0; j < outer; ++j) {
-        const int begin = indptr.data()[j], end = indptr.data()[j + 1];
-        require(begin >= 0 && begin <= end && end <= values.size(), "Invalid compressed pointers");
-        int previous = -1;
-        for (int k = begin; k < end; ++k) {
-            const int index = indices.data()[k];
-            require(index >= 0 && index < inner, "Invalid compressed inner indices");
-            canonical = canonical && index > previous;
-            previous = index;
-        }
+        bad_pointers |= unsigned(pointers[j]) > unsigned(count);
+        bad_pointers |= unsigned(pointers[j + 1]) > unsigned(count);
+        bad_pointers |= pointers[j] > pointers[j + 1];
     }
+    require(bad_pointers == 0, "Invalid compressed pointers");
+    unsigned bad_indices = 0;
+    for (int k = 0; k < count; ++k)
+        bad_indices |= unsigned(inner_indices[k]) >= unsigned(inner);
+    require(bad_indices == 0, "Invalid compressed inner indices");
+    unsigned noncanonical = 0;
+    for (int j = 0; j < outer; ++j) {
+        const int begin = pointers[j], end = pointers[j + 1];
+        if (end - begin < 2)
+            continue;
+        for (int k = begin + 1; k < end; ++k)
+            noncanonical |= inner_indices[k] <= inner_indices[k - 1];
+    }
+    const bool canonical = noncanonical == 0;
     S result(rows, cols);
     if (canonical) {
         result.resizeNonZeros(values.size());

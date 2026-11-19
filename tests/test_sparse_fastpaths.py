@@ -187,6 +187,9 @@ def test_rectangular_sparse_products_keep_left_storage(dtype, order, order_right
     assert actual.order == order
     assert actual.dtype == dtype
     np.testing.assert_array_equal(actual.toarray(), left @ right)
+    _, indices, indptr = actual.compressed_arrays()
+    for begin, end in zip(indptr[:-1], indptr[1:]):
+        assert np.all(np.diff(indices[begin:end]) > 0)
 
 
 @pytest.mark.parametrize("value_dtype", [np.float64, np.complex128])
@@ -245,3 +248,76 @@ def test_compressed_import_accepts_readonly_buffers(order):
         result.toarray(), expected if order == "C" else expected.T
     )
     assert result.nnz == 3
+
+
+@pytest.mark.parametrize("uncompressed", [False, True])
+def test_sparse_product_retains_cancellation_and_stored_zeros(
+    uncompressed, dtype, order
+):
+    left = sppy.asarray(np.array([[1, 1, 0], [0, 0, 2]], dtype=dtype), order=order)
+    right = sppy.asarray(np.array([[3, 0], [-3, 0], [0, 4]], dtype=dtype), order=order)
+    left[0, 2] = 0
+    right[0, 1] = 0
+    if uncompressed:
+        left.reserve(np.full(left.outer_size, 4, dtype=np.int32))
+        right.reserve(np.full(right.outer_size, 4, dtype=np.int32))
+    expected_left, expected_right = left.toarray(), right.toarray()
+    result = left @ right
+    np.testing.assert_array_equal(result.toarray(), expected_left @ expected_right)
+    assert result.nnz == 3  # Cancellation and an explicitly zero product survive.
+    assert result.is_compressed
+    values, indices, indptr = result.compressed_arrays()
+    for begin, end in zip(indptr[:-1], indptr[1:]):
+        assert np.all(np.diff(indices[begin:end]) > 0)
+    result.fill(9)
+    np.testing.assert_array_equal(left.toarray(), expected_left)
+    np.testing.assert_array_equal(right.toarray(), expected_right)
+
+
+@pytest.mark.parametrize(
+    "dtype", [np.dtype(t) for t in (np.int8, np.int16, np.int32, np.int64)]
+)
+def test_sparse_product_integer_precision_and_overflow(dtype, order):
+    maximum = np.iinfo(dtype).max
+    left = np.array([[maximum, maximum], [maximum, 2]], dtype=dtype)
+    right = np.array([[maximum, 2], [2, maximum]], dtype=dtype)
+    result = sppy.asarray(left, order=order) @ sppy.asarray(right, order=order)
+    np.testing.assert_array_equal(result.toarray(), left @ right)
+
+
+def test_sparse_product_complex_values_are_not_conjugated(order):
+    left = np.array([[1 + 2j, 3j], [0, -2j]])
+    right = np.array([[3j, 0], [1 - 1j, 2j]])
+    result = sppy.asarray(left, order=order) @ sppy.asarray(right, order=order)
+    np.testing.assert_array_equal(result.toarray(), left @ right)
+
+
+def test_sparse_product_huge_inner_axis_uses_sparse_workspace(order):
+    n = 2**31 - 1
+    if order == "C":
+        left = sppy.asarray([[2.0, 2.0]], order=order)
+        right = sppy.zeros((2, n), order=order)
+        right[0, n - 1] = 3
+        right[1, 1] = 4
+    else:
+        left = sppy.zeros((n, 2), order=order)
+        left[n - 1, 0] = 3
+        left[1, 1] = 4
+        right = sppy.asarray([[2.0], [2.0]], order=order)
+    result = left @ right
+    assert result.shape == ((1, n) if order == "C" else (n, 1))
+    assert result.nnz == 2
+    position = (0, n - 1) if order == "C" else (n - 1, 0)
+    assert result[position] == 6
+    _, indices, _ = result.compressed_arrays()
+    np.testing.assert_array_equal(indices, [1, n - 1])
+
+
+@pytest.mark.parametrize("shape,columns", [((0, 3), 4), ((3, 0), 4), ((3, 2), 0)])
+def test_sparse_product_empty_dimensions(shape, columns, dtype, order):
+    left = sppy.zeros(shape, dtype=dtype, order=order)
+    right = sppy.zeros((shape[1], columns), dtype=dtype, order=order)
+    result = left @ right
+    assert result.shape == (shape[0], columns)
+    assert result.nnz == 0
+    np.testing.assert_array_equal(result.toarray(), np.zeros(result.shape, dtype=dtype))

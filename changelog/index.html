@@ -64,9 +64,12 @@
 </li>
                                     
 <li>
-    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+    <a href="../migration/" class="dropdown-item">Migration to 1.0</a>
 </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../eigen-coverage/" class="nav-link">Eigen coverage</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
@@ -133,6 +136,10 @@
             
             <li class="nav-item" data-bs-level="1"><a href="#changelog" class="nav-link">Changelog</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#100" class="nav-link">1.0.0</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-bs-level="2"><a href="#070" class="nav-link">0.7.0</a>
               <ul class="nav flex-column">
               </ul>
@@ -177,6 +184,29 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="100">1.0.0<a class="headerlink" href="#100" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>Accelerate owned copies, canonical compressed imports, basic slicing, contiguous reductions, and sparse/dense products; preserve dtype, stored zeros, and independent results.</p>
+</li>
+<li>
+<p>Vectorize compressed-buffer validation and build sparse products directly in CSR/CSC order, retaining canonical indices and explicit zeros with bounded workspace for large sparse axes.</p>
+</li>
+<li>
+<p>Define sparse integer matrix products with NumPy-compatible fixed-width overflow.</p>
+</li>
+<li>
+<p>Replace generated Cython classes with typed pybind11/Eigen bindings.</p>
+</li>
+<li>Add complex64/128 arrays, adjoint products, and complex Matrix Market IO.</li>
+<li>Add Eigen LLT/LDLT, LU, and QR sparse factorizations with symbolic reuse.</li>
+<li>Add CG, BiCGSTAB, and least-squares CG with diagnostics and built-in preconditioners.</li>
+<li>Add AMD/COLAMD/natural orderings, triangular solves, and factor access.</li>
+<li>Add triplet/compressed assembly, storage controls, scaling, and sparse coefficient operations.</li>
+<li>Remove compatibility aliases and legacy helpers; default consistently to C order.</li>
+<li>Make stored_indices/values distinct from nonzero-value coordinates.</li>
+</ul>
+<p>See <a href="../migration/">migration</a> and <a href="../eigen-coverage/">Eigen coverage</a>.</p>
 <h2 id="070">0.7.0<a class="headerlink" href="#070" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Modern isolated builds via <code>pyproject.toml</code>, scikit-build-core, and CMake.</li>

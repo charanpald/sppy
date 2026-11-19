@@ -64,9 +64,12 @@
 </li>
                                     
 <li>
-    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+    <a href="../migration/" class="dropdown-item">Migration to 1.0</a>
 </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../eigen-coverage/" class="nav-link">Eigen coverage</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
@@ -133,24 +136,96 @@
             
             <li class="nav-item" data-bs-level="1"><a href="#linear-algebra" class="nav-link">Linear algebra</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-bs-level="2"><a href="#solve-a-linear-system" class="nav-link">Solve a linear system</a>
+            <li class="nav-item" data-bs-level="2"><a href="#direct-solves-and-factor-reuse" class="nav-link">Direct solves and factor reuse</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#randomized-svd" class="nav-link">Randomized SVD</a>
+            <li class="nav-item" data-bs-level="2"><a href="#factors-and-implicit-q" class="nav-link">Factors and implicit Q</a>
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#functions" class="nav-link">Functions</a>
+            <li class="nav-item" data-bs-level="2"><a href="#iterative-solves" class="nav-link">Iterative solves</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#norms-and-randomized-svd" class="nav-link">Norms and randomized SVD</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#solver-reference" class="nav-link">Solver reference</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#sppy.linalg.solvers" class="nav-link">solvers</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.ComputationInfo" class="nav-link">ComputationInfo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.IterativeResult" class="nav-link">IterativeResult</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.SparseFactorization" class="nav-link">SparseFactorization</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.SimplicialLLT" class="nav-link">SimplicialLLT</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.SimplicialLDLT" class="nav-link">SimplicialLDLT</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.SparseLU" class="nav-link">SparseLU</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.SparseQR" class="nav-link">SparseQR</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.Preconditioner" class="nav-link">Preconditioner</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.factorize" class="nav-link">factorize</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.solve" class="nav-link">solve</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.ordering" class="nav-link">ordering</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.triangular_solve" class="nav-link">triangular_solve</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.cg" class="nav-link">cg</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.bicgstab" class="nav-link">bicgstab</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.solvers.lscg" class="nav-link">lscg</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#other-functions" class="nav-link">Other functions</a>
               <ul class="nav flex-column">
               </ul>
             </li>
             <li class="nav-item" data-bs-level="2"><a href="#sppy.linalg.core" class="nav-link">core</a>
               <ul class="nav flex-column">
-            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.core.bicgstab" class="nav-link">bicgstab</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
             <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.core.norm" class="nav-link">norm</a>
               <ul class="nav flex-column">
               </ul>
@@ -159,14 +234,6 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="3"><a href="#sppy.linalg.core.biCGSTAB" class="nav-link">biCGSTAB</a>
-              <ul class="nav flex-column">
-              </ul>
-            </li>
-              </ul>
-            </li>
-            <li class="nav-item" data-bs-level="2"><a href="#general-linear-operators" class="nav-link">General linear operators</a>
-              <ul class="nav flex-column">
               </ul>
             </li>
             <li class="nav-item" data-bs-level="2"><a href="#sppy.linalg.general_linear_operator.GeneralLinearOperator" class="nav-link">GeneralLinearOperator</a>
@@ -193,47 +260,1349 @@
                     <div class="col-md-9" role="main">
 
 <h1 id="linear-algebra">Linear algebra<a class="headerlink" href="#linear-algebra" title="Permanent link">&para;</a></h1>
-<p>Import functions from <code>sppy.linalg</code>. The solver uses floating-point sparse
-matrices; randomized SVD also accepts dense arrays and general linear operators.</p>
-<h2 id="solve-a-linear-system">Solve a linear system<a class="headerlink" href="#solve-a-linear-system" title="Permanent link">&para;</a></h2>
+<p>These functions call Eigen directly and require no SciPy installation. Solvers
+accept float32/64 and complex64/128 matrices. Integer matrices must be explicitly
+cast before solving. See <a href="../eigen-coverage/">Eigen coverage</a> for the module map.</p>
+<h2 id="direct-solves-and-factor-reuse">Direct solves and factor reuse<a class="headerlink" href="#direct-solves-and-factor-reuse" title="Permanent link">&para;</a></h2>
 <pre><code class="language-python">import numpy as np
 import sppy
-from sppy.linalg import bicgstab, norm
+from sppy.linalg import SparseLU, SparseQR, SimplicialLLT, cg, ComputationInfo
 
 a = sppy.asarray([[4., 1.], [1., 3.]])
 b = np.array([1., 2.])
-x, status = bicgstab(a, b, rtol=1e-10)
-assert status == 0
+factor = SparseLU(a)
+x = factor.solve(b)
 np.testing.assert_allclose(a @ x, b)
-frobenius = norm(a)
-</code></pre>
-<p>Always inspect <code>status</code>: 0 means success, 1 a numerical issue, 2 no convergence,
-and 3 invalid input. These are SpPy's codes and differ from SciPy's convention.
-<code>norm</code> computes only the Frobenius norm; its <code>ord</code> argument is currently ignored.</p>
-<h2 id="randomized-svd">Randomized SVD<a class="headerlink" href="#randomized-svd" title="Permanent link">&para;</a></h2>
-<pre><code class="language-python">from sppy.linalg import rsvd
 
-u, singular_values, v = rsvd(a, k=1, p=1, q=2)
-approximation = (u * singular_values) @ v.T
-assert approximation.shape == a.shape
+# Reuse the symbolic pattern when only coefficients change.
+factor.factorize(a * 2)
+np.testing.assert_allclose((a * 2) @ factor.solve(b), b)
 </code></pre>
-<p><code>rsvd</code> returns right singular vectors as columns of <code>v</code>, rather than returning
-<code>v.T</code>. Increase <code>p</code> (oversampling) or <code>q</code> (power iterations) to improve the
-approximation. Sampling uses NumPy's global random state.</p>
-<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<p>Choose LLT/LDLT for Hermitian positive definite systems, LU for general square
+systems, and QR for rectangular least squares. All support dense vector or matrix
+right-hand sides and sparse RHS matrices. Sparse RHS solves return SparseArray. Cholesky reads the lower triangle by default; <code>lower=False</code>
+uses the upper triangle. Its <code>shift_offset</code> and <code>shift_scale</code> transform the
+diagonal as <code>scale * diagonal + offset</code>.</p>
+<p>Direct factorization failures raise <code>numpy.linalg.LinAlgError</code>. Analyze and
+factorize are separate operations; <code>compute</code> performs both. Numeric refactorization
+requires an identical stored sparsity pattern, including explicitly stored zeros.
+Changing the matrix afterward does not alter an existing factorization.</p>
+<h2 id="factors-and-implicit-q">Factors and implicit Q<a class="headerlink" href="#factors-and-implicit-q" title="Permanent link">&para;</a></h2>
+<p>Cholesky exposes <code>factor("L")</code>, <code>factor("U")</code>, and <code>factor("P")</code>; LDLT also
+exposes <code>factor("D")</code>. LU exposes sparse <code>L</code>/<code>U</code>, row <code>P</code> and column <code>Q</code> permutations, a
+determinant, and a stable <code>slogdet()</code>. QR exposes sparse <code>R</code>, column <code>P</code>, numerical <code>rank</code>, and
+<code>apply_q(rhs, adjoint=False)</code> without allocating a full dense Q.</p>
+<p>Permutation arrays follow Eigen's convention: <code>P[indices[j], j] = 1</code>.
+The empty Cholesky permutation represents identity when no reordering is needed.</p>
+<pre><code class="language-python">rectangular = sppy.asarray([[1., 0.], [0., 1.], [1., 1.]])
+qr = SparseQR(rectangular)
+least_squares = qr.solve(np.array([1., 2., 3.]))
+assert qr.rank == 2
+np.testing.assert_allclose(rectangular @ least_squares, [1., 2., 3.])
+</code></pre>
+<h2 id="iterative-solves">Iterative solves<a class="headerlink" href="#iterative-solves" title="Permanent link">&para;</a></h2>
+<pre><code class="language-python">result = cg(a, b, preconditioner=&quot;incomplete_cholesky&quot;, rtol=1e-10)
+assert result.info == ComputationInfo.SUCCESS
+np.testing.assert_allclose(a @ result.solution, b)
+x, status = result
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Matrix</th>
+<th>Available preconditioners</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cg</code></td>
+<td>Hermitian positive definite; both triangles are read</td>
+<td>identity, diagonal (default), incomplete_cholesky</td>
+</tr>
+<tr>
+<td><code>bicgstab</code></td>
+<td>General square</td>
+<td>identity, diagonal (default), incomplete_lut</td>
+</tr>
+<tr>
+<td><code>lscg</code></td>
+<td>Rectangular least squares</td>
+<td>identity, least_square_diagonal (default)</td>
+</tr>
+</tbody>
+</table>
+<p>Options include <code>x0</code>, <code>rtol</code>, and <code>maxiter</code>. ILUT adds <code>drop_tolerance</code> and
+<code>fill_factor</code>; incomplete Cholesky adds <code>initial_shift</code>. Results expose
+<code>solution</code>, <code>info</code>, <code>iterations</code>, and estimated relative <code>error</code>. For multiple
+RHS columns, diagnostics report the worst column. LSCG's error is measured on
+the normal equations. Inspect <code>info</code> before using a nonconverged result.</p>
+<p><code>Preconditioner(a, method=...)</code> builds an independently reusable inverse
+preconditioner with a <code>.solve(rhs)</code> method. <code>triangular_solve</code> handles lower,
+upper, and unit-diagonal systems. <code>ordering</code> computes AMD/COLAMD/natural gather
+permutations; pass them to <code>a.permuted</code>.</p>
+<h2 id="norms-and-randomized-svd">Norms and randomized SVD<a class="headerlink" href="#norms-and-randomized-svd" title="Permanent link">&para;</a></h2>
+<p><code>norm(a)</code> computes a Euclidean vector norm or Frobenius matrix norm. Matrix
+1/infinity norms are supported. Randomized SVD returns <code>(u, s, v)</code> and
+reconstructs as <code>(u * s) @ v.conj().T</code>. It uses local random sampling; pass
+<code>omega</code> to supply projection directions or <code>rng</code> for reproducible sampling.</p>
+<h2 id="solver-reference">Solver reference<a class="headerlink" href="#solver-reference" title="Permanent link">&para;</a></h2>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<h2 id="sppy.linalg.core" class="doc doc-heading">
-            <code>sppy.linalg.core</code>
+<h2 id="sppy.linalg.solvers" class="doc doc-heading">
+            <code>sppy.linalg.solvers</code>
 
 
-<a href="#sppy.linalg.core" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#sppy.linalg.solvers" class="headerlink" title="Permanent link">&para;</a></h2>
 
     <div class="doc doc-contents first">
+
+        <p>Eigen's built-in sparse direct and iterative solvers.</p>
+<p>No SciPy dependency is needed. Native solvers preserve float32/64 and
+complex64/128 precision and return owned arrays and factors.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.ComputationInfo" class="doc doc-heading">
+            <code>ComputationInfo</code>
+
+
+<a href="#sppy.linalg.solvers.ComputationInfo" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="enum.IntEnum">IntEnum</span></code></p>
+
+
+
+        <p>Eigen computation status.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.IterativeResult" class="doc doc-heading">
+            <code>IterativeResult</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+<a href="#sppy.linalg.solvers.IterativeResult" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Solution, Eigen status, iteration count, and estimated relative error.</p>
+<p>Unpacking yields (solution, info). Inspect iterations/error on the object.
+For multiple right-hand sides, status, iterations, and error are the worst
+values across columns. Check info before using a nonconverged solution.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.SparseFactorization" class="doc doc-heading">
+            <code>SparseFactorization</code>
+
+
+<a href="#sppy.linalg.solvers.SparseFactorization" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Reusable Eigen factorization, with separate symbolic and numeric steps.</p>
+<p>Parameters:
+    a: Optional matrix to factor immediately.
+    method: One of llt, ldlt, lu, or qr.
+    ordering: natural, amd, or colamd. Defaults to amd for Cholesky,
+        colamd for LU/QR. AMD requires square matrices.
+    lower: Read the lower triangle for Cholesky; False reads the upper.
+    shift_offset: Cholesky diagonal offset.
+    shift_scale: Cholesky diagonal scale, applied before the offset.
+    pivot_threshold: Optional LU or QR pivot threshold.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.rank" class="doc doc-heading">
+            <code class="highlight language-python">rank</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.rank" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerical rank from rank-revealing QR.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.analyze_pattern" class="doc doc-heading">
+            <code class="highlight language-python">analyze_pattern(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.analyze_pattern" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze structure without numerical factorization; invalidates old factors.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.factorize" class="doc doc-heading">
+            <code class="highlight language-python">factorize(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.factorize" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerically factor a matrix with the analyzed sparsity pattern.</p>
+<p>Raises numpy.linalg.LinAlgError on numerical failure. Shape, dtype, and
+stored coordinates must match the analyzed matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.compute" class="doc doc-heading">
+            <code class="highlight language-python">compute(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.compute" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze and factor a matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.solve" class="doc doc-heading">
+            <code class="highlight language-python">solve(b)</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.solve" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Solve for dense vectors/matrices or a sparse RHS matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.factor" class="doc doc-heading">
+            <code class="highlight language-python">factor(name)</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.factor" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Copy L/U for Cholesky/LU, D for LDLT, R for QR, or permutation P/Q.</p>
+<p>Permutations use Eigen's convention: P[indices[j], j] = 1. LU exposes
+row permutation P and column permutation Q; QR exposes column P.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.determinant" class="doc doc-heading">
+            <code class="highlight language-python">determinant()</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.determinant" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the determinant for LU or Cholesky.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.slogdet" class="doc doc-heading">
+            <code class="highlight language-python">slogdet()</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.slogdet" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return (phase, log(abs(det))) for LU or Cholesky without overflow.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseFactorization.apply_q" class="doc doc-heading">
+            <code class="highlight language-python">apply_q(b, *, adjoint=False)</code>
+
+<a href="#sppy.linalg.solvers.SparseFactorization.apply_q" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply QR's implicit Q or Q.H without forming a dense Q.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.SimplicialLLT" class="doc doc-heading">
+            <code>SimplicialLLT</code>
+
+
+<a href="#sppy.linalg.solvers.SimplicialLLT" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SparseFactorization (sppy.linalg.solvers.SparseFactorization)" href="#sppy.linalg.solvers.SparseFactorization">SparseFactorization</a></code></p>
+
+
+
+        <p>Sparse Cholesky LL.H for Hermitian positive definite matrices.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.rank" class="doc doc-heading">
+            <code class="highlight language-python">rank</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.rank" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerical rank from rank-revealing QR.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.analyze_pattern" class="doc doc-heading">
+            <code class="highlight language-python">analyze_pattern(a)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.analyze_pattern" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze structure without numerical factorization; invalidates old factors.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.factorize" class="doc doc-heading">
+            <code class="highlight language-python">factorize(a)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.factorize" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerically factor a matrix with the analyzed sparsity pattern.</p>
+<p>Raises numpy.linalg.LinAlgError on numerical failure. Shape, dtype, and
+stored coordinates must match the analyzed matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.compute" class="doc doc-heading">
+            <code class="highlight language-python">compute(a)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.compute" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze and factor a matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.solve" class="doc doc-heading">
+            <code class="highlight language-python">solve(b)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.solve" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Solve for dense vectors/matrices or a sparse RHS matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.factor" class="doc doc-heading">
+            <code class="highlight language-python">factor(name)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.factor" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Copy L/U for Cholesky/LU, D for LDLT, R for QR, or permutation P/Q.</p>
+<p>Permutations use Eigen's convention: P[indices[j], j] = 1. LU exposes
+row permutation P and column permutation Q; QR exposes column P.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.determinant" class="doc doc-heading">
+            <code class="highlight language-python">determinant()</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.determinant" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the determinant for LU or Cholesky.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.slogdet" class="doc doc-heading">
+            <code class="highlight language-python">slogdet()</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.slogdet" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return (phase, log(abs(det))) for LU or Cholesky without overflow.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLLT.apply_q" class="doc doc-heading">
+            <code class="highlight language-python">apply_q(b, *, adjoint=False)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLLT.apply_q" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply QR's implicit Q or Q.H without forming a dense Q.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.SimplicialLDLT" class="doc doc-heading">
+            <code>SimplicialLDLT</code>
+
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SparseFactorization (sppy.linalg.solvers.SparseFactorization)" href="#sppy.linalg.solvers.SparseFactorization">SparseFactorization</a></code></p>
+
+
+
+        <p>Sparse Cholesky LD L.H for Hermitian positive definite matrices.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.rank" class="doc doc-heading">
+            <code class="highlight language-python">rank</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.rank" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerical rank from rank-revealing QR.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.analyze_pattern" class="doc doc-heading">
+            <code class="highlight language-python">analyze_pattern(a)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.analyze_pattern" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze structure without numerical factorization; invalidates old factors.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.factorize" class="doc doc-heading">
+            <code class="highlight language-python">factorize(a)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.factorize" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerically factor a matrix with the analyzed sparsity pattern.</p>
+<p>Raises numpy.linalg.LinAlgError on numerical failure. Shape, dtype, and
+stored coordinates must match the analyzed matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.compute" class="doc doc-heading">
+            <code class="highlight language-python">compute(a)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.compute" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze and factor a matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.solve" class="doc doc-heading">
+            <code class="highlight language-python">solve(b)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.solve" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Solve for dense vectors/matrices or a sparse RHS matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.factor" class="doc doc-heading">
+            <code class="highlight language-python">factor(name)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.factor" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Copy L/U for Cholesky/LU, D for LDLT, R for QR, or permutation P/Q.</p>
+<p>Permutations use Eigen's convention: P[indices[j], j] = 1. LU exposes
+row permutation P and column permutation Q; QR exposes column P.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.determinant" class="doc doc-heading">
+            <code class="highlight language-python">determinant()</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.determinant" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the determinant for LU or Cholesky.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.slogdet" class="doc doc-heading">
+            <code class="highlight language-python">slogdet()</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.slogdet" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return (phase, log(abs(det))) for LU or Cholesky without overflow.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SimplicialLDLT.apply_q" class="doc doc-heading">
+            <code class="highlight language-python">apply_q(b, *, adjoint=False)</code>
+
+<a href="#sppy.linalg.solvers.SimplicialLDLT.apply_q" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply QR's implicit Q or Q.H without forming a dense Q.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.SparseLU" class="doc doc-heading">
+            <code>SparseLU</code>
+
+
+<a href="#sppy.linalg.solvers.SparseLU" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SparseFactorization (sppy.linalg.solvers.SparseFactorization)" href="#sppy.linalg.solvers.SparseFactorization">SparseFactorization</a></code></p>
+
+
+
+        <p>Sparse LU for general square matrices.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.rank" class="doc doc-heading">
+            <code class="highlight language-python">rank</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#sppy.linalg.solvers.SparseLU.rank" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerical rank from rank-revealing QR.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.analyze_pattern" class="doc doc-heading">
+            <code class="highlight language-python">analyze_pattern(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.analyze_pattern" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze structure without numerical factorization; invalidates old factors.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.factorize" class="doc doc-heading">
+            <code class="highlight language-python">factorize(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.factorize" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerically factor a matrix with the analyzed sparsity pattern.</p>
+<p>Raises numpy.linalg.LinAlgError on numerical failure. Shape, dtype, and
+stored coordinates must match the analyzed matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.compute" class="doc doc-heading">
+            <code class="highlight language-python">compute(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.compute" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze and factor a matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.solve" class="doc doc-heading">
+            <code class="highlight language-python">solve(b)</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.solve" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Solve for dense vectors/matrices or a sparse RHS matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.factor" class="doc doc-heading">
+            <code class="highlight language-python">factor(name)</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.factor" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Copy L/U for Cholesky/LU, D for LDLT, R for QR, or permutation P/Q.</p>
+<p>Permutations use Eigen's convention: P[indices[j], j] = 1. LU exposes
+row permutation P and column permutation Q; QR exposes column P.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.determinant" class="doc doc-heading">
+            <code class="highlight language-python">determinant()</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.determinant" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the determinant for LU or Cholesky.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.slogdet" class="doc doc-heading">
+            <code class="highlight language-python">slogdet()</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.slogdet" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return (phase, log(abs(det))) for LU or Cholesky without overflow.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseLU.apply_q" class="doc doc-heading">
+            <code class="highlight language-python">apply_q(b, *, adjoint=False)</code>
+
+<a href="#sppy.linalg.solvers.SparseLU.apply_q" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply QR's implicit Q or Q.H without forming a dense Q.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.SparseQR" class="doc doc-heading">
+            <code>SparseQR</code>
+
+
+<a href="#sppy.linalg.solvers.SparseQR" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="SparseFactorization (sppy.linalg.solvers.SparseFactorization)" href="#sppy.linalg.solvers.SparseFactorization">SparseFactorization</a></code></p>
+
+
+
+        <p>Rank-revealing sparse QR for rectangular least-squares problems.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.rank" class="doc doc-heading">
+            <code class="highlight language-python">rank</code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#sppy.linalg.solvers.SparseQR.rank" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerical rank from rank-revealing QR.</p>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.analyze_pattern" class="doc doc-heading">
+            <code class="highlight language-python">analyze_pattern(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.analyze_pattern" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze structure without numerical factorization; invalidates old factors.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.factorize" class="doc doc-heading">
+            <code class="highlight language-python">factorize(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.factorize" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Numerically factor a matrix with the analyzed sparsity pattern.</p>
+<p>Raises numpy.linalg.LinAlgError on numerical failure. Shape, dtype, and
+stored coordinates must match the analyzed matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.compute" class="doc doc-heading">
+            <code class="highlight language-python">compute(a)</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.compute" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Analyze and factor a matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.solve" class="doc doc-heading">
+            <code class="highlight language-python">solve(b)</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.solve" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Solve for dense vectors/matrices or a sparse RHS matrix.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.factor" class="doc doc-heading">
+            <code class="highlight language-python">factor(name)</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.factor" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Copy L/U for Cholesky/LU, D for LDLT, R for QR, or permutation P/Q.</p>
+<p>Permutations use Eigen's convention: P[indices[j], j] = 1. LU exposes
+row permutation P and column permutation Q; QR exposes column P.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.determinant" class="doc doc-heading">
+            <code class="highlight language-python">determinant()</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.determinant" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the determinant for LU or Cholesky.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.slogdet" class="doc doc-heading">
+            <code class="highlight language-python">slogdet()</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.slogdet" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return (phase, log(abs(det))) for LU or Cholesky without overflow.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="sppy.linalg.solvers.SparseQR.apply_q" class="doc doc-heading">
+            <code class="highlight language-python">apply_q(b, *, adjoint=False)</code>
+
+<a href="#sppy.linalg.solvers.SparseQR.apply_q" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Apply QR's implicit Q or Q.H without forming a dense Q.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="sppy.linalg.solvers.Preconditioner" class="doc doc-heading">
+            <code>Preconditioner</code>
+
+
+<a href="#sppy.linalg.solvers.Preconditioner" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+        <p>Reusable native inverse preconditioner for dense vectors or RHS matrices.</p>
+<p>Methods: identity, diagonal, least_square_diagonal, incomplete_lut, and
+incomplete_cholesky. Eigen's diagonal preconditioners use a unit inverse for
+zero diagonal entries. ILUT accepts drop_tolerance/fill_factor; incomplete
+Cholesky accepts initial_shift. The matrix is snapshotted during construction.</p>
+
 
 
 
@@ -258,17 +1627,42 @@ approximation. Sampling uses NumPy's global random state.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="sppy.linalg.core.bicgstab" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">bicgstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">)</span></code>
+<h4 id="sppy.linalg.solvers.Preconditioner.solve" class="doc doc-heading">
+            <code class="highlight language-python">solve(b)</code>
 
-<a href="#sppy.linalg.core.bicgstab" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#sppy.linalg.solvers.Preconditioner.solve" class="headerlink" title="Permanent link">&para;</a></h4>
 
 
     <div class="doc doc-contents ">
 
-        <p>Solve a floating-point sparse linear system; return (solution, status).</p>
-<p>Status codes retain SpPy's convention: 0 success, 1 numerical issue,
-2 no convergence, 3 invalid input.</p>
+        <p>Apply the inverse preconditioner to dense right-hand sides.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.linalg.solvers.factorize" class="doc doc-heading">
+            <code class="highlight language-python">factorize(a, *, method='lu', **options)</code>
+
+<a href="#sppy.linalg.solvers.factorize" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Construct a reusable native sparse factorization.</p>
 
 
     </div>
@@ -278,83 +1672,175 @@ approximation. Sampling uses NumPy's global random state.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="sppy.linalg.solvers.solve" class="doc doc-heading">
+            <code class="highlight language-python">solve(a, b, *, method='lu', **options)</code>
+
+<a href="#sppy.linalg.solvers.solve" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Factor and solve once; use factorize for repeated right-hand sides.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.linalg.solvers.ordering" class="doc doc-heading">
+            <code class="highlight language-python">ordering(a, method='amd')</code>
+
+<a href="#sppy.linalg.solvers.ordering" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return a gather permutation for AMD, COLAMD, or natural ordering.</p>
+<p>AMD expects a square matrix and operates on its self-adjoint structure.
+Use a.permuted(p, p) for symmetric ordering, or a.permuted(columns=p)
+for a column ordering.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.linalg.solvers.triangular_solve" class="doc doc-heading">
+            <code class="highlight language-python">triangular_solve(a, b, *, lower=True, unit_diagonal=False)</code>
+
+<a href="#sppy.linalg.solvers.triangular_solve" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Solve a sparse triangular system; optionally assume a unit diagonal.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.linalg.solvers.cg" class="doc doc-heading">
+            <code class="highlight language-python">cg(a, b, *, preconditioner='diagonal', **options)</code>
+
+<a href="#sppy.linalg.solvers.cg" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Conjugate gradient for Hermitian positive definite matrices.</p>
+<p>Preconditioners: identity, diagonal, incomplete_cholesky. Both triangles
+are read. Options: x0, maxiter, rtol, initial_shift.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.linalg.solvers.bicgstab" class="doc doc-heading">
+            <code class="highlight language-python">bicgstab(a, b, *, preconditioner='diagonal', **options)</code>
+
+<a href="#sppy.linalg.solvers.bicgstab" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>BiCGSTAB for general square matrices.</p>
+<p>Preconditioners: identity, diagonal, incomplete_lut. Options: x0, maxiter,
+rtol, drop_tolerance, fill_factor.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="sppy.linalg.solvers.lscg" class="doc doc-heading">
+            <code class="highlight language-python">lscg(a, b, *, preconditioner='least_square_diagonal', **options)</code>
+
+<a href="#sppy.linalg.solvers.lscg" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Least-squares conjugate gradient for rectangular matrices.</p>
+<p>Preconditioners: identity, least_square_diagonal. Options: x0, maxiter, rtol.
+The estimated error is measured on the normal equations, as in Eigen.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="other-functions">Other functions<a class="headerlink" href="#other-functions" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="sppy.linalg.core" class="doc doc-heading">
+            <code>sppy.linalg.core</code>
+
+
+<a href="#sppy.linalg.core" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+        <p>Sparse norms and randomized singular-value decomposition.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="sppy.linalg.core.norm" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">norm</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python">norm(a, ord=None)</code>
 
 <a href="#sppy.linalg.core.norm" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>This function returns the Frobenius norm of the input A, which is defined as
-sqrt(sum A_ij^2).</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>A</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A csarray object.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ord</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The type of norm required, currently ignored.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The Frobenius norm of A.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Vector p-norm or matrix Frobenius/1/infinity norm, without densifying.</p>
 
 
     </div>
@@ -365,7 +1851,7 @@ sqrt(sum A_ij^2).</p>
 
 
 <h3 id="sppy.linalg.core.rsvd" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">rsvd</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">omega</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python">rsvd(A, k, p=10, q=2, omega=None, *, rng=None)</code>
 
 <a href="#sppy.linalg.core.rsvd" class="headerlink" title="Permanent link">&para;</a></h3>
 
@@ -378,7 +1864,7 @@ approximate matrix decompositions, 2009.</p>
 <p>Finds the partial SVD of a sparse or dense matrix A, resolving the largest k
 singular vectors/values, using exponent q and k+p projections. Returns the
 left and right singular vectors, and the singular values. The resulting matrix
-can be approximated using A ~ U s V.T. To improve the approximation quality
+can be approximated using A ~ (U * s) @ V.conj().T. To improve the approximation quality
 for a fixed k, increase p or q.</p>
 
 
@@ -468,6 +1954,21 @@ for a fixed k, increase p or q.</p>
                   <code>None</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>rng</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional NumPy Generator or seed for reproducible projections.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -498,134 +1999,13 @@ for a fixed k, increase p or q.</p>
 
 </div>
 
-<div class="doc doc-object doc-function">
-
-
-<h3 id="sppy.linalg.core.biCGSTAB" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">biCGSTAB</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">maxIter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mi">10</span> <span class="o">**</span> <span class="o">-</span><span class="mi">6</span><span class="p">)</span></code>
-
-<a href="#sppy.linalg.core.biCGSTAB" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Solve the linear system of equations given by A x = b where A is a csarray
-and b is a numpy array of the same dtype. Uses the Iterative stabilized
-bi-conjugate gradient method.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>A</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A csarray object of size n x n</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>b</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A numpy array of length n of the same dtype as A.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>maxIter</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The maximum number of iteartions of the method</p>
-              </div>
-            </td>
-            <td>
-                  <code>1000</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>tol</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The error tolerance</p>
-              </div>
-            </td>
-            <td>
-                  <code>10 ** -6</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The output code: 0 = success, 1 = numerical Issue, 2 = no convergence, 3 = invalid input</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
 
 
   </div>
 
     </div>
 
-</div><h2 id="general-linear-operators">General linear operators<a class="headerlink" href="#general-linear-operators" title="Permanent link">&para;</a></h2>
-<p>Wrap a matrix with <code>GeneralLinearOperator.as_linear_operator(a)</code> to expose
-<code>matvec</code>, <code>rmatvec</code>, <code>matmat</code>, and <code>rmatmat</code> callbacks. Combine operators lazily
-with <code>as_linear_operator_sum(left, right)</code>.</p>
-
+</div>
 
 <div class="doc doc-object doc-class">
 
@@ -673,7 +2053,7 @@ with many of the scipy functions.</p>
 
 
 <h3 id="sppy.linalg.general_linear_operator.GeneralLinearOperator.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">matvec</span><span class="p">,</span> <span class="n">rmatvec</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">matmat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rmatmat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python">__init__(shape, matvec, rmatvec=None, matmat=None, rmatmat=None, add=None, dtype=None)</code>
 
 <a href="#sppy.linalg.general_linear_operator.GeneralLinearOperator.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
 
@@ -689,7 +2069,7 @@ with many of the scipy functions.</p>
 
 
 <h3 id="sppy.linalg.general_linear_operator.GeneralLinearOperator.as_linear_operator" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">as_linear_operator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <code class="highlight language-python">as_linear_operator(X, parallel=False)</code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
@@ -700,7 +2080,7 @@ with many of the scipy functions.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Make a general linear operator from csarray X.</p>
+        <p>Make a general linear operator from SparseArray X.</p>
 
 
     </div>
@@ -711,7 +2091,7 @@ with many of the scipy functions.</p>
 
 
 <h3 id="sppy.linalg.general_linear_operator.GeneralLinearOperator.as_linear_operator_sum" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">as_linear_operator_sum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span></code>
+            <code class="highlight language-python">as_linear_operator_sum(X, Y)</code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>

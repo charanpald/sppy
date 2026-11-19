@@ -64,9 +64,12 @@
 </li>
                                     
 <li>
-    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+    <a href="../migration/" class="dropdown-item">Migration to 1.0</a>
 </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../eigen-coverage/" class="nav-link">Eigen coverage</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
@@ -170,7 +173,7 @@ assert a.sum() == 5
 <code>np.asarray(a)</code> always allocates dense storage. Other NumPy functions may also
 coerce to dense arrays; do not assume they preserve sparsity.</p>
 <p>Supported storage dtypes are signed 8/16/32/64-bit integers and 32/64-bit floats.
-Boolean, unsigned, and complex storage are unsupported. Arrays have one or two
+Complex64/128 storage is supported. Boolean and unsigned storage are unsupported. Arrays have one or two
 dimensions. Individual dimensions and stored-entry indices use signed 32-bit
 limits. General arithmetic broadcasting, whole-array boolean masks, new-axis
 indexing, and the full set of NumPy reduction keywords are unsupported.</p>
@@ -201,7 +204,7 @@ with TemporaryDirectory() as directory:
 </code></pre>
 <p>Matrix Market IO requires two-dimensional arrays and SciPy. The reader supports
 comments, symmetry, and compressed input through SciPy. Integer files are loaded
-as <code>int64</code>, real files as <code>float64</code>; complex values are rejected.
+as <code>int64</code>, real files as <code>float64</code>; complex files as <code>complex128</code>.
 See the <a href="../io/">IO reference</a> for arguments and storage selection.</p></div>
             </div>
         </div>

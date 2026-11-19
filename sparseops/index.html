@@ -64,9 +64,12 @@
 </li>
                                     
 <li>
-    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+    <a href="../migration/" class="dropdown-item">Migration to 1.0</a>
 </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../eigen-coverage/" class="nav-link">Eigen coverage</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
@@ -153,6 +156,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-bs-level="2"><a href="#eigen-storage-and-structured-operations" class="nav-link">Eigen storage and structured operations</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
               </ul>
             </li>
         </ul>
@@ -175,7 +182,7 @@ columns = sppy.asarray([[0., 2.], [3., 0.]], order=&quot;F&quot;)
 <p>Use <code>asarray</code> for data, including tuples. In <code>SparseArray((5, 7))</code>, the tuple
 specifies a shape instead of values. <code>asarray</code> infers the input dtype.
 <code>zeros</code>, <code>ones</code>, and <code>eye</code> default to row storage (<code>order="C"</code>). The direct
-<code>SparseArray</code> constructor and <code>rand</code> retain the legacy column-storage default.
+<code>SparseArray</code> constructor and <code>rand</code> also default to row storage.
 Choose <code>order="F"</code> for column storage and <code>order="C"</code> for row storage.</p>
 <p><code>rand</code> samples coordinates with replacement, so the resulting density may be
 lower than requested. Pass a NumPy <code>Generator</code> for reproducible inputs.
@@ -273,7 +280,7 @@ reductions. Empty min/max retain the historical NaN result.</p>
 <h2 id="stored-zeros-and-memory">Stored zeros and memory<a class="headerlink" href="#stored-zeros-and-memory" title="Permanent link">&para;</a></h2>
 <p><code>a.nnz</code> counts stored entries, including stored zeros. <code>a.count_nonzero()</code>
 counts nonzero values. <code>a.eliminate_zeros()</code> removes exact zeros in place;
-<code>a.prune()</code> removes entries using a tolerance.</p>
+<code>a.prune(tolerance=...)</code> removes entries using an absolute magnitude threshold.</p>
 <div class="admonition warning">
 <p class="admonition-title">Operations that can fill an array</p>
 <p><code>a.toarray()</code> and <code>np.asarray(a)</code> allocate dense storage. <code>ones</code>, <code>cos</code>,
@@ -283,7 +290,38 @@ before applying these operations to large shapes.</p>
 </div>
 <p>Prefer sparse methods when memory matters. <a href="../interoperability/">NumPy interoperability</a>
 explains the conversion boundaries, and the <a href="../csarray/">API reference</a>
-lists the available methods.</p></div>
+lists the available methods.</p>
+<h2 id="eigen-storage-and-structured-operations">Eigen storage and structured operations<a class="headerlink" href="#eigen-storage-and-structured-operations" title="Permanent link">&para;</a></h2>
+<p>Assemble unsorted entries with <code>SparseArray.from_triplets(shape, rows, columns,
+values)</code>. Duplicate contributions are summed. <code>insert_from_triplets</code> adds
+contributions to existing entries. Import CSR/CSC arrays with <code>from_compressed</code>
+and export independent <code>(values, indices, indptr)</code> copies with <code>compressed_arrays</code>.</p>
+<p><code>is_compressed</code>, <code>inner_size</code>, and <code>outer_size</code> describe the native layout.
+<code>reserve</code> accepts total capacity or a vector of capacities per outer row/column.
+<code>uncompress</code> enables insertion storage; <code>compress</code> restores compressed storage;
+<code>squeeze</code> also frees unused entry capacity. <code>resize(shape, preserve=True)</code> retains
+in-bounds entries; the default discards data. <code>swap</code> exchanges matching storage
+objects in constant time.</p>
+<p><code>triangular(lower=..., unit_diagonal=...)</code> materializes a triangle.
+<code>selfadjoint(lower=...)</code> reconstructs a Hermitian matrix from one triangle.
+<code>T</code> transposes and <code>H</code> conjugate-transposes. <code>real</code>, <code>imag</code>, <code>conjugate</code>, and
+<code>abs2</code> support complex coefficients. <code>scale_rows</code>/<code>scale_columns</code> multiply by
+diagonal scales without forming a diagonal matrix.</p>
+<p>Use <code>stored_indices()</code> when pairing coordinates with <code>values()</code>; <code>nonzero()</code>
+excludes explicitly stored zeros. <code>minimum</code>/<code>maximum</code> compare sparse arrays
+including implicit zeros. <code>unary(function)</code> applies a NumPy-compatible function
+to all values, including implicit zeros. A nonzero result at zero fills every
+position, as with <code>exp</code> or <code>log</code>.</p>
+<p>Scalar <code>/</code> and in-place arithmetic (<code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>) are supported.
+In-place arithmetic keeps object identity and rejects dtype changes that cannot
+be cast with NumPy's same-kind rule. <code>vdot</code> conjugates the first sparse vector;
+<code>dot</code> and <code>outer</code> do not. <code>lp_norm</code> computes an entrywise norm and <code>normalize</code>
+normalizes a floating-point or complex vector in place.</p>
+<p>Basic integer/slice selections run in native sparse code without allocating
+full-axis index grids. Same-dtype copies and storage-order changes use direct
+native storage operations. Canonical compressed buffers are validated and copied
+directly; unsorted or duplicate compressed entries use the summing assembly path.
+Copies retain the source compression state when storage order is unchanged.</p></div>
             </div>
         </div>
 

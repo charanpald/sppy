@@ -64,9 +64,12 @@
 </li>
                                     
 <li>
-    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+    <a href="../migration/" class="dropdown-item">Migration to 1.0</a>
 </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../eigen-coverage/" class="nav-link">Eigen coverage</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle active" aria-current="page" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
@@ -156,9 +159,9 @@
 <p>These functions require the optional SciPy dependency. See the
 <a href="../interoperability/#matrix-market-files">interoperability guide</a> for a round trip.
 Paths and open binary streams are accepted. Arrays must be two-dimensional.</p>
-<p><code>mmread(filename, storagetype="col")</code> defaults to column storage; pass
-<code>storagetype="row"</code> to use row storage. Real files are converted to <code>float64</code>
-and integer files to <code>int64</code>. Complex input is rejected.</p>
+<p><code>mmread(filename, order="C")</code> defaults to row storage; pass
+<code>order="F"</code> to use column storage. Real files are converted to <code>float64</code>
+integer files to <code>int64</code>, and complex files to <code>complex128</code>.</p>
 <p><code>mmwrite(filename, A, comment="", field=None, precision=None)</code> writes general
 symmetry explicitly. <code>field</code> and <code>precision</code> are forwarded to SciPy's writer.</p>
 
@@ -201,7 +204,7 @@ symmetry explicitly. <code>field</code> and <code>precision</code> are forwarded
 
 
 <h3 id="sppy.io.matrix_market.mmread" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mmread</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">storagetype</span><span class="o">=</span><span class="s1">'col'</span><span class="p">)</span></code>
+            <code class="highlight language-python">mmread(filename, *, order='C')</code>
 
 <a href="#sppy.io.matrix_market.mmread" class="headerlink" title="Permanent link">&para;</a></h3>
 
@@ -210,7 +213,7 @@ symmetry explicitly. <code>field</code> and <code>precision</code> are forwarded
 
         <p>Read a Matrix Market file into a sparse array.</p>
 <p>SciPy is required. Symmetric files, comments, and compressed files are
-handled by SciPy. Only real and integer values are supported by csarray.</p>
+handled by SciPy. Real, integer, and complex files are supported.</p>
 
 
     </div>
@@ -221,7 +224,7 @@ handled by SciPy. Only real and integer values are supported by csarray.</p>
 
 
 <h3 id="sppy.io.matrix_market.mmwrite" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">mmwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python">mmwrite(filename, A, comment='', field=None, precision=None)</code>
 
 <a href="#sppy.io.matrix_market.mmwrite" class="headerlink" title="Permanent link">&para;</a></h3>
 

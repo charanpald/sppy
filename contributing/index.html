@@ -64,9 +64,12 @@
 </li>
                                     
 <li>
-    <a href="../migration/" class="dropdown-item">Migration to 0.7</a>
+    <a href="../migration/" class="dropdown-item">Migration to 1.0</a>
 </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../eigen-coverage/" class="nav-link">Eigen coverage</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
@@ -178,11 +181,11 @@ To keep both environments installed, use <code>uv sync --locked --group docs</co
 <pre><code class="language-sh">uv run --locked pytest
 uv run --locked ruff check .
 uv run --locked ruff format --check sppy tests profiling
-uv run --locked clang-format --dry-run --Werror sppy/include/*.h tests/native/*.cpp profiling/native/*.cpp
+uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
 uv build
 </code></pre>
 <p><code>uv build</code> writes the source distribution and wheel to <code>dist/</code>. Native
-binding generation runs in the build directory. <code>setup.py</code> and <code>MANIFEST.in</code>
+bindings are compiled from <code>sppy/native/</code> using pybind11 and Eigen. <code>setup.py</code> and <code>MANIFEST.in</code>
 are no longer needed; package and archive settings live in <code>pyproject.toml</code>.</p>
 <p>After editing dependency declarations, run <code>uv lock</code> and commit the lockfile.
 After changing external Eigen headers, force a rebuild:</p>
@@ -202,20 +205,21 @@ run serially.</p>
 <p>The pytest suite lives in the repository's top-level <code>tests/</code> directory.
 Tests use Arrange–Act–Assert sections, parametrized cases, isolated temporary
 files, and local random generators. Run a focused subset with, for example,
-<code>uv run pytest tests/test_numpy_compatibility.py</code>. Native C++ tests are run by
-pytest when a GCC/Clang compiler and Eigen headers are available; select them
-with <code>uv run pytest -m native</code>. Missing native prerequisites are reported as
-skips.</p>
+<code>uv run pytest tests/test_numpy_compatibility.py</code>. Tests of the actual native extension boundary run with
+<code>uv run pytest -m native</code>; no second compiler invocation is needed.
+Numerical solver and storage contracts are in <code>tests/test_eigen_features.py</code>.</p>
 <p><code>sppy.test()</code> locates checkout tests and does not search installed packages.
 Runtime wheels do not include tests or profiling tools; source archives do.</p>
 <p>Opt-in profiling tools are in <code>profiling/</code>. For example:</p>
-<pre><code class="language-sh">uv run python -m profiling.sparse_array --operation dot --size 1000
-uv run python -m profiling.linear_operator --size 1000 --columns 8
-uv run python -m profiling.matrix_market --size 1000
-uv run python -m profiling.benchmark --operation dot --size 1000
+<pre><code class="language-sh">uv run --locked python -m profiling.benchmark --operations all --size 1000 --output /tmp/sppy-benchmark.json
+uv run --locked python -m profiling.profile --operation matmat --backend sppy_C --output /tmp/sppy.prof
 </code></pre>
 <p>See the <a href="https://github.com/charanpald/sppy/blob/master/profiling/README.md">profiling guide</a> for workload settings, profile files, and benchmark
-output. Importing these modules performs no profiling or input generation.</p></div>
+output. Importing these modules performs no profiling or input generation.</p>
+<p>The native build directory is reused to speed incremental builds. To switch
+an existing OpenMP build off, explicitly rebuild with <code>SPPY_OPENMP=0</code>.
+Do not mutate a sparse array concurrently with a native operation on that same
+array. Reusable direct factorization methods serialize access to their state.</p></div>
             </div>
         </div>
 

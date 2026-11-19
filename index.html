@@ -64,9 +64,12 @@
 </li>
                                     
 <li>
-    <a href="migration/" class="dropdown-item">Migration to 0.7</a>
+    <a href="migration/" class="dropdown-item">Migration to 1.0</a>
 </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="eigen-coverage/" class="nav-link">Eigen coverage</a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
@@ -165,19 +168,20 @@ dense = np.asarray(a)             # Explicitly allocate a dense array
 </code></pre>
 <p>Start with <a href="install/">installation</a> and the <a href="quickstart/">quick start</a>,
 then explore the <a href="sparseops/">sparse array guide</a>. Existing users should read
-<a href="migration/">the 0.7 migration guide</a>.</p>
+<a href="migration/">the 1.0 migration guide</a>.</p>
 <h2 id="what-to-expect">What to expect<a class="headerlink" href="#what-to-expect" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Signed integer storage: <code>int8</code>, <code>int16</code>, <code>int32</code>, and <code>int64</code>.</li>
-<li>Floating-point storage: <code>float32</code> and <code>float64</code>.</li>
+<li>Floating-point storage: <code>float32</code> and <code>float64</code>; complex: <code>complex64</code> and <code>complex128</code>.</li>
 <li>Row-major (<code>order="C"</code>) and column-major (<code>order="F"</code>) matrices.</li>
 <li>Optional <a href="interoperability/">SciPy conversion and Matrix Market IO</a>.</li>
 <li><a href="linalg/">Linear solvers, Frobenius norms, and randomized SVD</a>.</li>
 </ul>
 <p>SpPy requires Python 3.11+, NumPy 2, Eigen 5.0.1+, and a C++17 compiler to build.
 It supports vectors and matrices, rather than arbitrary-dimensional tensors.
-Complex, unsigned, and boolean storage are unsupported. NumPy compatibility is
+Unsigned and boolean storage are unsupported. NumPy compatibility is
 partial; see <a href="interoperability/">interoperability and limits</a>.</p>
+<p>See <a href="eigen-coverage/">Eigen coverage</a> for supported modules and boundaries.</p>
 <h2 id="project-and-support">Project and support<a class="headerlink" href="#project-and-support" title="Permanent link">&para;</a></h2>
 <p>Report bugs and request features in the
 <a href="https://github.com/charanpald/sppy/issues">GitHub issue tracker</a>.
@@ -265,5 +269,5 @@ See <a href="contributing/">contributing</a> for validation and documentation co
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-11-18 18:04:02.912403+00:00
+Build Date UTC : 2026-11-19 08:41:39.523482+00:00
 -->

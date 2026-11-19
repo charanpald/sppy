@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://charanpald.github.io/sppy/eigen-coverage/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Eigen coverage - SpPy</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" disabled>
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">SpPy</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Getting started</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../install/" class="dropdown-item">Installation</a>
+</li>
+                                    
+<li>
+    <a href="../quickstart/" class="dropdown-item">Quick start</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">User guide</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../sparseops/" class="dropdown-item">Sparse arrays</a>
+</li>
+                                    
+<li>
+    <a href="../interoperability/" class="dropdown-item">NumPy and SciPy</a>
+</li>
+                                    
+<li>
+    <a href="../migration/" class="dropdown-item">Migration to 1.0</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Eigen coverage</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">API reference</a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="../csarray/" class="dropdown-item">Arrays and constructors</a>
+</li>
+                                    
+<li>
+    <a href="../linalg/" class="dropdown-item">Linear algebra</a>
+</li>
+                                    
+<li>
+    <a href="../io/" class="dropdown-item">Matrix Market IO</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../contributing/" class="nav-link">Contributing</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../changelog/" class="nav-link">Changelog</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../migration/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../csarray/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/charanpald/sppy/edit/master/docs/eigen-coverage.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#eigen-sparse-coverage" class="nav-link">Eigen sparse coverage</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#precision-and-ownership" class="nav-link">Precision and ownership</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#deliberate-boundaries" class="nav-link">Deliberate boundaries</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="eigen-sparse-coverage">Eigen sparse coverage<a class="headerlink" href="#eigen-sparse-coverage" title="Permanent link">&para;</a></h1>
+<p>SpPy 1.0 targets the built-in modules shipped with <strong>Eigen 5.0.1</strong>. The Python
+interface materializes owned results instead of exposing C++ expression-template
+objects. No SciPy dependency is required for the features in this table.</p>
+<table>
+<thead>
+<tr>
+<th>Eigen module</th>
+<th>SpPy interface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SparseCore</td>
+<td><code>SparseArray</code>, vector/matrix storage in C/F order, indexing and blocks, triplets, CSR/CSC import/export, reserve/compress/uncompress/squeeze, resize/swap, pruning, arithmetic, sparse/dense products, reductions, diagonal scaling, coefficient operations, triangular/Hermitian materialization, adjoint, permutations</td>
+</tr>
+<tr>
+<td>OrderingMethods</td>
+<td><code>linalg.ordering(a, "amd"/"colamd"/"natural")</code>, ordering selection on direct factorizations</td>
+</tr>
+<tr>
+<td>SparseCholesky</td>
+<td><code>SimplicialLLT</code>, <code>SimplicialLDLT</code>, symbolic analysis, numerical refactorization, dense/sparse RHS solves, sparse L/U factors, LDLT D, permutations, determinant, diagonal shifts</td>
+</tr>
+<tr>
+<td>SparseLU</td>
+<td><code>SparseLU</code>, symbolic analysis, numerical refactorization, dense/sparse RHS solves, sparse L/U, row/column permutations, determinant/log determinant, pivot threshold</td>
+</tr>
+<tr>
+<td>SparseQR</td>
+<td><code>SparseQR</code>, rectangular least squares, symbolic analysis, numerical refactorization, rank, sparse R, implicit Q/Q.H application, column permutation, pivot threshold</td>
+</tr>
+<tr>
+<td>IterativeLinearSolvers</td>
+<td><code>cg</code>, <code>bicgstab</code>, <code>lscg</code>, initial guesses, multiple RHS, iteration/error/status diagnostics, identity/diagonal/least-square diagonal/incomplete LU/incomplete Cholesky preconditioners</td>
+</tr>
+</tbody>
+</table>
+<p>See the <a href="../csarray/">array API</a> and <a href="../linalg/">solver API</a> for signatures.</p>
+<h2 id="precision-and-ownership">Precision and ownership<a class="headerlink" href="#precision-and-ownership" title="Permanent link">&para;</a></h2>
+<p>Arrays support signed 8/16/32/64-bit integers, float32/64, and complex64/128.
+Solvers operate natively in float32/64 or complex64/128; cast integer arrays
+explicitly before solving. Sparse vectors use an owned single-column Eigen
+matrix internally, with one outer pointer and NumPy-style one-dimensional behavior in Python.
+Their native entry storage is proportional to stored entries, even for large
+logical vector sizes.</p>
+<p>Dimensions and storage indices are signed 32-bit integers. Each matrix has one
+storage order; arithmetic converts compatible inputs when needed. Compressed
+arrays and factors are copies. Changing them cannot invalidate an Eigen object.</p>
+<h2 id="deliberate-boundaries">Deliberate boundaries<a class="headerlink" href="#deliberate-boundaries" title="Permanent link">&para;</a></h2>
+<p>This is a Python interface to the built-in modules, not a binding of every C++
+template overload. Non-owning <code>Eigen::Map</code>/<code>Ref</code>, raw pointer mutation,
+expression lifetimes, custom C++ scalar types, custom C++ ordering functors,
+and custom C++ preconditioner classes are not exposed. Boolean and unsigned
+storage, 64-bit storage indices, are not supported. LDLT is intended for positive definite systems, rather than
+a general pivoted symmetric-indefinite solver.</p>
+<p>External support modules (SuiteSparse, SuperLU, MKL/Pardiso, PaStiX, METIS,
+Accelerate) and Eigen's unsupported modules are outside this release's scope.
+Newer Eigen APIs beyond the 5.0.1 baseline are not implied by these bindings.</p>
+<p>For the upstream module overview, see
+<a href="https://libeigen.gitlab.io/eigen/docs-5.0/group__TutorialSparse.html">Eigen's sparse tutorial</a>
+and <a href="https://libeigen.gitlab.io/eigen/docs-5.0/group__TopicSparseSystems.html">built-in sparse solvers</a>.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

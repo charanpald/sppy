@@ -2,46 +2,50 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://charanpald.github.io/sppy/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/changelog/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/contributing/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/csarray/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
+    </url>
+    <url>
+         <loc>https://charanpald.github.io/sppy/eigen-coverage/</loc>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/install/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/interoperability/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/io/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/linalg/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/migration/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/quickstart/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
     <url>
          <loc>https://charanpald.github.io/sppy/sparseops/</loc>
-         <lastmod>2026-11-18</lastmod>
+         <lastmod>2026-11-19</lastmod>
     </url>
 </urlset>

@@ -65,7 +65,7 @@ uv run --locked --only-group docs mkdocs build --strict
 
 ## Performance versus SciPy sparse
 
-Local synthetic benchmarks compare all **24 workloads** in C/CSR and F/CSC
+Local synthetic benchmarks compare all **24 operations** in C/CSR and F/CSC
 storage. Selected **SpPy C versus SciPy CSR** medians are below; speedup is
 SciPy time / SpPy time, so **above 1× favors SpPy**.
 

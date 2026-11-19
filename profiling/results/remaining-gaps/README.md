@@ -56,6 +56,11 @@ No SciPy runtime dependency was added. Kernels are selected automatically;
 set `SPPY_DISABLE_SIMD=1` **before starting Python** to force the baseline CPU
 path. The complete test suite was also run with that setting.
 
+Validation: **3,162 tests passed in each CPU mode**. Python/native style checks,
+the strict MkDocs build, wheel and source builds, source archive completeness,
+and isolated wheel numerical smoke tests in both CPU modes also passed. The
+wheel smoke tests did not import SciPy.
+
 ## Every operation
 
 Speedup is previous SpPy / new SpPy across all input/order combinations.

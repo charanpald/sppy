@@ -186,6 +186,18 @@
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
 <h2 id="100">1.0.0<a class="headerlink" href="#100" title="Permanent link">&para;</a></h2>
 <ul>
+<li>Generate sorted sparse products with hierarchical occupancy bits, avoiding sorting and conversion copies; fuse compressed-index copying with validation.</li>
+<li>Add runtime-selected SIMD panel/complex-product kernels with portable fallbacks and smaller LU workspace for narrow-band inputs.</li>
+<li>
+<p>Correct BiCGSTAB's per-RHS relative-tolerance scaling and diagnostics, including tiny/zero RHS and iteration limits.</p>
+</li>
+<li>
+<p>Add native promoted reductions and paired gather, equal-pattern arithmetic, and faster real/complex dense products and norms.</p>
+</li>
+<li>Pass owned storage snapshots directly to direct and iterative solvers; combine symbolic/numeric setup and solve dense LU RHS blocks directly from supernodal factors.</li>
+<li>
+<p>Adapt sparse-product assembly to output ordering and avoid temporary triplet objects during construction.</p>
+</li>
 <li>
 <p>Accelerate owned copies, canonical compressed imports, basic slicing, contiguous reductions, and sparse/dense products; preserve dtype, stored zeros, and independent results.</p>
 </li>

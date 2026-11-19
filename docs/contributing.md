@@ -30,6 +30,24 @@ Use relative Markdown links between pages and runnable Python code blocks.
 To keep both environments installed, use `uv sync --locked --group docs` and
 `uv run --locked --group docs mkdocs serve` with Eigen configured.
 
+## Publish documentation to GitHub Pages
+
+In the repository's **Settings → Pages → Build and deployment**, select
+**GitHub Actions** as the source. The `documentation` workflow builds MkDocs
+on pull requests and publishes `site/` after pushes to `master`. It can also
+be started manually from the Actions tab on `master`.
+
+Do not select a branch's `/docs` directory: it contains MkDocs source, not
+the generated website. That setting invokes Jekyll and can fail with
+`No such file or directory @ dir_chdir0 - /github/workspace/docs` when the
+selected publishing branch has no `docs/` directory. Publishing through
+Actions replaces the old `gh-pages` branch deployment; no `mkdocs gh-deploy`
+command is needed.
+
+The workflow uploads the generated site and deploys it with GitHub's Pages
+actions. Pull requests only validate the build and cannot deploy. The site is
+published at <https://charanpald.github.io/sppy/>.
+
 ## Checks and release builds
 
 With the default development environment:

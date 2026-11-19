@@ -2,6 +2,10 @@
 
 ## 1.0.0
 
+- Add native promoted reductions and paired gather, equal-pattern arithmetic, and faster real/complex dense products and norms.
+- Pass owned storage snapshots directly to direct and iterative solvers; combine symbolic/numeric setup and solve dense LU RHS blocks directly from supernodal factors.
+- Adapt sparse-product assembly to output ordering and avoid temporary triplet objects during construction.
+
 - Accelerate owned copies, canonical compressed imports, basic slicing, contiguous reductions, and sparse/dense products; preserve dtype, stored zeros, and independent results.
 
 - Vectorize compressed-buffer validation and build sparse products directly in CSR/CSC order, retaining canonical indices and explicit zeros with bounded workspace for large sparse axes.

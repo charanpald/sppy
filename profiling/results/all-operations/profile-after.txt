@@ -1,0 +1,292 @@
+
+construct-triplets
+         9500 function calls in 0.010 seconds
+
+   Ordered by: cumulative time
+   List reduced from 27 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.010    0.000 workloads.py:199(<lambda>)
+      100    0.000    0.000    0.010    0.000 sparse_array.py:227(from_triplets)
+      100    0.002    0.000    0.007    0.000 sparse_array.py:163(_put_coordinates)
+      100    0.004    0.000    0.004    0.000 {built-in method sppy._native.assemble}
+      200    0.000    0.000    0.001    0.000 sparse_array.py:22(_shape)
+      100    0.000    0.000    0.001    0.000 sparse_array.py:52(__init__)
+      600    0.001    0.000    0.001    0.000 sparse_array.py:27(<genexpr>)
+      400    0.000    0.000    0.001    0.000 {method 'any' of 'numpy.ndarray' objects}
+      100    0.001    0.000    0.001    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      400    0.000    0.000    0.000    0.000 _methods.py:55(_any)
+
+
+
+construct-compressed
+         3000 function calls in 0.002 seconds
+
+   Ordered by: cumulative time
+   List reduced from 15 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.002    0.000 workloads.py:221(<lambda>)
+      100    0.000    0.000    0.002    0.000 sparse_array.py:237(from_compressed)
+      100    0.000    0.000    0.001    0.000 sparse_array.py:22(_shape)
+      100    0.001    0.000    0.001    0.000 {built-in method sppy._native.from_compressed}
+      300    0.000    0.000    0.000    0.000 sparse_array.py:27(<genexpr>)
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      200    0.000    0.000    0.000    0.000 getlimits.py:399(__init__)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:99(_from_backend)
+      600    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+      500    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+
+
+
+gather
+         4400 function calls in 0.003 seconds
+
+   Ordered by: cumulative time
+   List reduced from 23 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.002    0.000 workloads.py:252(<lambda>)
+      100    0.000    0.000    0.002    0.000 workloads.py:424(_gather)
+      100    0.000    0.000    0.002    0.000 sparse_array.py:889(__getitem__)
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.gather_signed}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:874(_index_tuple)
+      100    0.000    0.000    0.000    0.000 _stride_tricks_impl.py:588(broadcast_arrays)
+      300    0.000    0.000    0.000    0.000 sparse_array.py:119(ndim)
+      600    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+      100    0.000    0.000    0.000    0.000 _stride_tricks_impl.py:520(_broadcast_shape)
+
+
+
+sum
+         800 function calls in 0.001 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:1086(sum)
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.sum}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:1159(_finish_reduction)
+      100    0.000    0.000    0.000    0.000 {built-in method numpy.asarray}
+      200    0.000    0.000    0.000    0.000 sparse_array.py:109(dtype)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:1143(_normalize_axis)
+
+
+
+column-sum
+         2600 function calls in 0.002 seconds
+
+   Ordered by: cumulative time
+   List reduced from 12 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.001    0.000 workloads.py:290(<lambda>)
+      100    0.000    0.000    0.001    0.000 sparse_array.py:1086(sum)
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.sum}
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:1143(_normalize_axis)
+      500    0.000    0.000    0.000    0.000 sparse_array.py:119(ndim)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:1159(_finish_reduction)
+      500    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+      500    0.000    0.000    0.000    0.000 sparse_array.py:114(shape)
+      200    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+
+
+
+norm
+         700 function calls in 0.001 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 workloads.py:295(<lambda>)
+      100    0.000    0.000    0.000    0.000 core.py:8(norm)
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.norm}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:119(ndim)
+      100    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:114(shape)
+
+
+
+add
+         2400 function calls in 0.002 seconds
+
+   Ordered by: cumulative time
+   List reduced from 16 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.002    0.000 workloads.py:273(<lambda>)
+      100    0.000    0.000    0.002    0.000 sparse_array.py:385(__add__)
+      100    0.000    0.000    0.002    0.000 sparse_array.py:359(_binary_sparse)
+      100    0.001    0.000    0.001    0.000 {built-in method sppy._native.add}
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 numeric.py:1911(isscalar)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:106(_wrap_backend)
+      300    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:99(_from_backend)
+      100    0.000    0.000    0.000    0.000 <frozen abc>:117(__instancecheck__)
+
+
+
+multiply
+         2900 function calls in 0.002 seconds
+
+   Ordered by: cumulative time
+   List reduced from 16 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.002    0.000 workloads.py:275(<lambda>)
+      100    0.000    0.000    0.002    0.000 sparse_array.py:402(multiply)
+      100    0.000    0.000    0.001    0.000 sparse_array.py:359(_binary_sparse)
+      100    0.001    0.000    0.001    0.000 {built-in method sppy._native.multiply}
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      200    0.000    0.000    0.000    0.000 numeric.py:1911(isscalar)
+      500    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:106(_wrap_backend)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:99(_from_backend)
+      200    0.000    0.000    0.000    0.000 <frozen abc>:117(__instancecheck__)
+
+
+
+matvec
+         1400 function calls in 0.001 seconds
+
+   Ordered by: cumulative time
+   List reduced from 11 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.001    0.000 workloads.py:277(<lambda>)
+      100    0.000    0.000    0.001    0.000 sparse_array.py:408(dot)
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.dense_matmul}
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:119(ndim)
+      300    0.000    0.000    0.000    0.000 sparse_array.py:109(dtype)
+      100    0.000    0.000    0.000    0.000 {built-in method numpy.ascontiguousarray}
+      200    0.000    0.000    0.000    0.000 sparse_array.py:114(shape)
+      100    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+      100    0.000    0.000    0.000    0.000 {built-in method numpy.asarray}
+
+
+
+matmat
+         1400 function calls in 0.002 seconds
+
+   Ordered by: cumulative time
+   List reduced from 11 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.001    0.000 workloads.py:279(<lambda>)
+      100    0.000    0.000    0.001    0.000 sparse_array.py:408(dot)
+      100    0.001    0.000    0.001    0.000 {built-in method sppy._native.dense_matmul}
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:119(ndim)
+      300    0.000    0.000    0.000    0.000 sparse_array.py:109(dtype)
+      100    0.000    0.000    0.000    0.000 {built-in method numpy.ascontiguousarray}
+      100    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+      200    0.000    0.000    0.000    0.000 sparse_array.py:114(shape)
+      100    0.000    0.000    0.000    0.000 {built-in method numpy.asarray}
+
+
+
+sparse-matmul
+         2700 function calls in 0.024 seconds
+
+   Ordered by: cumulative time
+   List reduced from 12 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.023    0.000 workloads.py:283(<lambda>)
+      100    0.000    0.000    0.023    0.000 sparse_array.py:408(dot)
+      100    0.023    0.000    0.023    0.000 {built-in method sppy._native.matmul}
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      300    0.000    0.000    0.000    0.000 sparse_array.py:119(ndim)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:99(_from_backend)
+      500    0.000    0.000    0.000    0.000 sparse_array.py:114(shape)
+      500    0.000    0.000    0.000    0.000 sparse_array.py:109(dtype)
+      300    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+      400    0.000    0.000    0.000    0.000 sparse_array.py:127(order)
+
+
+
+copy-prune
+         1700 function calls in 0.001 seconds
+
+   Ordered by: cumulative time
+   List reduced from 14 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.001    0.000 workloads.py:315(run)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:325(copy)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:331(astype)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:565(eliminate_zeros)
+      100    0.000    0.000    0.000    0.000 sparse_array.py:561(prune)
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.prune}
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.copy}
+      100    0.000    0.000    0.000    0.000 sparse_array.py:99(_from_backend)
+      300    0.000    0.000    0.000    0.000 sparse_array.py:109(dtype)
+
+
+
+lu-factor
+         215 function calls in 0.229 seconds
+
+   Ordered by: cumulative time
+   List reduced from 33 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        5    0.000    0.000    0.229    0.046 workloads.py:325(<lambda>)
+        5    0.000    0.000    0.229    0.046 workloads.py:407(_lu)
+        5    0.000    0.000    0.229    0.046 solvers.py:275(__init__)
+        5    0.000    0.000    0.229    0.046 solvers.py:81(__init__)
+        5    0.000    0.000    0.229    0.046 solvers.py:59(synchronized)
+        5    0.000    0.000    0.229    0.046 solvers.py:160(compute)
+        5    0.229    0.046    0.229    0.046 {built-in method sppy._native.compute_matrix}
+        5    0.000    0.000    0.000    0.000 solvers.py:114(_prepare)
+        5    0.000    0.000    0.000    0.000 _dtype.py:342(_name_get)
+        5    0.000    0.000    0.000    0.000 solvers.py:28(_matrix)
+
+
+
+lu-solve
+         1800 function calls in 0.141 seconds
+
+   Ordered by: cumulative time
+   List reduced from 17 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.141    0.001 workloads.py:338(<lambda>)
+      100    0.000    0.000    0.141    0.001 solvers.py:59(synchronized)
+      100    0.000    0.000    0.141    0.001 solvers.py:194(solve)
+      100    0.140    0.001    0.140    0.001 {built-in method sppy._native.solve}
+      100    0.000    0.000    0.001    0.000 solvers.py:45(_rhs)
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 {method 'all' of 'numpy.ndarray' objects}
+      100    0.000    0.000    0.000    0.000 _methods.py:64(_all)
+      100    0.000    0.000    0.000    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+      200    0.000    0.000    0.000    0.000 {built-in method numpy.asarray}
+
+
+
+bicgstab
+         4400 function calls in 0.021 seconds
+
+   Ordered by: cumulative time
+   List reduced from 31 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.000    0.000    0.021    0.000 workloads.py:350(<lambda>)
+      100    0.000    0.000    0.021    0.000 solvers.py:399(bicgstab)
+      100    0.001    0.000    0.021    0.000 solvers.py:350(_iterate)
+      100    0.019    0.000    0.019    0.000 {built-in method sppy._native.iterate_matrix_float64}
+      100    0.000    0.000    0.001    0.000 solvers.py:28(_matrix)
+      100    0.000    0.000    0.000    0.000 solvers.py:45(_rhs)
+      100    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      100    0.000    0.000    0.000    0.000 _dtype.py:342(_name_get)
+      100    0.000    0.000    0.000    0.000 {built-in method sppy._native.all_finite}
+      100    0.000    0.000    0.000    0.000 _dtype.py:326(_name_includes_bit_suffix)
+
+

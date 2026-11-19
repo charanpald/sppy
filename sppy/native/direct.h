@@ -1,5 +1,6 @@
 #pragma once
-#include "common.h"
+#include "matrix_storage.h"
+#include "supernodal_solve.h"
 #include <Eigen/OrderingMethods>
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseLU>
@@ -30,7 +31,13 @@ template <class T, class Solver, int Kind> struct DirectModel : DirectBase<T> {
     void analyze(const Sparse<T> &a) override { solver.analyzePattern(a); }
     void factorize(const Sparse<T> &a) override { solver.factorize(a); }
     int info() const override { return solver.info(); }
-    ColDense<T> solve(const ColDense<T> &b) const override { return solver.solve(b); }
+    ColDense<T> solve(const ColDense<T> &b) const override {
+        if constexpr (Kind == 2) {
+            if (b.cols() >= 4)
+                return super_solve(solver, b);
+        }
+        return solver.solve(b);
+    }
     py::object factor(const std::string &name) const override {
         if constexpr (Kind == 0 || Kind == 1) {
             if (name == "L") {
@@ -170,7 +177,9 @@ template <class T> class Factor {
             throw py::value_error("Unknown ordering");
     }
     void analyze(int r, int c, Array<int> ri, Array<int> ci, Array<T> values) {
-        auto a = sparse_copy<T>(r, c, ri, ci, values);
+        analyze_storage(sparse_copy<T>(r, c, ri, ci, values));
+    }
+    void analyze_storage(Sparse<T> a) {
         check_shape(a);
         ready = false;
         analyzed = false;
@@ -182,7 +191,9 @@ template <class T> class Factor {
         analyzed = true;
     }
     int factorize(int r, int c, Array<int> ri, Array<int> ci, Array<T> values) {
-        auto a = sparse_copy<T>(r, c, ri, ci, values);
+        return factorize_storage(sparse_copy<T>(r, c, ri, ci, values));
+    }
+    int factorize_storage(const Sparse<T> &a) {
         check_shape(a);
         ready = false;
         require(analyzed, "Call analyze_pattern before factorize");
@@ -198,6 +209,24 @@ template <class T> class Factor {
             py::gil_scoped_release release;
             solver->factorize(a);
         }
+        ready = solver->info() == Eigen::Success;
+        return solver->info();
+    }
+    void analyze_matrix(py::handle backend) { analyze_storage(solver_matrix<T>(backend)); }
+    int factorize_matrix(py::handle backend) {
+        return factorize_storage(solver_matrix<T>(backend));
+    }
+    int compute_matrix(py::handle backend) {
+        auto a = solver_matrix<T>(backend);
+        check_shape(a);
+        ready = analyzed = false;
+        {
+            py::gil_scoped_release release;
+            solver->analyze(a);
+            solver->factorize(a);
+        }
+        pattern = std::move(a);
+        analyzed = true;
         ready = solver->info() == Eigen::Success;
         return solver->info();
     }
@@ -253,6 +282,9 @@ template <class T> void bind_direct(py::module_ &m, const char *name) {
     py::class_<F>(m, (std::string("Factor_") + name).c_str())
         .def(py::init<std::string, std::string, double, double, double>())
         .def("analyze", &F::analyze)
+        .def("analyze_matrix", &F::analyze_matrix)
+        .def("factorize_matrix", &F::factorize_matrix)
+        .def("compute_matrix", &F::compute_matrix)
         .def("factorize", &F::factorize)
         .def("solve", &F::solve)
         .def("solve_sparse", &F::solve_sparse)

@@ -1,4 +1,6 @@
 #pragma once
+#include "product_scatter.h"
+#include "scalar_arithmetic.h"
 #include <Eigen/SparseCore>
 #include <algorithm>
 #include <cstdint>
@@ -10,31 +12,6 @@
 #include <vector>
 
 namespace sppy {
-// Integer arithmetic follows NumPy's fixed-width modular behavior without
-// invoking signed C++ overflow. Floating/complex arithmetic stays in its dtype.
-template <class T> T product_value(T a, T b) {
-    if constexpr (std::is_integral_v<T>) {
-        using U = std::make_unsigned_t<T>;
-        U bits = U(uint64_t(U(a)) * uint64_t(U(b)));
-        T value;
-        std::memcpy(&value, &bits, sizeof(T));
-        return value;
-    } else {
-        return a * b;
-    }
-}
-template <class T> T sum_value(T a, T b) {
-    if constexpr (std::is_integral_v<T>) {
-        using U = std::make_unsigned_t<T>;
-        U bits = U(uint64_t(U(a)) + uint64_t(U(b)));
-        T value;
-        std::memcpy(&value, &bits, sizeof(T));
-        return value;
-    } else {
-        return a + b;
-    }
-}
-
 // Gustavson accumulation in either CSR or CSC order. Results remain canonical
 // and retain structurally touched zeros, including exact cancellation.
 template <class S> S sparse_product(const S &left, const S &right) {
@@ -47,31 +24,42 @@ template <class S> S sparse_product(const S &left, const S &right) {
     const S &outer = S::IsRowMajor ? left : right;
     const S &inner = S::IsRowMajor ? right : left;
     const Eigen::Index width = result.innerSize();
+    if constexpr (std::is_floating_point_v<T>) {
+        if (width >= 2048 && width <= (1 << 20) &&
+            int64_t(left.nonZeros()) * right.nonZeros() / std::max<Eigen::Index>(1, left.cols()) >
+                width * 8 &&
+            product_needs_sorting(outer, inner, int(width)))
+            return product_scatter(left, right);
+    }
     const int64_t estimate = std::min<int64_t>(int64_t(left.nonZeros()) * right.nonZeros() /
-                                                   std::max<Eigen::Index>(1, left.cols()),
+                                                       std::max<Eigen::Index>(1, left.cols()) +
+                                                   std::min(left.rows(), right.cols()),
                                                int64_t(1) << 20);
     result.resizeNonZeros(Eigen::Index(estimate));
     int64_t allocated = estimate;
     const bool dense = width <= (1 << 20);
-    std::vector<int> marks(dense ? width : 0, -1), touched;
+    std::vector<uint8_t> marks(dense ? width : 0, 0);
+    std::vector<int> touched(dense ? width : 0);
     std::vector<T> sums(dense ? width : 0);
     std::unordered_map<int, T> hash;
     int64_t written = 0;
     bool canonical = true;
     for (int j = 0; j < outer.outerSize(); ++j) {
-        touched.clear();
-        if (!dense)
+        int touched_count = 0;
+        if (!dense) {
+            touched.clear();
             hash.clear();
+        }
         for (typename S::InnerIterator a(outer, j); a; ++a) {
             for (typename S::InnerIterator b(inner, a.index()); b; ++b) {
                 const int index = b.index();
                 const T value = S::IsRowMajor ? product_value(a.value(), b.value())
                                               : product_value(b.value(), a.value());
                 if (dense) {
-                    if (marks[index] != j) {
-                        marks[index] = j;
+                    if (!marks[index]) {
+                        marks[index] = 1;
                         sums[index] = value;
-                        touched.push_back(index);
+                        touched[touched_count++] = index;
                     } else {
                         sums[index] = sum_value(sums[index], value);
                     }
@@ -84,11 +72,13 @@ template <class S> S sparse_product(const S &left, const S &right) {
                 }
             }
         }
+        if (!dense)
+            touched_count = int(touched.size());
         const int64_t begin = written;
-        written += touched.size();
+        written += touched_count;
         if (written > std::numeric_limits<int>::max())
             throw std::overflow_error("Too many stored product entries");
-        if (!std::is_sorted(touched.begin(), touched.end())) {
+        if (!std::is_sorted(touched.begin(), touched.begin() + touched_count)) {
             if (dense)
                 canonical = false;
             else
@@ -101,9 +91,12 @@ template <class S> S sparse_product(const S &left, const S &right) {
         }
         result.outerIndexPtr()[j] = int(begin);
         int position = int(begin);
-        for (int index : touched) {
+        for (int k = 0; k < touched_count; ++k) {
+            const int index = touched[k];
             result.innerIndexPtr()[position] = index;
             result.valuePtr()[position++] = dense ? sums[index] : hash.at(index);
+            if (dense)
+                marks[index] = 0;
         }
     }
     result.outerIndexPtr()[result.outerSize()] = int(written);

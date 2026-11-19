@@ -367,9 +367,17 @@ class SparseArray:
             other = SparseArray(numpy.asarray(other))
         if self.shape != other.shape:
             raise ValueError("Sparse arithmetic requires equal shapes")
-        dtype = numpy.result_type(self.dtype, other.dtype)
-        left = self.astype(dtype, copy=False)
-        right = other.astype(dtype, order=self.order, copy=False)
+        if self.dtype == other.dtype:
+            left = self
+            right = (
+                other
+                if other.order == self.order or self.ndim == 1
+                else other.astype(self.dtype, order=self.order, copy=False)
+            )
+        else:
+            dtype = numpy.result_type(self.dtype, other.dtype)
+            left = self.astype(dtype, copy=False)
+            right = other.astype(dtype, order=self.order, copy=False)
         return left._wrap_backend(
             getattr(left._array, operation)(right._array), self.shape
         )
@@ -402,7 +410,11 @@ class SparseArray:
         if isinstance(other, SparseArray):
             if self.shape[-1] != other.shape[0]:
                 raise ValueError("Product shape mismatch")
-            dtype = numpy.result_type(self.dtype, other.dtype)
+            dtype = (
+                self.dtype
+                if self.dtype == other.dtype
+                else numpy.result_type(self.dtype, other.dtype)
+            )
             if self.ndim == 1:
                 if other.ndim == 1:
                     indices = self.stored_indices()[0]
@@ -412,20 +424,32 @@ class SparseArray:
                     )
                 return other.T.dot(self)
             storage = "F" if other.ndim == 1 else self.order
-            left = self.astype(dtype, order=storage, copy=False)
-            right = other.astype(dtype, order=storage, copy=False)
+            left = (
+                self
+                if dtype == self.dtype and storage == self.order
+                else self.astype(dtype, order=storage, copy=False)
+            )
+            right = (
+                other
+                if dtype == other.dtype and (storage == other.order or other.ndim == 1)
+                else other.astype(dtype, order=storage, copy=False)
+            )
             backend = left._array.matmul(right._array)
             shape = (self.shape[0],) if other.ndim == 1 else tuple(backend.shape)
             return self._from_backend(backend, dtype, self.order, shape)
         dense = numpy.asarray(other)
         if dense.ndim not in {1, 2} or self.shape[-1] != dense.shape[0]:
             raise ValueError("Product shape mismatch")
-        dtype = numpy.result_type(self.dtype, dense.dtype)
+        dtype = (
+            self.dtype
+            if self.dtype == dense.dtype
+            else numpy.result_type(self.dtype, dense.dtype)
+        )
         if self.ndim == 1:
             return self.values().astype(dtype) @ dense[self.stored_indices()[0]].astype(
                 dtype
             )
-        left = self.astype(dtype, copy=False)
+        left = self if dtype == self.dtype else self.astype(dtype, copy=False)
         operand = dense[:, None] if dense.ndim == 1 else dense
         result = left._array.dense_matmul(numpy.ascontiguousarray(operand, dtype=dtype))
         return result[:, 0] if dense.ndim == 1 else result
@@ -904,6 +928,13 @@ class SparseArray:
                 mode = 2 if dropped[0] else 1 if dropped[1] else 0
             backend = self._array.slice_basic(*axes[0], *axes[1], mode)
             return self._from_backend(backend, self.dtype, self.order, tuple(shape))
+        if self.ndim == 2 and all(
+            isinstance(index, numpy.ndarray) and index.dtype.kind == "i"
+            for index in key
+        ):
+            rows, cols = numpy.broadcast_arrays(*key)
+            result = self._array.gather_signed(rows.ravel(), cols.ravel())
+            return result.reshape(rows.shape)
         parsed = [self._indices(index, axis) for axis, index in enumerate(key)]
         if all(scalar for _, scalar in parsed):
             native = tuple(int(values) for values, _ in parsed)
@@ -1055,6 +1086,14 @@ class SparseArray:
     def sum(self, axis=None, dtype=None, out=None, keepdims=False):
         """Sum values, including NumPy's axis/dtype/out/keepdims conventions."""
         axis = self._normalize_axis(axis)
+        expected_dtype = (
+            numpy.dtype(numpy.int64) if self.dtype.kind == "i" else self.dtype
+        )
+        if dtype is None or numpy.dtype(dtype) == expected_dtype:
+            result = self._array.sum(-1 if axis is None or self.ndim == 1 else axis)
+            if axis is None or self.ndim == 1:
+                result = result[0]
+            return self._finish_reduction(result, axis, out, keepdims)
         values = self.values()
         if axis is None or self.ndim == 1:
             result = values.sum(dtype=dtype)

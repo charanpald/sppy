@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "ordered_triplets.h"
 #include <algorithm>
 #include <cstdint>
 
@@ -12,16 +13,57 @@ S assemble_triplets(int rows, int cols, Array<int> ri, Array<int> ci, Array<T> v
                 ri.size() == values.size(),
             "Coordinate and value lengths differ");
     require(values.size() <= std::numeric_limits<int>::max(), "Too many stored entries");
-    std::vector<Eigen::Triplet<T>> entries;
-    entries.reserve(values.size());
-    for (py::ssize_t k = 0; k < values.size(); ++k) {
-        require(ri.data()[k] >= 0 && ri.data()[k] < rows && ci.data()[k] >= 0 &&
-                    ci.data()[k] < cols,
-                "Coordinate out of bounds");
-        entries.emplace_back(ri.data()[k], ci.data()[k], values.data()[k]);
+    const int count = int(values.size());
+    unsigned invalid = 0, unsorted = 0;
+    const int *rows_data = ri.data(), *cols_data = ci.data();
+    for (int k = 0; k < count; ++k)
+        invalid |=
+            unsigned(rows_data[k]) >= unsigned(rows) || unsigned(cols_data[k]) >= unsigned(cols);
+    require(invalid == 0, "Coordinate out of bounds");
+    for (int k = 1; k < count; ++k) {
+        const int outer = S::IsRowMajor ? rows_data[k] : cols_data[k];
+        const int previous_outer = S::IsRowMajor ? rows_data[k - 1] : cols_data[k - 1];
+        const int inner = S::IsRowMajor ? cols_data[k] : rows_data[k];
+        const int previous_inner = S::IsRowMajor ? cols_data[k - 1] : rows_data[k - 1];
+        unsorted |= outer < previous_outer || (outer == previous_outer && inner < previous_inner);
     }
+    if (unsorted) {
+        auto ordered =
+            ordered_triplet_scatter<S>(rows, cols, rows_data, cols_data, values.data(), count);
+        if (ordered)
+            return std::move(*ordered);
+    }
+    // Eigen can consume a forward iterator over the original NumPy buffers;
+    // avoid allocating and copying a separate vector of Triplet objects.
+    struct Entry {
+        const int *rows, *columns;
+        const T *values;
+        int position;
+        int row() const { return rows[position]; }
+        int col() const { return columns[position]; }
+        const T &value() const { return values[position]; }
+    };
+    struct Iterator {
+        Entry entry;
+        const Entry *operator->() const { return &entry; }
+        Iterator &operator++() {
+            ++entry.position;
+            return *this;
+        }
+        bool operator!=(const Iterator &other) const {
+            return entry.position != other.entry.position;
+        }
+        bool operator==(const Iterator &other) const {
+            return entry.position == other.entry.position;
+        }
+    };
+    Iterator begin{{rows_data, cols_data, values.data(), 0}},
+        end{{rows_data, cols_data, values.data(), count}};
     S result(rows, cols);
-    result.setFromTriplets(entries.begin(), entries.end());
+    if (!unsorted)
+        result.setFromSortedTriplets(begin, end);
+    else
+        result.setFromTriplets(begin, end);
     return result;
 }
 
@@ -54,13 +96,16 @@ S import_compressed(int rows, int cols, Array<T> values, Array<int> indices, Arr
     for (int k = 0; k < count; ++k)
         bad_indices |= unsigned(inner_indices[k]) >= unsigned(inner);
     require(bad_indices == 0, "Invalid compressed inner indices");
-    unsigned noncanonical = 0;
-    for (int j = 0; j < outer; ++j) {
-        const int begin = pointers[j], end = pointers[j + 1];
-        if (end - begin < 2)
-            continue;
-        for (int k = begin + 1; k < end; ++k)
-            noncanonical |= inner_indices[k] <= inner_indices[k - 1];
+    // Count descending/equal adjacent indices in one vectorizable scan, then
+    // exclude the transitions between nonempty outer segments. Empty segments
+    // can repeat pointers, so subtract each distinct boundary only once.
+    int noncanonical = 0;
+    for (int k = 1; k < count; ++k)
+        noncanonical += inner_indices[k] <= inner_indices[k - 1];
+    for (int j = 1; j < outer; ++j) {
+        const int boundary = pointers[j];
+        if (boundary != pointers[j - 1] && boundary > 0 && boundary < count)
+            noncanonical -= inner_indices[boundary] <= inner_indices[boundary - 1];
     }
     const bool canonical = noncanonical == 0;
     S result(rows, cols);

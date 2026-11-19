@@ -110,3 +110,11 @@ See [recorded measurements](results/README.md) for an example run and its limits
 See the [paired optimization results](results/optimization/README.md) for native-copy, basic-slice, and product improvements against the preserved baseline.
 
 See the [compressed-import and sparse-product results](results/import-product/README.md) for the latest paired measurements and remaining SciPy gaps.
+
+See the [full optimization audit](results/all-operations/README.md) for all 24 workloads, paired samples, first/warm LU solves and remaining SciPy gaps.
+
+To check first-call costs separately from reused-factor timings, use
+`python -m profiling.solve_latency --size 1000 --entries 5000 --repeats 7 --warm-solves 7 --output /tmp/solve-latency.json`.
+Each first solve receives a fresh LU factorization prepared outside timing. The
+tool then measures repeated solves and validates both, with the same input/thread
+controls as the main benchmark. Solve warmups/batching are not used.

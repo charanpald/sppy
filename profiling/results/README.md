@@ -1,5 +1,8 @@
 # Baseline SciPy comparisons
 
+See the [full 24-operation optimization audit](all-operations/README.md) for the
+latest complete before/after results, first-solve checks and remaining gaps.
+
 See the [compressed-import and sparse-product follow-up](import-product/README.md)
 for the latest targeted optimization measurements.
 

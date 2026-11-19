@@ -32,7 +32,7 @@ def _matrix(a):
         raise ValueError("Solvers require floating-point or complex storage")
     if not all(a.shape):
         raise ValueError("Solvers require nonempty matrix dimensions")
-    if not np.isfinite(a.values()).all():
+    if not a._array.all_finite():
         raise ValueError("Matrix must contain finite values")
     return a
 
@@ -134,7 +134,7 @@ class SparseFactorization:
             -1.0 if self.pivot_threshold is None else self.pivot_threshold,
         )
         self._shape, self._dtype = a.shape, a.dtype
-        self._native.analyze(*_arguments(a))
+        self._native.analyze_matrix(a._array)
         return self
 
     @_locked
@@ -150,7 +150,7 @@ class SparseFactorization:
         a = self._prepare(a)
         if a.dtype != self._dtype or a.shape != self._shape:
             raise ValueError("Shape and dtype must match the analyzed matrix")
-        self.info = ComputationInfo(self._native.factorize(*_arguments(a)))
+        self.info = ComputationInfo(self._native.factorize_matrix(a._array))
         if self.info != ComputationInfo.SUCCESS:
             raise np.linalg.LinAlgError(
                 f"{self.method} factorization failed: {self.info.name}"
@@ -160,7 +160,24 @@ class SparseFactorization:
     @_locked
     def compute(self, a):
         """Analyze and factor a matrix."""
-        return self.analyze_pattern(a).factorize(a)
+        self.info = ComputationInfo.INVALID_INPUT
+        self._native = None
+        a = self._prepare(a)
+        cls = getattr(_native, f"Factor_{a.dtype.name}")
+        self._native = cls(
+            self.method,
+            self.ordering,
+            self.shift_offset,
+            self.shift_scale,
+            -1.0 if self.pivot_threshold is None else self.pivot_threshold,
+        )
+        self._shape, self._dtype = a.shape, a.dtype
+        self.info = ComputationInfo(self._native.compute_matrix(a._array))
+        if self.info != ComputationInfo.SUCCESS:
+            raise np.linalg.LinAlgError(
+                f"{self.method} factorization failed: {self.info.name}"
+            )
+        return self
 
     def _require_ready(self):
         if self._native is None or self.info != ComputationInfo.SUCCESS:
@@ -176,7 +193,11 @@ class SparseFactorization:
 
     @_locked
     def solve(self, b):
-        """Solve for dense vectors/matrices or a sparse RHS matrix."""
+        """Solve for dense vectors/matrices or a sparse RHS matrix.
+
+        LU solves with four or more dense RHS columns process the whole block
+        directly from the factorization, without copying the sparse factors.
+        """
         self._require_ready()
         if isinstance(b, SparseArray):
             if b.ndim != 2 or b.shape[0] != self.shape[0]:
@@ -298,8 +319,8 @@ def triangular_solve(a, b, *, lower=True, unit_diagonal=False):
     if a.shape[0] != a.shape[1]:
         raise ValueError("Triangular solve requires a square matrix")
     b, vector = _rhs(b, a.dtype, a.shape[0])
-    result = getattr(_native, f"triangular_solve_{a.dtype.name}")(
-        *_arguments(a),
+    result = getattr(_native, f"triangular_solve_matrix_{a.dtype.name}")(
+        a._array,
         b,
         lower,
         unit_diagonal,
@@ -348,9 +369,9 @@ def _iterate(
         if guess.shape[1] != b.shape[1] or guess_vector != vector:
             raise ValueError("Initial guess must match the solution shape")
     maxiter, fill_factor = operator.index(maxiter), operator.index(fill_factor)
-    function = getattr(_native, f"iterate_{a.dtype.name}")
+    function = getattr(_native, f"iterate_matrix_{a.dtype.name}")
     x, info, iterations, error = function(
-        *_arguments(a),
+        a._array,
         b,
         guess,
         method,

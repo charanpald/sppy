@@ -1,39 +1,11 @@
 #pragma once
+#include "array_algorithms.h"
 #include "array_ops.h"
+#include "dense_kernels.h"
+#include "matrix_storage.h"
 #include "sparse_product.h"
 #include <type_traits>
 namespace sppy {
-template <class T, int Order> struct Matrix {
-    using Storage = Eigen::SparseMatrix<T, Order, int>;
-    Storage a;
-    Matrix(int rows, int cols) {
-        require(rows >= 0 && cols >= 0, "Negative dimensions");
-        a.resize(rows, cols);
-    }
-    explicit Matrix(Storage value) : a(std::move(value)) {}
-    auto coordinates() const {
-        py::array_t<int> rows(a.nonZeros()), cols(a.nonZeros());
-        int k = 0;
-        for (int j = 0; j < a.outerSize(); ++j)
-            for (typename Storage::InnerIterator it(a, j); it; ++it, ++k) {
-                rows.mutable_data()[k] = it.row();
-                cols.mutable_data()[k] = it.col();
-            }
-        return py::make_tuple(rows, cols);
-    }
-    auto values() const {
-        py::array_t<T> result(a.nonZeros());
-        if (a.isCompressed()) {
-            std::copy_n(a.valuePtr(), a.nonZeros(), result.mutable_data());
-        } else {
-            int k = 0;
-            for (int j = 0; j < a.outerSize(); ++j)
-                for (typename Storage::InnerIterator it(a, j); it; ++it)
-                    result.mutable_data()[k++] = it.value();
-        }
-        return result;
-    }
-};
 template <class T, int O> void bind_matrix(py::module_ &m, const std::string &name) {
     using M = Matrix<T, O>;
     using S = typename M::Storage;
@@ -67,6 +39,23 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
                      require(r >= 0 && r < m.a.rows() && c >= 0 && c < m.a.cols(),
                              "Coordinate out of bounds");
                      result.mutable_data()[k] = m.a.coeff(r, c);
+                 }
+                 return result;
+             })
+        .def("gather_signed",
+             [](const M &m, Array<int64_t> rows, Array<int64_t> columns) {
+                 require(rows.ndim() == 1 && columns.ndim() == 1 && rows.size() == columns.size(),
+                         "Coordinate lengths differ");
+                 py::array_t<T> result(rows.size());
+                 for (py::ssize_t k = 0; k < rows.size(); ++k) {
+                     int64_t r = rows.data()[k], c = columns.data()[k];
+                     if (r < 0)
+                         r += m.a.rows();
+                     if (c < 0)
+                         c += m.a.cols();
+                     require(r >= 0 && r < m.a.rows() && c >= 0 && c < m.a.cols(),
+                             "Index out of range");
+                     result.mutable_data()[k] = m.a.coeff(int(r), int(c));
                  }
                  return result;
              })
@@ -112,17 +101,17 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
         .def("add",
              [](const M &x, const M &y) {
                  require(x.a.rows() == y.a.rows() && x.a.cols() == y.a.cols(), "Shape mismatch");
-                 return M(S(x.a + y.a));
+                 return M(coefficient_binary<0>(x.a, y.a));
              })
         .def("subtract",
              [](const M &x, const M &y) {
                  require(x.a.rows() == y.a.rows() && x.a.cols() == y.a.cols(), "Shape mismatch");
-                 return M(S(x.a - y.a));
+                 return M(coefficient_binary<1>(x.a, y.a));
              })
         .def("multiply",
              [](const M &x, const M &y) {
                  require(x.a.rows() == y.a.rows() && x.a.cols() == y.a.cols(), "Shape mismatch");
-                 return M(S(x.a.cwiseProduct(y.a)));
+                 return M(coefficient_binary<2>(x.a, y.a));
              })
         .def("matmul",
              [](const M &x, const M &y) {
@@ -140,7 +129,26 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
                  T *output_data = output.mutable_data();
                  Eigen::Map<const Dense<T>> input(input_data, y.shape(0), columns);
                  Eigen::Map<Dense<T>> result(output_data, x.a.rows(), columns);
+                 bool block = columns == 8;
+                 if constexpr (Eigen::NumTraits<T>::IsComplex)
+                     block = block && all_finite(x.a) && input.allFinite();
+                 if (block) {
+                     py::gil_scoped_release release;
+                     if constexpr (Eigen::NumTraits<T>::IsComplex && O == Eigen::RowMajor) {
+                         complex_row_block<8>(x.a, input_data, output_data);
+                     } else {
+                         dense_block_product<8>(x.a, input_data, output_data);
+                     }
+                     return output;
+                 }
                  if (columns == 1) {
+                     if constexpr (std::is_floating_point_v<T> && O == Eigen::RowMajor) {
+                         if (narrow_vector_rows(x.a)) {
+                             py::gil_scoped_release release;
+                             raw_vector_product(x.a, input_data, output_data);
+                             return output;
+                         }
+                     }
                      using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
                      Eigen::Map<const Vector> vector(input_data, y.shape(0));
                      Eigen::Map<Vector> destination(output_data, x.a.rows());
@@ -230,6 +238,10 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
         .def("prune",
              [](M &m, double tolerance) {
                  require(std::isfinite(tolerance) && tolerance >= 0, "Invalid tolerance");
+                 if (tolerance == 0) {
+                     m.a.prune([](int, int, const T &v) { return v != T(0); });
+                     return;
+                 }
                  m.a.prune([tolerance](int, int, const T &v) {
                      if constexpr (std::is_integral_v<T>) {
                          using U = std::make_unsigned_t<T>;
@@ -241,9 +253,15 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
                      }
                  });
              })
+        .def("all_finite", [](const M &m) { return all_finite(m.a); })
+        .def("sum", [](const M &m, int axis) { return sparse_sum(m.a, axis); })
         .def("norm",
              [](const M &m) {
                  using P = typename Eigen::NumTraits<T>::NonInteger;
+                 if constexpr (std::is_floating_point_v<T>) {
+                     if (m.a.isCompressed())
+                         return contiguous_norm(m.a.valuePtr(), m.a.nonZeros());
+                 }
                  if (m.a.isCompressed()) {
                      Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>> values(m.a.valuePtr(),
                                                                                   m.a.nonZeros());

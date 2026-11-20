@@ -8,9 +8,16 @@ from sppy.linalg.general_linear_operator import GeneralLinearOperator
 def norm(a, ord=None):
     """Vector p-norm or matrix Frobenius/1/infinity norm, without densifying."""
     if a.ndim == 1:
-        if isinstance(ord, (int, float)) and ord < 0 and a.count_nonzero() < a.size:
-            return 0.0
-        return numpy.linalg.norm(a.values(), ord=ord)
+        values = a.values()
+        if (
+            isinstance(ord, (int, float, numpy.integer, numpy.floating))
+            and ord < 0
+            and len(values) < a.size
+        ):
+            # One representative implicit zero suffices for negative norms,
+            # while letting NumPy preserve NaNs and complex absolute values.
+            values = numpy.append(values, values.dtype.type(0))
+        return numpy.linalg.norm(values, ord=ord)
     if ord in (None, "fro"):
         return a._array.norm()
     if ord == 1:

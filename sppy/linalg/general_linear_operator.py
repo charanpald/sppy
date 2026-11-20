@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class GeneralLinearOperator(object):
     """
     A more general form of LinearOperator in scipy.linalg. Can be used
@@ -94,5 +97,11 @@ class GeneralLinearOperator(object):
             return Y.add(X.add(V))
 
         return GeneralLinearOperator(
-            X.shape, matvec, rmatvec, matmat, rmatmat, add, X.dtype
+            X.shape,
+            matvec,
+            rmatvec,
+            matmat,
+            rmatmat,
+            add,
+            np.result_type(X.dtype, Y.dtype),
         )

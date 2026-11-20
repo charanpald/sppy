@@ -229,3 +229,45 @@ def test_builtin_solvers_do_not_import_scipy():
         [sys.executable, "-c", script], capture_output=True, text=True, timeout=30
     )
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize("operation", ["matvec", "rmatvec", "matmat", "rmatmat"])
+@pytest.mark.parametrize(
+    "left_dtype,right_dtype",
+    [(np.float32, np.float64), (np.float32, np.complex128), (np.complex64, np.float64)],
+)
+def test_linear_operator_sum_promotes_dtype(operation, left_dtype, right_dtype):
+    left = np.array([[1, 2], [0, 3]], dtype=left_dtype)
+    right = np.array([[2, 0], [1, 4]], dtype=right_dtype)
+    if np.issubdtype(right_dtype, np.complexfloating):
+        right *= 1j
+    operator = GeneralLinearOperator.as_linear_operator_sum(
+        GeneralLinearOperator.as_linear_operator(sppy.asarray(left)),
+        GeneralLinearOperator.as_linear_operator(sppy.asarray(right)),
+    )
+    operand = np.ones((2, 3) if operation.endswith("mat") else 2, dtype=np.float32)
+    matrix = left + right
+    if operation.startswith("r"):
+        matrix = matrix.conj().T
+
+    result = getattr(operator, operation)(operand)
+
+    assert operator.dtype == np.result_type(left_dtype, right_dtype)
+    assert result.dtype == operator.dtype
+    np.testing.assert_allclose(result, matrix @ operand)
+
+
+@pytest.mark.parametrize("ord", [-1, -2, -np.inf, np.float32(-1)])
+@pytest.mark.parametrize("dtype", [np.float32, np.float64, np.complex64, np.complex128])
+@pytest.mark.parametrize("value", [2, np.inf, np.nan, complex(np.nan, np.inf)])
+def test_negative_vector_norm_preserves_nonfinite_values(ord, dtype, value):
+    if isinstance(value, complex) and not np.issubdtype(dtype, np.complexfloating):
+        pytest.skip("Complex values require complex storage")
+    dense = np.array([0, value, 0], dtype=dtype)
+    array = sppy.asarray(dense)
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        expected = np.linalg.norm(dense, ord=ord)
+        result = norm(array, ord=ord)
+
+    np.testing.assert_allclose(result, expected, equal_nan=True)

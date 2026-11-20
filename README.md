@@ -65,22 +65,47 @@ uv run --locked --only-group docs mkdocs build --strict
 
 ## Performance versus SciPy sparse
 
-Local synthetic benchmarks compare all **24 operations** in C/CSR and F/CSC
-storage. Selected **SpPy C versus SciPy CSR** medians are below; speedup is
-SciPy time / SpPy time, so **above 1× favors SpPy**.
+Local synthetic benchmarks cover **24 operations** in C/CSR and F/CSC storage.
+The table below lists common sparse-matrix operations on the same random
+**1,000 × 1,000 float64 matrix with 4,993 stored entries**, comparing
+**SpPy C versus SciPy CSR**. Times are median **microseconds per call**;
+speedup is SciPy time / SpPy time, so **above 1× favors SpPy**.
 
-| Input | Operation | SpPy C | SciPy CSR | SpPy speedup |
-| --- | --- | ---: | ---: | ---: |
-| Random 1,000 float64 | gather | 5.38 µs | 12.66 µs | 2.35× |
-| Random 10,000 float64 | construct-compressed | 30.32 µs | 23.11 µs | 0.76× |
-| Random 10,000 float64 | column-sum | 59.45 µs | 86.04 µs | 1.45× |
-| Random 10,000 float64 | sparse-matmul | 2.25 ms | 2.57 ms | 1.14× |
-| Banded 10,000 float64 | sparse-matmul | 481.96 µs | 575.98 µs | 1.20× |
-| Random 1,000 complex128 | matvec | 6.13 µs | 7.11 µs | 1.16× |
-| Random 1,000 complex128 | matmat | 20.64 µs | 40.58 µs | 1.97× |
-| Random 1,000 complex128 | lu-factor | 99.31 ms | 80.12 ms | 0.81× |
-| Random 1,000 complex128 | lu-solve | 2.98 ms | 3.11 ms | 1.04× |
-| Random 1,000 complex128 | bicgstab | 629.08 µs | 675.26 µs | 1.07× |
+| Operation | SpPy C (µs) | SciPy CSR (µs) | SpPy speedup |
+| --- | ---: | ---: | ---: |
+| COO / triplet construction | 47.91 | 68.73 | 1.43× |
+| CSR / CSC construction | 6.69 | 10.11 | 1.51× |
+| Copy (`A.copy()`) | 2.16 | 11.07 | 5.12× |
+| Paired-coordinate indexing | 5.38 | 12.66 | 2.35× |
+| Sparse slicing (`A[::2, ::2]`) | 10.23 | 53.53 | 5.23× |
+| Transpose (`A.T`, owned result) | 10.76 | 37.41 | 3.48× |
+| Sparse addition (`A + A`) | 10.17 | 32.70 | 3.22× |
+| Elementwise multiplication (`A * A`) | 10.65 | 36.15 | 3.4× |
+| Sparse × dense vector (`A @ x`) | 3.99 | 4.43 | 1.11× |
+| Sparse × dense matrix (`A @ X`) | 9.55 | 18.16 | 1.9× |
+| Sparse × sparse matrix (`A @ A.H`) | 177.39 | 220.75 | 1.24× |
+| Total sum (`A.sum()`) | 1.61 | 3.47 | 2.15× |
+| Column sums (`A.sum(axis=0)`) | 3.43 | 28.17 | 8.2× |
+| Mean (`A.mean()`) | 4.13 | 28.74 | 6.95× |
+| Frobenius norm (`linalg.norm(A)`) | 0.67 | 2.10 | 3.11× |
+| LU factorization | 41721.38 | 40146.00 | 0.962× |
+| LU solve (reused factors) | 1413.42 | 1707.33 | 1.21× |
+| Conjugate gradient (CG) | 135.42 | 415.49 | 3.07× |
+| BiCGSTAB | 163.54 | 527.50 | 3.23× |
+| Triangular solve | 18.67 | 343.83 | 18.4× |
+
+Dense matrix products and reused-factor LU solves use eight RHS columns.
+Transpose timings include an owned result in the input storage order; SciPy's
+transpose view is materialized. Sparse matrix multiplication excludes preparation
+of `A.H`. Iterative solves include diagonal-preconditioner setup; LU factorization
+and reused-factor solves are timed separately. All results are checked numerically.
+
+See the [full 1,000-row report](profiling/results/remaining-gaps/after-random-1000.md)
+for all operations and F/CSC timings, and the
+[10,000-row float64](profiling/results/remaining-gaps/after-random-10000.md),
+[banded](profiling/results/remaining-gaps/after-banded-10000.md), and
+[complex128](profiling/results/remaining-gaps/after-complex-1000.md) reports
+for other sizes, patterns, and dtypes.
 
 Measured on 19 November 2026 on a Ryzen 5 5600X, with one numerical thread,
 seven samples, Python 3.14.3, NumPy 2.5.5, SciPy 1.18.1 and Eigen 5.0.1.

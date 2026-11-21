@@ -87,6 +87,14 @@ run serially.
 
 ## Tests and profiling layout
 
+Python modules, classes, and functions (including private helpers and tests) must
+have docstrings. Annotate function parameters and return values using standard
+typing tools and `numpy.typing`; use `Any` for dynamic native bindings and
+intentionally invalid test inputs where a narrower type would be misleading.
+Ruff checks these requirements. The package includes a `py.typed` marker so type
+checkers can use its inline annotations. Repository-specific development guidance
+is in the root `AGENTS.md`.
+
 The pytest suite lives in the repository's top-level `tests/` directory.
 Tests use Arrange–Act–Assert sections, parametrized cases, isolated temporary
 files, and local random generators. Run a focused subset with, for example,

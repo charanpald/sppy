@@ -1,9 +1,13 @@
 """Measure first and repeated LU solves separately, excluding factorization."""
 
+from __future__ import annotations
+
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from statistics import median
 from time import perf_counter
+from typing import Any
 
 from profiling._common import (
     BACKENDS,
@@ -15,7 +19,8 @@ from profiling._common import (
 )
 
 
-def main(argv=None):
+def main(argv: Sequence[str] | None = None) -> dict[str, Any]:
+    """Parse command-line options and execute the profiling tool."""
     arguments = parser(__doc__)
     arguments.add_argument("--backend", choices=BACKENDS, default="sppy_C")
     arguments.add_argument("--warm-solves", type=positive_int, default=7)

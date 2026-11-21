@@ -1,13 +1,19 @@
 """CLI configuration, thread controls, and reproducibility metadata."""
 
+from __future__ import annotations
+
 import argparse
-from contextlib import contextmanager
-from datetime import datetime, timezone
 import os
-from pathlib import Path
 import platform
 import subprocess
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from sppy._typing import Scalar
 
 BACKENDS = ("sppy_C", "sppy_F", "scipy_csr", "scipy_csc")
 ARRAY_OPERATIONS = (
@@ -35,21 +41,24 @@ SOLVER_OPERATIONS = ("lu-factor", "lu-solve", "cg", "bicgstab", "triangular-solv
 OPERATIONS = ARRAY_OPERATIONS + SOLVER_OPERATIONS
 
 
-def positive_int(value):
+def positive_int(value: Scalar) -> int:
+    """Parse a strictly positive integer CLI argument."""
     number = int(value)
     if number <= 0:
         raise argparse.ArgumentTypeError("must be a positive integer")
     return number
 
 
-def nonnegative_int(value):
+def nonnegative_int(value: Scalar) -> int:
+    """Parse a nonnegative integer CLI argument."""
     number = int(value)
     if number < 0:
         raise argparse.ArgumentTypeError("must be a nonnegative integer")
     return number
 
 
-def nonnegative_float(value):
+def nonnegative_float(value: Scalar) -> float:
+    """Parse a finite nonnegative floating-point CLI argument."""
     import math
 
     number = float(value)
@@ -58,7 +67,8 @@ def nonnegative_float(value):
     return number
 
 
-def parser(description):
+def parser(description: str) -> argparse.ArgumentParser:
+    """Create the shared sparse benchmark argument parser."""
     result = argparse.ArgumentParser(description=description)
     result.add_argument("--size", type=positive_int, default=1000)
     result.add_argument(
@@ -103,7 +113,10 @@ def parser(description):
     return result
 
 
-def validate_options(arguments, options):
+def validate_options(
+    arguments: argparse.ArgumentParser, options: argparse.Namespace
+) -> None:
+    """Reject unsupported dimensions, triplet counts, and tolerances."""
     if options.size > 2**31 - 1 or options.entries > 2**31 - 1:
         arguments.error("dimensions and triplet counts must fit signed 32-bit storage")
     if options.rtol == 0:
@@ -111,10 +124,11 @@ def validate_options(arguments, options):
 
 
 @contextmanager
-def numerical_threads(count):
+def numerical_threads(count: int) -> Iterator[None]:
     """Control already-loaded native libraries and restore their thread settings."""
-    import sppy
     from threadpoolctl import threadpool_limits
+
+    import sppy
 
     previous = sppy.get_num_threads()
     with threadpool_limits(limits=count):
@@ -125,11 +139,13 @@ def numerical_threads(count):
             sppy.set_num_threads(previous)
 
 
-def environment():
+def environment() -> dict[str, Any]:
+    """Collect numerical library, machine, thread, and revision metadata."""
     import numpy as np
     import scipy
-    import sppy
     from threadpoolctl import threadpool_info
+
+    import sppy
 
     root = Path(__file__).resolve().parents[1]
     revision, dirty = None, None

@@ -1,12 +1,16 @@
 """Storage ownership and NumPy semantics at optimized native boundaries."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import pytest
+from numpy.typing import DTypeLike
 
 import sppy
-from sppy.linalg import norm
 from profiling._common import numerical_threads
-
+from sppy.linalg import norm
 
 MATRIX_KEYS = [
     (slice(None), slice(None)),
@@ -27,7 +31,10 @@ MATRIX_KEYS = [
 
 
 @pytest.mark.parametrize("key", MATRIX_KEYS)
-def test_basic_slices_match_numpy_and_keep_stored_zeros(key, dtype, order):
+def test_basic_slices_match_numpy_and_keep_stored_zeros(
+    key: Any, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify basic slices match numpy and keep stored zeros."""
     dense = np.arange(30).reshape(5, 6).astype(dtype)
     a = sppy.asarray(dense, order=order)
     a[0, 0] = 0  # Every position is now explicitly stored.
@@ -54,7 +61,10 @@ def test_basic_slices_match_numpy_and_keep_stored_zeros(key, dtype, order):
         slice(None, None, 10**100),
     ],
 )
-def test_vector_slices_are_owned_and_keep_order(key, dtype, order):
+def test_vector_slices_are_owned_and_keep_order(
+    key: Any, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify vector slices are owned and keep order."""
     dense = np.arange(6).astype(dtype)
     a = sppy.asarray(dense, order=order)
     a[0] = 0
@@ -73,14 +83,18 @@ def test_vector_slices_are_owned_and_keep_order(key, dtype, order):
         ((0,), slice(None, None, -1)),
     ],
 )
-def test_empty_slices_preserve_shape(shape, key, order):
+def test_empty_slices_preserve_shape(
+    shape: tuple[int, ...], key: Any, order: str
+) -> None:
+    """Verify empty slices preserve shape."""
     a = sppy.zeros(shape, order=order)
     result = a[key]
     assert result.shape == np.zeros(shape)[key].shape
     assert result.nnz == 0
 
 
-def test_basic_slices_of_huge_sparse_axes_do_not_allocate_index_grids():
+def test_basic_slices_of_huge_sparse_axes_do_not_allocate_index_grids() -> None:
+    """Verify basic slices of huge sparse axes do not allocate index grids."""
     n = 2**31 - 1
     vector = sppy.zeros(n)
     vector[-1] = 3
@@ -103,8 +117,9 @@ def test_basic_slices_of_huge_sparse_axes_do_not_allocate_index_grids():
 
 @pytest.mark.parametrize("compressed", [False, True])
 def test_copy_and_storage_conversion_preserve_entries_without_aliasing(
-    compressed, dtype, order
-):
+    compressed: bool, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify copy and storage conversion preserve entries without aliasing."""
     a = sppy.asarray(np.array([[0, 2, 0], [3, 0, 4]], dtype=dtype), order=order)
     a[0, 0] = 0
     if compressed:
@@ -128,8 +143,11 @@ def test_copy_and_storage_conversion_preserve_entries_without_aliasing(
 
 
 @pytest.mark.parametrize("canonical", [False, True])
-def test_compressed_import_copies_and_sums_duplicate_indices(canonical, dtype, order):
+def test_compressed_import_copies_and_sums_duplicate_indices(
+    canonical: bool, dtype: np.dtype[Any], order: str
+) -> None:
     # Compressed outer vectors represent rows for C and columns for F.
+    """Verify compressed import copies and sums duplicate indices."""
     indices = np.array([0, 1, 2, 3] if canonical else [2, 0, 2, 1], dtype=np.int32)
     values = np.array([0, 2, 3, 4], dtype=dtype)
     indptr = np.array([0, 4, 4], dtype=np.int32)
@@ -150,20 +168,25 @@ def test_compressed_import_copies_and_sums_duplicate_indices(canonical, dtype, o
 
 
 @pytest.mark.parametrize("indptr", [[0, -1, 2], [0, 3, 2], [1, 1, 2]])
-def test_compressed_import_rejects_invalid_int32_pointers(indptr):
+def test_compressed_import_rejects_invalid_int32_pointers(indptr: Any) -> None:
+    """Verify compressed import rejects invalid int32 pointers."""
     with pytest.raises(ValueError, match="pointers"):
         sppy.SparseArray.from_compressed(
             (2, 2), [1.0, 2.0], np.array([0, 1], np.int32), np.array(indptr, np.int32)
         )
 
 
-def test_wide_invalid_indices_are_rejected_before_narrowing():
+def test_wide_invalid_indices_are_rejected_before_narrowing() -> None:
+    """Verify wide invalid indices are rejected before narrowing."""
     with pytest.raises(ValueError, match="indices"):
         sppy.SparseArray.from_compressed((1, 2), [1.0], [2**32 + 1], [0, 1])
 
 
 @pytest.mark.parametrize("columns", [0, 1, 8, 17])
-def test_dense_products_use_typed_owned_outputs(columns, dtype, order):
+def test_dense_products_use_typed_owned_outputs(
+    columns: int, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify dense products use typed owned outputs."""
     dense = (np.arange(35).reshape(5, 7) % 3).astype(dtype)
     operand = (np.arange(7 * columns).reshape(7, columns) % 3).astype(dtype)
     if dtype.kind == "c":
@@ -180,7 +203,10 @@ def test_dense_products_use_typed_owned_outputs(columns, dtype, order):
 
 
 @pytest.mark.parametrize("order_right", ["C", "F"])
-def test_rectangular_sparse_products_keep_left_storage(dtype, order, order_right):
+def test_rectangular_sparse_products_keep_left_storage(
+    dtype: np.dtype[Any], order: str, order_right: str
+) -> None:
+    """Verify rectangular sparse products keep left storage."""
     left = (np.arange(35).reshape(5, 7) % 3).astype(dtype)
     right = (np.arange(28).reshape(7, 4) % 3).astype(dtype)
     actual = sppy.asarray(left, order=order) @ sppy.asarray(right, order=order_right)
@@ -193,7 +219,8 @@ def test_rectangular_sparse_products_keep_left_storage(dtype, order, order_right
 
 
 @pytest.mark.parametrize("value_dtype", [np.float64, np.complex128])
-def test_parallel_row_products_match_serial(value_dtype):
+def test_parallel_row_products_match_serial(value_dtype: DTypeLike) -> None:
+    """Verify parallel row products match serial."""
     rng = np.random.default_rng(21)
     dense = rng.normal(size=(512, 12)).astype(value_dtype)
     operand = rng.normal(size=(12, 8)).astype(value_dtype)
@@ -210,7 +237,8 @@ def test_parallel_row_products_match_serial(value_dtype):
 @pytest.mark.parametrize(
     "descriptor", [(2**63 - 1, 1, 2), (0, 0, 1), (0, -(2**63), 1), (0, 1, -1)]
 )
-def test_native_slice_rejects_malformed_descriptors(descriptor):
+def test_native_slice_rejects_malformed_descriptors(descriptor: Any) -> None:
+    """Verify native slice rejects malformed descriptors."""
     a = sppy.eye(3)
     with pytest.raises(ValueError):
         a._array.slice_basic(*descriptor, 0, 1, 3, 0)
@@ -220,8 +248,9 @@ def test_native_slice_rejects_malformed_descriptors(descriptor):
 @pytest.mark.parametrize("columns", [None, 0, 1, 8])
 @pytest.mark.parametrize("value_dtype", [np.int64, np.float64, np.complex128])
 def test_empty_sparse_dense_products_initialize_all_outputs(
-    shape, columns, value_dtype, order
-):
+    shape: tuple[int, ...], columns: int, value_dtype: DTypeLike, order: str
+) -> None:
+    """Verify empty sparse dense products initialize all outputs."""
     a = sppy.zeros(shape, dtype=value_dtype, order=order)
     rhs_shape = (shape[1],) if columns is None else (shape[1], columns)
     rhs = np.ones(rhs_shape, dtype=value_dtype)
@@ -234,7 +263,8 @@ def test_empty_sparse_dense_products_initialize_all_outputs(
 
 
 @pytest.mark.parametrize("order", ["C", "F"])
-def test_compressed_import_accepts_readonly_buffers(order):
+def test_compressed_import_accepts_readonly_buffers(order: str) -> None:
+    """Verify compressed import accepts readonly buffers."""
     values = np.array([0.0, 2.0, 3.0])
     indices = np.array([0, 1, 1], np.int32)
     indptr = np.array([0, 2, 3], np.int32)
@@ -252,8 +282,9 @@ def test_compressed_import_accepts_readonly_buffers(order):
 
 @pytest.mark.parametrize("uncompressed", [False, True])
 def test_sparse_product_retains_cancellation_and_stored_zeros(
-    uncompressed, dtype, order
-):
+    uncompressed: bool, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify sparse product retains cancellation and stored zeros."""
     left = sppy.asarray(np.array([[1, 1, 0], [0, 0, 2]], dtype=dtype), order=order)
     right = sppy.asarray(np.array([[3, 0], [-3, 0], [0, 4]], dtype=dtype), order=order)
     left[0, 2] = 0
@@ -277,7 +308,10 @@ def test_sparse_product_retains_cancellation_and_stored_zeros(
 @pytest.mark.parametrize(
     "dtype", [np.dtype(t) for t in (np.int8, np.int16, np.int32, np.int64)]
 )
-def test_sparse_product_integer_precision_and_overflow(dtype, order):
+def test_sparse_product_integer_precision_and_overflow(
+    dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify sparse product integer precision and overflow."""
     maximum = np.iinfo(dtype).max
     left = np.array([[maximum, maximum], [maximum, 2]], dtype=dtype)
     right = np.array([[maximum, 2], [2, maximum]], dtype=dtype)
@@ -285,14 +319,16 @@ def test_sparse_product_integer_precision_and_overflow(dtype, order):
     np.testing.assert_array_equal(result.toarray(), left @ right)
 
 
-def test_sparse_product_complex_values_are_not_conjugated(order):
+def test_sparse_product_complex_values_are_not_conjugated(order: str) -> None:
+    """Verify sparse product complex values are not conjugated."""
     left = np.array([[1 + 2j, 3j], [0, -2j]])
     right = np.array([[3j, 0], [1 - 1j, 2j]])
     result = sppy.asarray(left, order=order) @ sppy.asarray(right, order=order)
     np.testing.assert_array_equal(result.toarray(), left @ right)
 
 
-def test_sparse_product_huge_inner_axis_uses_sparse_workspace(order):
+def test_sparse_product_huge_inner_axis_uses_sparse_workspace(order: str) -> None:
+    """Verify sparse product huge inner axis uses sparse workspace."""
     n = 2**31 - 1
     if order == "C":
         left = sppy.asarray([[2.0, 2.0]], order=order)
@@ -314,7 +350,10 @@ def test_sparse_product_huge_inner_axis_uses_sparse_workspace(order):
 
 
 @pytest.mark.parametrize("shape,columns", [((0, 3), 4), ((3, 0), 4), ((3, 2), 0)])
-def test_sparse_product_empty_dimensions(shape, columns, dtype, order):
+def test_sparse_product_empty_dimensions(
+    shape: tuple[int, ...], columns: int, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify sparse product empty dimensions."""
     left = sppy.zeros(shape, dtype=dtype, order=order)
     right = sppy.zeros((shape[1], columns), dtype=dtype, order=order)
     result = left @ right

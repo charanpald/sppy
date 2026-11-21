@@ -1,18 +1,25 @@
 """Sparse array contracts, expressed as Arrange–Act–Assert pytest cases."""
 
+from __future__ import annotations
+
 import operator
 import pickle
+from typing import Any
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 from scipy import sparse
 
 import sppy
 
 
 @pytest.mark.parametrize("shape", [(5, 7), (1, 1), (1, 0), (0, 0), (5,), (0,), 5, 0])
-def test_empty_constructor_metadata(shape, dtype, order):
+def test_empty_constructor_metadata(
+    shape: tuple[int, ...], dtype: np.dtype[Any], order: str
+) -> None:
     # Arrange
+    """Verify empty constructor metadata."""
     expected_shape = (shape,) if isinstance(shape, int) else shape
 
     # Act
@@ -27,8 +34,11 @@ def test_empty_constructor_metadata(shape, dtype, order):
     assert result.nnz == 0
 
 
-def test_dense_constructor_preserves_values(dense, dtype, order):
+def test_dense_constructor_preserves_values(
+    dense: NDArray[Any], dtype: np.dtype[Any], order: str
+) -> None:
     # Arrange
+    """Verify dense constructor preserves values."""
     expected = dense.astype(dtype)
 
     # Act
@@ -44,8 +54,9 @@ def test_dense_constructor_preserves_values(dense, dtype, order):
     "source_format",
     [sparse.csr_matrix, sparse.csc_matrix, sparse.coo_matrix, sparse.csr_array],
 )
-def test_scipy_constructor(source_format, order):
+def test_scipy_constructor(source_format: str, order: str) -> None:
     # Arrange
+    """Verify scipy constructor."""
     expected = np.array([[0.0, 2.0], [-3.0, 0.0]])
     source = source_format(expected)
 
@@ -60,8 +71,9 @@ def test_scipy_constructor(source_format, order):
 @pytest.mark.parametrize(
     "source", [(0, 1, 2), (-1, 2), (2**31, 2), (1.5, 2), "invalid"]
 )
-def test_constructor_rejects_invalid_shapes(source):
+def test_constructor_rejects_invalid_shapes(source: Any) -> None:
     # Arrange
+    """Verify constructor rejects invalid shapes."""
     constructor = sppy.SparseArray
 
     # Act / Assert
@@ -76,8 +88,9 @@ def test_constructor_rejects_invalid_shapes(source):
         {"dtype": np.uint64},
     ],
 )
-def test_constructor_rejects_invalid_options(kwargs):
+def test_constructor_rejects_invalid_options(kwargs: Any) -> None:
     # Arrange
+    """Verify constructor rejects invalid options."""
     shape = (2, 3)
 
     # Act / Assert
@@ -85,8 +98,9 @@ def test_constructor_rejects_invalid_options(kwargs):
         sppy.SparseArray(shape, **kwargs)
 
 
-def test_sparse_constructor_casts_and_copies(dense, order):
+def test_sparse_constructor_casts_and_copies(dense: NDArray[Any], order: str) -> None:
     # Arrange
+    """Verify sparse constructor casts and copies."""
     source = sppy.asarray(dense)
     expected = dense.astype(np.int64)
 
@@ -103,8 +117,11 @@ def test_sparse_constructor_casts_and_copies(dense, order):
     "operation",
     [operator.abs, operator.neg, lambda a: a * 2, lambda a: 0.5 * a, lambda a: a**2],
 )
-def test_elementwise_scalar_operations(dense, order, operation):
+def test_elementwise_scalar_operations(
+    dense: NDArray[Any], order: str, operation: str
+) -> None:
     # Arrange
+    """Verify elementwise scalar operations."""
     array = sppy.asarray(dense, order=order)
     expected = operation(dense)
 
@@ -117,8 +134,11 @@ def test_elementwise_scalar_operations(dense, order, operation):
 
 
 @pytest.mark.parametrize("operation", [operator.add, operator.sub, operator.mul])
-def test_binary_operations_promote_and_match_numpy(dense, order, operation):
+def test_binary_operations_promote_and_match_numpy(
+    dense: NDArray[Any], order: str, operation: str
+) -> None:
     # Arrange
+    """Verify binary operations promote and match numpy."""
     left = sppy.asarray(dense.astype(np.int64), order=order)
     right = sppy.asarray(dense.astype(np.float32), order="F" if order == "C" else "C")
     expected = operation(dense.astype(np.int64), dense.astype(np.float32))
@@ -134,8 +154,9 @@ def test_binary_operations_promote_and_match_numpy(dense, order, operation):
 @pytest.mark.parametrize(
     "operation", [operator.add, operator.sub, operator.mul, operator.matmul]
 )
-def test_binary_operations_reject_incompatible_shapes(operation):
+def test_binary_operations_reject_incompatible_shapes(operation: str) -> None:
     # Arrange
+    """Verify binary operations reject incompatible shapes."""
     left = sppy.zeros((2, 3))
     right = sppy.zeros((4, 5))
 
@@ -145,8 +166,9 @@ def test_binary_operations_reject_incompatible_shapes(operation):
 
 
 @pytest.mark.parametrize("shape", [(3, 4), (5,)])
-def test_copy_is_independent(shape, order):
+def test_copy_is_independent(shape: tuple[int, ...], order: str) -> None:
     # Arrange
+    """Verify copy is independent."""
     source = sppy.ones(shape, order=order)
     copied = source.copy()
 
@@ -160,8 +182,9 @@ def test_copy_is_independent(shape, order):
 
 
 @pytest.mark.parametrize("method", ["reserve", "compress", "eliminate_zeros"])
-def test_storage_operations_preserve_values(method, order):
+def test_storage_operations_preserve_values(method: str, order: str) -> None:
     # Arrange
+    """Verify storage operations preserve values."""
     expected = np.array([[0.0, 2.0], [-3.0, 0.0]])
     array = sppy.asarray(expected, order=order)
     arguments = (20,) if method == "reserve" else ()
@@ -173,8 +196,9 @@ def test_storage_operations_preserve_values(method, order):
     np.testing.assert_array_equal(array.toarray(), expected)
 
 
-def test_reserve_rejects_negative_capacity():
+def test_reserve_rejects_negative_capacity() -> None:
     # Arrange
+    """Verify reserve rejects negative capacity."""
     array = sppy.zeros((2, 2))
 
     # Act / Assert
@@ -182,8 +206,11 @@ def test_reserve_rejects_negative_capacity():
         array.reserve(-1)
 
 
-def test_nonzero_coordinates_match_stored_values(dense, order):
+def test_nonzero_coordinates_match_stored_values(
+    dense: NDArray[Any], order: str
+) -> None:
     # Arrange
+    """Verify nonzero coordinates match stored values."""
     array = sppy.asarray(dense, order=order)
     expected = np.zeros_like(dense)
 
@@ -199,8 +226,9 @@ def test_nonzero_coordinates_match_stored_values(dense, order):
 
 
 @pytest.mark.parametrize("axis", [0, 1])
-def test_row_and_column_indices(axis, order):
+def test_row_and_column_indices(axis: int | None, order: str) -> None:
     # Arrange
+    """Verify row and column indices."""
     dense = np.array([[0, 2, 0], [3, 0, -1]])
     array = sppy.asarray(dense, order=order)
     expected = np.flatnonzero(dense[1, :] if axis == 0 else dense[:, 1])
@@ -214,8 +242,9 @@ def test_row_and_column_indices(axis, order):
 
 
 @pytest.mark.parametrize("method", ["row_indices", "column_indices"])
-def test_axis_indices_reject_out_of_bounds(method):
+def test_axis_indices_reject_out_of_bounds(method: str) -> None:
     # Arrange
+    """Verify axis indices reject out of bounds."""
     array = sppy.zeros((2, 3))
 
     # Act / Assert
@@ -223,8 +252,9 @@ def test_axis_indices_reject_out_of_bounds(method):
         getattr(array, method)(10)
 
 
-def test_nonzero_rows_list(order):
+def test_nonzero_rows_list(order: str) -> None:
     # Arrange
+    """Verify nonzero rows list."""
     dense = np.array([[0.0, 2.0, -1.0], [3.0, 0.0, 0.0]])
     array = sppy.asarray(dense, order=order)
     expected = [np.flatnonzero(row) for row in dense]
@@ -238,8 +268,9 @@ def test_nonzero_rows_list(order):
         np.testing.assert_array_equal(actual, indices)
 
 
-def test_nonzero_rows_ptr(order):
+def test_nonzero_rows_ptr(order: str) -> None:
     # Arrange
+    """Verify nonzero rows ptr."""
     dense = np.array([[0.0, 2.0, -1.0], [3.0, 0.0, 0.0]])
     array = sppy.asarray(dense, order=order)
     expected = sparse.csr_matrix(dense)
@@ -254,8 +285,9 @@ def test_nonzero_rows_ptr(order):
 
 @pytest.mark.parametrize("init", [False, True])
 @pytest.mark.parametrize("values", [2.5, np.array([1.0, -2.0, 3.0])])
-def test_put_assigns_values(init, values, order):
+def test_put_assigns_values(init: bool, values: Any, order: str) -> None:
     # Arrange
+    """Verify put assigns values."""
     array = sppy.zeros((4, 5), order=order)
     rows = np.array([0, 1, 3], dtype=np.int32)
     columns = np.array([1, 3, 2], dtype=np.int32)
@@ -270,8 +302,9 @@ def test_put_assigns_values(init, values, order):
     assert array.nnz == 3
 
 
-def test_initial_put_sums_duplicate_triplets(order):
+def test_initial_put_sums_duplicate_triplets(order: str) -> None:
     # Arrange
+    """Verify initial put sums duplicate triplets."""
     array = sppy.zeros((2, 2), order=order)
     rows = np.array([0, 0, 1], dtype=np.int32)
     columns = np.array([1, 1, 0], dtype=np.int32)
@@ -284,8 +317,9 @@ def test_initial_put_sums_duplicate_triplets(order):
     np.testing.assert_array_equal(array.toarray(), [[0, 5], [-1, 0]])
 
 
-def test_put_supports_large_sparse_dimensions(order):
+def test_put_supports_large_sparse_dimensions(order: str) -> None:
     # Arrange
+    """Verify put supports large sparse dimensions."""
     array = sppy.zeros((1_000_000, 1_000_000), order=order)
     rows = np.array([1, 900_000], dtype=np.int32)
     columns = np.array([999_999, 3], dtype=np.int32)
@@ -300,8 +334,9 @@ def test_put_supports_large_sparse_dimensions(order):
 
 
 @pytest.mark.parametrize("method", ["to_scipy_csr", "to_scipy_csc"])
-def test_scipy_export(method, dtype, order):
+def test_scipy_export(method: str, dtype: np.dtype[Any], order: str) -> None:
     # Arrange
+    """Verify scipy export."""
     dense = np.array([[0, 2], [-3, 0]], dtype=dtype)
     array = sppy.asarray(dense, order=order)
 
@@ -314,8 +349,11 @@ def test_scipy_export(method, dtype, order):
     assert result.format == method.rsplit("_", 1)[1]
 
 
-def test_pickle_roundtrip(dense, dtype, order):
+def test_pickle_roundtrip(
+    dense: NDArray[Any], dtype: np.dtype[Any], order: str
+) -> None:
     # Arrange
+    """Verify pickle roundtrip."""
     dense = dense.astype(dtype)
     array = sppy.asarray(dense, order=order)
 
@@ -328,8 +366,9 @@ def test_pickle_roundtrip(dense, dtype, order):
     assert result.order == order
 
 
-def test_string_describes_array():
+def test_string_describes_array() -> None:
     # Arrange
+    """Verify string describes array."""
     array = sppy.asarray([[0.0, 2.0], [3.0, 0.0]])
 
     # Act
@@ -342,8 +381,9 @@ def test_string_describes_array():
     assert "SparseArray" in representation
 
 
-def test_prune_removes_exact_stored_zero(order):
+def test_prune_removes_exact_stored_zero(order: str) -> None:
     # Arrange
+    """Verify prune removes exact stored zero."""
     array = sppy.asarray([[1.0, 2.0], [0.0, 3.0]], order=order)
     array[0, 1] = 0
     expected = np.diag([1.0, 3.0])
@@ -357,8 +397,9 @@ def test_prune_removes_exact_stored_zero(order):
 
 
 @pytest.mark.parametrize("method", ["submatrix", "subarray"])
-def test_submatrix_selection(method, order):
+def test_submatrix_selection(method: str, order: str) -> None:
     # Arrange
+    """Verify submatrix selection."""
     dense = np.arange(20.0).reshape(4, 5)
     array = sppy.asarray(dense, order=order)
     arguments = (
@@ -378,8 +419,9 @@ def test_submatrix_selection(method, order):
 @pytest.mark.parametrize(
     "arguments", [(-1, 0, 2, 2), (0, -1, 2, 2), (0, 0, 20, 2), (0, 0, 2, 20)]
 )
-def test_submatrix_rejects_invalid_block(arguments):
+def test_submatrix_rejects_invalid_block(arguments: Any) -> None:
     # Arrange
+    """Verify submatrix rejects invalid block."""
     array = sppy.zeros((3, 4))
 
     # Act / Assert
@@ -387,8 +429,9 @@ def test_submatrix_rejects_invalid_block(arguments):
         array.submatrix(*arguments)
 
 
-def test_transpose_matches_numpy(dense, order):
+def test_transpose_matches_numpy(dense: NDArray[Any], order: str) -> None:
     # Arrange
+    """Verify transpose matches numpy."""
     array = sppy.asarray(dense, order=order)
     expected = dense.T
 
@@ -401,8 +444,11 @@ def test_transpose_matches_numpy(dense, order):
 
 @pytest.mark.parametrize("parallel", [False, True])
 @pytest.mark.parametrize("operand_shape", [(4,), (4, 3)])
-def test_dense_dot_matches_numpy(parallel, operand_shape, order, rng):
+def test_dense_dot_matches_numpy(
+    parallel: bool, operand_shape: Any, order: str, rng: np.random.Generator
+) -> None:
     # Arrange
+    """Verify dense dot matches numpy."""
     dense = np.array([[0.0, 1.0, 0.0, -2.0], [3.0, 0.0, 4.0, 0.0]])
     array = sppy.asarray(dense, order=order)
     operand = rng.normal(size=operand_shape)
@@ -419,8 +465,9 @@ def test_dense_dot_matches_numpy(parallel, operand_shape, order, rng):
 
 
 @pytest.mark.parametrize("vector", [False, True])
-def test_sparse_dot_matches_numpy(vector, order):
+def test_sparse_dot_matches_numpy(vector: bool, order: str) -> None:
     # Arrange
+    """Verify sparse dot matches numpy."""
     dense = (
         np.array([0.0, 2.0, -3.0]) if vector else np.array([[0.0, 2.0], [-3.0, 1.0]])
     )
@@ -435,8 +482,9 @@ def test_sparse_dot_matches_numpy(vector, order):
 
 
 @pytest.mark.parametrize("shape", [(2, 3), (4,)])
-def test_fill_ones(shape):
+def test_fill_ones(shape: tuple[int, ...]) -> None:
     # Arrange
+    """Verify fill ones."""
     array = sppy.zeros(shape)
     expected = np.ones(shape)
 

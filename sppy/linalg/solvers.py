@@ -4,16 +4,25 @@ No SciPy dependency is needed. Native solvers preserve float32/64 and
 complex64/128 precision and return owned arrays and factors.
 """
 
+from __future__ import annotations
+
+import operator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from enum import IntEnum
 from functools import wraps
 from threading import RLock
-import operator
+from typing import Any, Concatenate, ParamSpec, Self, TypeVar
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 
 from sppy import _native
+from sppy._typing import Scalar
 from sppy.sparse_array import SparseArray
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 class ComputationInfo(IntEnum):
@@ -25,7 +34,8 @@ class ComputationInfo(IntEnum):
     INVALID_INPUT = 3
 
 
-def _matrix(a):
+def _matrix(a: SparseArray) -> SparseArray:
+    """Validate a finite, nonempty floating or complex sparse matrix."""
     if not isinstance(a, SparseArray) or a.ndim != 2:
         raise ValueError("Expected a two-dimensional SparseArray")
     if a.dtype.kind not in "fc":
@@ -37,12 +47,16 @@ def _matrix(a):
     return a
 
 
-def _arguments(a):
+def _arguments(
+    a: SparseArray,
+) -> tuple[int, int, NDArray[np.int32], NDArray[np.int32], NDArray[Any]]:
+    """Export matrix shape, coordinates, and values for a native call."""
     rows, columns = a.stored_indices()
     return *a.shape, rows, columns, a.values()
 
 
-def _rhs(b, dtype, rows):
+def _rhs(b: ArrayLike, dtype: np.dtype[Any], rows: int) -> tuple[NDArray[Any], bool]:
+    """Validate dense right-hand sides and normalize them to a contiguous matrix."""
     b = np.asarray(b)
     if b.ndim not in {1, 2} or b.shape[0] != rows:
         raise ValueError("Right-hand side has incompatible dimensions")
@@ -55,9 +69,14 @@ def _rhs(b, dtype, rows):
     return np.ascontiguousarray(b[:, None] if vector else b), vector
 
 
-def _locked(method):
+def _locked(
+    method: Callable[Concatenate[SparseFactorization, P], R],
+) -> Callable[Concatenate[SparseFactorization, P], R]:
+    """Serialize calls to a factorization method using its reentrant lock."""
+
     @wraps(method)
-    def synchronized(self, *args, **kwargs):
+    def synchronized(self: SparseFactorization, *args: P.args, **kwargs: P.kwargs) -> R:
+        """Call the wrapped method while holding the factorization lock."""
         with self._lock:
             return method(self, *args, **kwargs)
 
@@ -80,15 +99,16 @@ class SparseFactorization:
 
     def __init__(
         self,
-        a=None,
+        a: SparseArray | None = None,
         *,
-        method="lu",
-        ordering=None,
-        lower=True,
-        shift_offset=0.0,
-        shift_scale=1.0,
-        pivot_threshold=None,
-    ):
+        method: str = "lu",
+        ordering: str | None = None,
+        lower: bool = True,
+        shift_offset: float = 0.0,
+        shift_scale: float = 1.0,
+        pivot_threshold: float | None = None,
+    ) -> None:
+        """Configure the solver and optionally factor the supplied matrix."""
         if method not in {"llt", "ldlt", "lu", "qr"}:
             raise ValueError("Unknown direct method")
         ordering = ordering or ("amd" if method in {"llt", "ldlt"} else "colamd")
@@ -111,7 +131,8 @@ class SparseFactorization:
         if a is not None:
             self.compute(a)
 
-    def _prepare(self, a):
+    def _prepare(self, a: SparseArray) -> SparseArray:
+        """Validate factorization dimensions and reconstruct the selected triangle."""
         a = _matrix(a)
         if self.method != "qr" and a.shape[0] != a.shape[1]:
             raise ValueError("This factorization requires a square matrix")
@@ -120,7 +141,7 @@ class SparseFactorization:
         return a.selfadjoint(lower=self.lower) if self.method in {"llt", "ldlt"} else a
 
     @_locked
-    def analyze_pattern(self, a):
+    def analyze_pattern(self, a: SparseArray) -> Self:
         """Analyze structure without numerical factorization; invalidates old factors."""
         self.info = ComputationInfo.INVALID_INPUT
         self._native = None
@@ -138,7 +159,7 @@ class SparseFactorization:
         return self
 
     @_locked
-    def factorize(self, a):
+    def factorize(self, a: SparseArray) -> Self:
         """Numerically factor a matrix with the analyzed sparsity pattern.
 
         Raises numpy.linalg.LinAlgError on numerical failure. Shape, dtype, and
@@ -158,7 +179,7 @@ class SparseFactorization:
         return self
 
     @_locked
-    def compute(self, a):
+    def compute(self, a: SparseArray) -> Self:
         """Analyze and factor a matrix."""
         self.info = ComputationInfo.INVALID_INPUT
         self._native = None
@@ -179,20 +200,23 @@ class SparseFactorization:
             )
         return self
 
-    def _require_ready(self):
+    def _require_ready(self) -> None:
+        """Require a successful numerical factorization before accessing factors."""
         if self._native is None or self.info != ComputationInfo.SUCCESS:
             raise ValueError("No successful factorization is available")
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, int] | None:
+        """Shape of the analyzed matrix, or None before analysis."""
         return self._shape
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype[Any] | None:
+        """Scalar dtype of the analyzed matrix, or None before analysis."""
         return self._dtype
 
     @_locked
-    def solve(self, b):
+    def solve(self, b: SparseArray | ArrayLike) -> SparseArray | NDArray[Any]:
         """Solve for dense vectors/matrices or a sparse RHS matrix.
 
         LU solves with four or more dense RHS columns process the whole block
@@ -214,7 +238,7 @@ class SparseFactorization:
         return result[:, 0] if vector else result
 
     @_locked
-    def factor(self, name):
+    def factor(self, name: str) -> SparseArray | NDArray[Any]:
         """Copy L/U for Cholesky/LU, D for LDLT, R for QR, or permutation P/Q.
 
         Permutations use Eigen's convention: P[indices[j], j] = 1. LU exposes
@@ -228,26 +252,26 @@ class SparseFactorization:
         return value.ravel() if name == "D" else value
 
     @_locked
-    def determinant(self):
+    def determinant(self) -> Scalar:
         """Return the determinant for LU or Cholesky."""
         self._require_ready()
         return self._native.determinant()
 
     @_locked
-    def slogdet(self):
+    def slogdet(self) -> tuple[Scalar, float]:
         """Return (phase, log(abs(det))) for LU or Cholesky without overflow."""
         self._require_ready()
         return self._native.slogdet()
 
     @property
     @_locked
-    def rank(self):
+    def rank(self) -> int:
         """Numerical rank from rank-revealing QR."""
         self._require_ready()
         return self._native.rank
 
     @_locked
-    def apply_q(self, b, *, adjoint=False):
+    def apply_q(self, b: ArrayLike, *, adjoint: bool = False) -> NDArray[Any]:
         """Apply QR's implicit Q or Q.H without forming a dense Q."""
         self._require_ready()
         b, vector = _rhs(b, self.dtype, self.shape[0])
@@ -258,42 +282,50 @@ class SparseFactorization:
 class SimplicialLLT(SparseFactorization):
     """Sparse Cholesky LL.H for Hermitian positive definite matrices."""
 
-    def __init__(self, a=None, **options):
+    def __init__(self, a: SparseArray | None = None, **options: Any) -> None:
+        """Initialize a LLT solver, optionally factoring a matrix immediately."""
         super().__init__(a, method="llt", **options)
 
 
 class SimplicialLDLT(SparseFactorization):
     """Sparse Cholesky LD L.H for Hermitian positive definite matrices."""
 
-    def __init__(self, a=None, **options):
+    def __init__(self, a: SparseArray | None = None, **options: Any) -> None:
+        """Initialize a LDLT solver, optionally factoring a matrix immediately."""
         super().__init__(a, method="ldlt", **options)
 
 
 class SparseLU(SparseFactorization):
     """Sparse LU for general square matrices."""
 
-    def __init__(self, a=None, **options):
+    def __init__(self, a: SparseArray | None = None, **options: Any) -> None:
+        """Initialize a LU solver, optionally factoring a matrix immediately."""
         super().__init__(a, method="lu", **options)
 
 
 class SparseQR(SparseFactorization):
     """Rank-revealing sparse QR for rectangular least-squares problems."""
 
-    def __init__(self, a=None, **options):
+    def __init__(self, a: SparseArray | None = None, **options: Any) -> None:
+        """Initialize a QR solver, optionally factoring a matrix immediately."""
         super().__init__(a, method="qr", **options)
 
 
-def factorize(a, *, method="lu", **options):
+def factorize(
+    a: SparseArray, *, method: str = "lu", **options: Any
+) -> SparseFactorization:
     """Construct a reusable native sparse factorization."""
     return SparseFactorization(a, method=method, **options)
 
 
-def solve(a, b, *, method="lu", **options):
+def solve(
+    a: SparseArray, b: SparseArray | ArrayLike, *, method: str = "lu", **options: Any
+) -> SparseArray | NDArray[Any]:
     """Factor and solve once; use factorize for repeated right-hand sides."""
     return factorize(a, method=method, **options).solve(b)
 
 
-def ordering(a, method="amd"):
+def ordering(a: SparseArray, method: str = "amd") -> NDArray[np.int64]:
     """Return a gather permutation for AMD, COLAMD, or natural ordering.
 
     AMD expects a square matrix and operates on its self-adjoint structure.
@@ -313,7 +345,9 @@ def ordering(a, method="amd"):
     return np.argsort(function(*_arguments(a), method))
 
 
-def triangular_solve(a, b, *, lower=True, unit_diagonal=False):
+def triangular_solve(
+    a: SparseArray, b: ArrayLike, *, lower: bool = True, unit_diagonal: bool = False
+) -> NDArray[Any]:
     """Solve a sparse triangular system; optionally assume a unit diagonal."""
     a = _matrix(a)
     if a.shape[0] != a.shape[1]:
@@ -342,24 +376,26 @@ class IterativeResult:
     iterations: int
     error: float
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[NDArray[Any] | ComputationInfo]:
+        """Yield the solution followed by the computation status."""
         yield self.solution
         yield self.info
 
 
 def _iterate(
-    a,
-    b,
+    a: SparseArray,
+    b: ArrayLike,
     *,
-    method,
-    preconditioner,
-    x0=None,
-    maxiter=1000,
-    rtol=1e-6,
-    drop_tolerance=1e-4,
-    fill_factor=10,
-    initial_shift=1e-3,
-):
+    method: str,
+    preconditioner: str,
+    x0: ArrayLike | None = None,
+    maxiter: int = 1000,
+    rtol: float = 1e-6,
+    drop_tolerance: float = 1e-4,
+    fill_factor: int = 10,
+    initial_shift: float = 1e-3,
+) -> IterativeResult:
+    """Validate input and run a native iterative solver with diagnostics."""
     a = _matrix(a)
     b, vector = _rhs(b, a.dtype, a.shape[0])
     if x0 is None:
@@ -387,7 +423,9 @@ def _iterate(
     )
 
 
-def cg(a, b, *, preconditioner="diagonal", **options):
+def cg(
+    a: SparseArray, b: ArrayLike, *, preconditioner: str = "diagonal", **options: Any
+) -> IterativeResult:
     """Conjugate gradient for Hermitian positive definite matrices.
 
     Preconditioners: identity, diagonal, incomplete_cholesky. Both triangles
@@ -396,7 +434,9 @@ def cg(a, b, *, preconditioner="diagonal", **options):
     return _iterate(a, b, method="cg", preconditioner=preconditioner, **options)
 
 
-def bicgstab(a, b, *, preconditioner="diagonal", **options):
+def bicgstab(
+    a: SparseArray, b: ArrayLike, *, preconditioner: str = "diagonal", **options: Any
+) -> IterativeResult:
     """BiCGSTAB for general square matrices.
 
     Preconditioners: identity, diagonal, incomplete_lut. Options: x0, maxiter,
@@ -405,7 +445,13 @@ def bicgstab(a, b, *, preconditioner="diagonal", **options):
     return _iterate(a, b, method="bicgstab", preconditioner=preconditioner, **options)
 
 
-def lscg(a, b, *, preconditioner="least_square_diagonal", **options):
+def lscg(
+    a: SparseArray,
+    b: ArrayLike,
+    *,
+    preconditioner: str = "least_square_diagonal",
+    **options: Any,
+) -> IterativeResult:
     """Least-squares conjugate gradient for rectangular matrices.
 
     Preconditioners: identity, least_square_diagonal. Options: x0, maxiter, rtol.
@@ -425,13 +471,14 @@ class Preconditioner:
 
     def __init__(
         self,
-        a,
-        method="diagonal",
+        a: SparseArray,
+        method: str = "diagonal",
         *,
-        drop_tolerance=1e-4,
-        fill_factor=10,
-        initial_shift=1e-3,
-    ):
+        drop_tolerance: float = 1e-4,
+        fill_factor: int = 10,
+        initial_shift: float = 1e-3,
+    ) -> None:
+        """Snapshot the matrix and construct the selected inverse preconditioner."""
         a = _matrix(a)
         self.dtype, self.shape = a.dtype, (a.shape[1], a.shape[1])
         cls = getattr(_native, f"Preconditioner_{a.dtype.name}")
@@ -443,7 +490,7 @@ class Preconditioner:
             initial_shift,
         )
 
-    def solve(self, b):
+    def solve(self, b: ArrayLike) -> NDArray[Any]:
         """Apply the inverse preconditioner to dense right-hand sides."""
         b, vector = _rhs(b, self.dtype, self.shape[0])
         result = self._native.solve(b)

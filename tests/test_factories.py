@@ -1,5 +1,9 @@
 """Array factories compared with NumPy and deterministic RNG expectations."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -8,8 +12,11 @@ import sppy
 
 @pytest.mark.parametrize("factory", ["ones", "zeros"])
 @pytest.mark.parametrize("shape", [(3, 4), (5,), (0,), (0, 0)])
-def test_factory_values(factory, shape, dtype, order):
+def test_factory_values(
+    factory: str, shape: tuple[int, ...], dtype: np.dtype[Any], order: str
+) -> None:
     # Arrange
+    """Verify factory values."""
     expected = getattr(np, factory)(shape, dtype=dtype)
 
     # Act
@@ -24,8 +31,11 @@ def test_factory_values(factory, shape, dtype, order):
 @pytest.mark.parametrize(
     "shape,offset", [((3, 3), 0), ((3, 5), 1), ((5, 3), -1), ((2, 3), 10)]
 )
-def test_eye(shape, offset, dtype, order):
+def test_eye(
+    shape: tuple[int, ...], offset: int, dtype: np.dtype[Any], order: str
+) -> None:
     # Arrange
+    """Verify eye."""
     expected = np.eye(*shape, k=offset, dtype=dtype)
 
     # Act
@@ -37,8 +47,9 @@ def test_eye(shape, offset, dtype, order):
 
 
 @pytest.mark.parametrize("offset", [-2, 0, 1])
-def test_diag_construction(offset, dtype):
+def test_diag_construction(offset: int, dtype: np.dtype[Any]) -> None:
     # Arrange
+    """Verify diag construction."""
     vector = np.array([1, 2, -3], dtype=dtype)
     expected = np.diag(vector, k=offset)
 
@@ -51,8 +62,11 @@ def test_diag_construction(offset, dtype):
 
 @pytest.mark.parametrize("shape", [(4, 5), (10,), (0,), (0, 0)])
 @pytest.mark.parametrize("density", [0.0, 0.25, 1.0])
-def test_rand_is_reproducible(shape, density, order):
+def test_rand_is_reproducible(
+    shape: tuple[int, ...], density: float, order: str
+) -> None:
     # Arrange
+    """Verify rand is reproducible."""
     left_rng = np.random.default_rng(21)
     right_rng = np.random.default_rng(21)
 
@@ -68,8 +82,9 @@ def test_rand_is_reproducible(shape, density, order):
 
 
 @pytest.mark.parametrize("density", [-0.1, 1.1])
-def test_rand_rejects_invalid_density(density):
+def test_rand_rejects_invalid_density(density: float) -> None:
     # Arrange
+    """Verify rand rejects invalid density."""
     shape = (2, 3)
 
     # Act / Assert

@@ -1,7 +1,12 @@
 """Numerical and storage contracts for native benchmark optimizations."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import pytest
+from numpy.typing import DTypeLike
 
 import sppy
 from sppy import _native
@@ -11,8 +16,9 @@ from sppy.linalg import SparseLU
 @pytest.mark.parametrize("compressed", [False, True])
 @pytest.mark.parametrize("axis", [None, 0, 1])
 def test_native_reductions_preserve_promotion_and_output(
-    axis, compressed, dtype, order
-):
+    axis: int | None, compressed: bool, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify native reductions preserve promotion and output."""
     dense = np.array([[0, 2, -3], [4, 0, 5]], dtype=dtype)
     if dtype.kind == "c":
         dense += 1j * dense
@@ -33,7 +39,8 @@ def test_native_reductions_preserve_promotion_and_output(
     )
 
 
-def test_sum_int64_overflow_and_small_integer_promotion(order):
+def test_sum_int64_overflow_and_small_integer_promotion(order: str) -> None:
+    """Verify sum int64 overflow and small integer promotion."""
     dense = np.array([[np.iinfo(np.int64).max, 1], [2, -3]], dtype=np.int64)
     array = sppy.asarray(dense, order=order)
     for axis in [None, 0, 1]:
@@ -46,8 +53,9 @@ def test_sum_int64_overflow_and_small_integer_promotion(order):
 
 @pytest.mark.parametrize("same_object", [False, True])
 def test_equal_pattern_arithmetic_retains_zeros_and_ownership(
-    same_object, dtype, order
-):
+    same_object: bool, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify equal pattern arithmetic retains zeros and ownership."""
     dense = np.array([[1, 0], [2, -3]], dtype=dtype)
     left = sppy.asarray(dense, order=order)
     left[0, 1] = 0
@@ -73,13 +81,19 @@ def test_equal_pattern_arithmetic_retains_zeros_and_ownership(
         (np.array(1), np.array(2)),
     ],
 )
-def test_signed_paired_gather_broadcasts_and_normalizes(key, dtype, order):
+def test_signed_paired_gather_broadcasts_and_normalizes(
+    key: Any, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify signed paired gather broadcasts and normalizes."""
     dense = np.arange(6).reshape(2, 3).astype(dtype)
     np.testing.assert_array_equal(sppy.asarray(dense, order=order)[key], dense[key])
 
 
 @pytest.mark.parametrize("bad", [-(2**63), 2**63 - 1, -3, 2])
-def test_signed_paired_gather_rejects_wide_invalid_indices(bad, order):
+def test_signed_paired_gather_rejects_wide_invalid_indices(
+    bad: Any, order: str
+) -> None:
+    """Verify signed paired gather rejects wide invalid indices."""
     array = sppy.eye(2, order=order)
     with pytest.raises(ValueError, match="range"):
         array[np.array([bad], np.int64), np.array([0])]
@@ -88,8 +102,9 @@ def test_signed_paired_gather_rejects_wide_invalid_indices(bad, order):
 @pytest.mark.parametrize("pointers", [[0, 0, 2, 2, 3, 3], [0, 1, 1, 1, 3, 3]])
 @pytest.mark.parametrize("canonical", [False, True])
 def test_compressed_ordering_ignores_repeated_empty_boundaries(
-    pointers, canonical, order
-):
+    pointers: Any, canonical: bool, order: str
+) -> None:
+    """Verify compressed ordering ignores repeated empty boundaries."""
     indices = np.array([2, 0, 1] if canonical else [2, 0, 0], np.int32)
     if canonical:
         for begin, end in zip(pointers[:-1], pointers[1:]):
@@ -112,7 +127,10 @@ def test_compressed_ordering_ignores_repeated_empty_boundaries(
 
 @pytest.mark.parametrize("columns", [1, 4, 8, 17])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.complex64, np.complex128])
-def test_lu_batched_solve_uses_refactorized_storage(columns, dtype, order):
+def test_lu_batched_solve_uses_refactorized_storage(
+    columns: int, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify lu batched solve uses refactorized storage."""
     dense = np.array([[0, 2, 1], [3, 1, 0], [1, 0, 4]], dtype=dtype)
     if np.dtype(dtype).kind == "c":
         dense += 0.5j * dense
@@ -134,13 +152,15 @@ def test_lu_batched_solve_uses_refactorized_storage(columns, dtype, order):
 
 
 @pytest.mark.native
-def test_native_solver_storage_rejects_incompatible_dtype():
+def test_native_solver_storage_rejects_incompatible_dtype() -> None:
+    """Verify native solver storage rejects incompatible dtype."""
     factor = _native.Factor_float64("lu", "colamd", 0.0, 1.0, -1.0)
     with pytest.raises(TypeError, match="scalar type"):
         factor.compute_matrix(sppy.eye(2, dtype=np.complex128)._array)
 
 
-def test_compressed_validation_and_triplets_match_duplicate_scatter(order):
+def test_compressed_validation_and_triplets_match_duplicate_scatter(order: str) -> None:
+    """Verify compressed validation and triplets match duplicate scatter."""
     rng = np.random.default_rng(42)
     for _ in range(40):
         rows, columns = map(int, rng.integers(0, 8, size=2))
@@ -183,8 +203,9 @@ def test_compressed_validation_and_triplets_match_duplicate_scatter(order):
     "value_dtype", [np.float32, np.float64, np.complex64, np.complex128]
 )
 def test_product_kernels_handle_rectangles_and_sparse_gaps(
-    columns, compressed, value_dtype, order
-):
+    columns: int, compressed: bool, value_dtype: DTypeLike, order: str
+) -> None:
+    """Verify product kernels handle rectangles and sparse gaps."""
     rng = np.random.default_rng(3)
     dense = rng.normal(size=(7, 11)).astype(value_dtype)
     dense[rng.random(dense.shape) < 0.6] = 0
@@ -199,7 +220,8 @@ def test_product_kernels_handle_rectangles_and_sparse_gaps(
 
 
 @pytest.mark.parametrize("columns", [1, 8])
-def test_complex_nonfinite_product_uses_ieee_fallback(columns, order):
+def test_complex_nonfinite_product_uses_ieee_fallback(columns: int, order: str) -> None:
+    """Verify complex nonfinite product uses ieee fallback."""
     from scipy.sparse import csr_array
 
     dense = np.array([[complex(np.inf, 0), 2 + 3j], [1 + 2j, 4 - 2j]])
@@ -213,7 +235,10 @@ def test_complex_nonfinite_product_uses_ieee_fallback(columns, order):
 
 @pytest.mark.parametrize("size", [0, 1, 7, 8, 9, 71])
 @pytest.mark.parametrize("value_dtype", [np.float32, np.float64])
-def test_native_norm_handles_accumulator_tail_and_nonfinite(size, value_dtype, order):
+def test_native_norm_handles_accumulator_tail_and_nonfinite(
+    size: int, value_dtype: DTypeLike, order: str
+) -> None:
+    """Verify native norm handles accumulator tail and nonfinite."""
     from sppy.linalg import norm
 
     dense = np.arange(1, size + 1, dtype=value_dtype).reshape(1, size)
@@ -226,7 +251,8 @@ def test_native_norm_handles_accumulator_tail_and_nonfinite(size, value_dtype, o
         assert np.isnan(norm(array))
 
 
-def test_complex_zero_pruning_preserves_nonfinite_and_source(order):
+def test_complex_zero_pruning_preserves_nonfinite_and_source(order: str) -> None:
+    """Verify complex zero pruning preserves nonfinite and source."""
     array = sppy.asarray(
         [[0j, complex(np.nan, 0)], [complex(np.inf, 0), 2j]], order=order
     )
@@ -243,8 +269,9 @@ def test_complex_zero_pruning_preserves_nonfinite_and_source(order):
 @pytest.mark.parametrize("value_dtype", [np.float32, np.float64])
 @pytest.mark.parametrize("compressed", [False, True])
 def test_large_rectangular_product_scatter_keeps_canonical_structural_zeros(
-    value_dtype, compressed, order
-):
+    value_dtype: DTypeLike, compressed: bool, order: str
+) -> None:
+    """Verify large rectangular product scatter keeps canonical structural zeros."""
     from scipy.sparse import csr_array
 
     rng = np.random.default_rng(17)
@@ -284,8 +311,9 @@ def test_large_rectangular_product_scatter_keeps_canonical_structural_zeros(
 )
 @pytest.mark.parametrize("columns", [4, 8, 17])
 def test_supernodal_block_solve_handles_sparse_pivoted_systems(
-    value_dtype, columns, order
-):
+    value_dtype: DTypeLike, columns: int, order: str
+) -> None:
+    """Verify supernodal block solve handles sparse pivoted systems."""
     rng = np.random.default_rng(61)
     size = 73
     dense = rng.normal(size=(size, size)).astype(value_dtype)
@@ -303,8 +331,9 @@ def test_supernodal_block_solve_handles_sparse_pivoted_systems(
 @pytest.mark.parametrize("corruption", [None, "duplicates", "unsorted"])
 @pytest.mark.parametrize("value_dtype", [np.float64, np.complex128])
 def test_large_run_ordered_triplets_validate_every_outer_vector(
-    corruption, value_dtype, order
-):
+    corruption: str, value_dtype: DTypeLike, order: str
+) -> None:
+    """Verify large run ordered triplets validate every outer vector."""
     from scipy.sparse import csr_array
 
     size = 5000

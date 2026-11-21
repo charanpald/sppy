@@ -1,12 +1,17 @@
 """Benchmark SpPy 1.0 against SciPy CSR/CSC arrays on matched, checked inputs."""
 
+from __future__ import annotations
+
+import argparse
 import gc
 import json
 import math
-from pathlib import Path
 import random
 import statistics
+from collections.abc import Callable, Sequence
+from pathlib import Path
 from time import perf_counter
+from typing import TYPE_CHECKING, Any
 
 from profiling._common import (
     ARRAY_OPERATIONS,
@@ -21,8 +26,11 @@ from profiling._common import (
     validate_options,
 )
 
+if TYPE_CHECKING:
+    from profiling.workloads import Workload
 
-def time_batch(operation, count):
+
+def time_batch(operation: Callable[[], Any], count: int) -> tuple[float, Any]:
     """Time calls and intermediate result destruction; keep the last result to validate."""
     enabled = gc.isenabled()
     gc.disable()
@@ -37,7 +45,15 @@ def time_batch(operation, count):
     return elapsed, result
 
 
-def measure(workloads, *, repeats, warmups, min_time, max_batch, seed):
+def measure(
+    workloads: dict[str, Workload],
+    *,
+    repeats: int,
+    warmups: int,
+    min_time: float,
+    max_batch: int,
+    seed: int,
+) -> tuple[dict[str, Any], list[list[str]]]:
     """Warm, calibrate, then interleave implementations in seeded random order."""
     rng = random.Random(seed)
     names = list(workloads)
@@ -83,7 +99,8 @@ def measure(workloads, *, repeats, warmups, min_time, max_batch, seed):
     return result, order
 
 
-def markdown_report(report):
+def markdown_report(report: dict[str, Any]) -> str:
+    """Render benchmark timings as a Markdown comparison table."""
     config, env = report["configuration"], report["environment"]
     lines = [
         "# SpPy versus SciPy sparse",
@@ -114,7 +131,8 @@ def markdown_report(report):
     return "\n".join(lines)
 
 
-def run(options, operations):
+def run(options: argparse.Namespace, operations: Sequence[str]) -> dict[str, Any]:
+    """Run the prepared operation and return its result."""
     from profiling.workloads import Fixture
 
     with numerical_threads(options.threads):
@@ -171,7 +189,8 @@ def run(options, operations):
         return report
 
 
-def main(argv=None):
+def main(argv: Sequence[str] | None = None) -> dict[str, Any]:
+    """Parse command-line options and execute the profiling tool."""
     arguments = parser(__doc__)
     arguments.add_argument(
         "--operations",

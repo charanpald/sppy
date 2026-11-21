@@ -4,40 +4,53 @@ All preparation and validation happens outside measured regions. Sparse results
 are compared as sparse differences, without allocating a dense square matrix.
 """
 
-from dataclasses import dataclass
+from __future__ import annotations
+
+import argparse
 import hashlib
-from typing import Callable
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 from scipy import sparse
 from scipy.sparse import linalg as sla
 
 import sppy
-from sppy import linalg
 from profiling._common import BACKENDS, SOLVER_OPERATIONS
+from sppy import linalg
 
 
 @dataclass
 class Workload:
-    run: Callable
-    check: Callable
+    """Prepared callable, numerical validator, and measured operation scope."""
+
+    run: Callable[[], Any]
+    check: Callable[[Any], dict[str, Any]]
     description: str
 
 
 @dataclass
 class SolveResult:
-    solution: np.ndarray
+    """SciPy solution and convergence status with the shared solver interface."""
+
+    solution: NDArray[Any]
     info: int
 
 
-def _random_values(rng, count, dtype):
+def _random_values(
+    rng: np.random.Generator, count: int, dtype: np.dtype[Any]
+) -> NDArray[Any]:
+    """Generate contiguous real or complex normal samples."""
     values = rng.standard_normal(count)
     if dtype.kind == "c":
         values = values + 1j * rng.standard_normal(count)
     return np.ascontiguousarray(values, dtype=dtype)
 
 
-def _canonical(matrix, format):
+def _canonical(matrix: sparse.sparray, format: str) -> sparse.sparray:
+    """Copy, coalesce, prune, and sort SciPy sparse buffers with int32 indices."""
     result = matrix.asformat(format).copy()
     result.sum_duplicates()
     result.eliminate_zeros()
@@ -51,7 +64,8 @@ def _canonical(matrix, format):
 class Fixture:
     """Deterministic canonical input, independent of the implementation timed."""
 
-    def __init__(self, options):
+    def __init__(self, options: argparse.Namespace) -> None:
+        """Generate reproducible canonical inputs and backend-independent references."""
         self.options = options
         self.dtype = np.dtype(options.dtype)
         self.rng = np.random.default_rng(options.seed)
@@ -97,7 +111,8 @@ class Fixture:
         self._factors = None
 
     @staticmethod
-    def _backends(csr):
+    def _backends(csr: sparse.csr_array) -> dict[str, Any]:
+        """Create independent inputs for each sparse backend."""
         return {
             "sppy_C": sppy.asarray(csr, order="C"),
             "sppy_F": sppy.asarray(csr, order="F"),
@@ -105,7 +120,8 @@ class Fixture:
             "scipy_csc": _canonical(csr, "csc"),
         }
 
-    def fingerprint(self):
+    def fingerprint(self) -> str:
+        """Hash canonical input buffers and dtype for reproducibility."""
         digest = hashlib.sha256()
         for array in (
             np.asarray(self.csr.shape, dtype=np.int64),
@@ -117,7 +133,8 @@ class Fixture:
         digest.update(self.dtype.str.encode())
         return digest.hexdigest()
 
-    def system(self):
+    def system(self) -> dict[str, Any]:
+        """Lazily construct a strictly diagonally dominant Hermitian system."""
         if self._system is None:
             # Strict Hermitian diagonal dominance gives a well-conditioned SPD
             # system for both direct and iterative benchmarks.
@@ -129,12 +146,14 @@ class Fixture:
             self._system = self._backends(a)
         return self._system
 
-    def factors(self):
+    def factors(self) -> dict[str, Any]:
+        """Lazily factor the matched system for each backend."""
         if self._factors is None:
             self._factors = {name: _lu(name, a) for name, a in self.system().items()}
         return self._factors
 
-    def check_equal(self, actual, expected):
+    def check_equal(self, actual: Any, expected: Any) -> dict[str, bool]:
+        """Validate result values, sparse shapes, and sparse dtypes."""
         if isinstance(expected, sppy.SparseArray):
             expected = sparse.csr_array(expected.to_scipy_csr())
         if isinstance(actual, sppy.SparseArray):
@@ -166,7 +185,10 @@ class Fixture:
             )
         return {"passed": True}
 
-    def check_solution(self, actual, a, rhs):
+    def check_solution(
+        self, actual: Any, a: Any, rhs: ArrayLike
+    ) -> dict[str, bool | float]:
+        """Validate convergence and the relative residual of a solution."""
         if isinstance(actual, SolveResult) or isinstance(
             actual, linalg.IterativeResult
         ):
@@ -182,7 +204,8 @@ class Fixture:
             )
         return {"passed": True, "relative_residual": float(residual)}
 
-    def workloads(self, operation):
+    def workloads(self, operation: str) -> dict[str, Workload]:
+        """Prepare matched operations and numerical checks for each backend."""
         arrays = self.system() if operation in SOLVER_OPERATIONS else self.arrays
         reference = arrays["scipy_csr"]
         result = {}
@@ -240,7 +263,8 @@ class Fixture:
                 run, expected = a.copy, reference
             elif operation == "copy-assign":
 
-                def run(a=a):
+                def run(a: Any = a) -> Any:
+                    """Run the prepared operation and return its result."""
                     out = a.copy()
                     out[self.sample_rows, self.sample_columns] = 1
                     return out
@@ -312,7 +336,8 @@ class Fixture:
                 source = a.copy()
                 source[self.sample_rows, self.sample_columns] = 0
 
-                def run(source=source):
+                def run(source: Any = source) -> Any:
+                    """Run the prepared operation and return its result."""
                     out = source.copy()
                     out.eliminate_zeros()
                     return out
@@ -404,13 +429,17 @@ class Fixture:
         return result
 
 
-def _lu(name, a):
+def _lu(name: str, a: Any) -> Any:
+    """Factor a backend matrix using matched LU ordering and pivot settings."""
     if name.startswith("sppy_"):
         return linalg.SparseLU(a, ordering="colamd", pivot_threshold=1.0)
     return sla.splu(a.tocsc(), permc_spec="COLAMD", diag_pivot_thresh=1.0)
 
 
-def _scipy_iterative(a, rhs, method, rtol, maxiter):
+def _scipy_iterative(
+    a: Any, rhs: ArrayLike, method: str, rtol: float, maxiter: int
+) -> SolveResult:
+    """Solve with a SciPy iterative method and diagonal preconditioning."""
     inverse = 1 / a.diagonal()
     preconditioner = sla.LinearOperator(
         a.shape, matvec=lambda x: inverse * x, dtype=a.dtype
@@ -421,7 +450,8 @@ def _scipy_iterative(a, rhs, method, rtol, maxiter):
     return SolveResult(x, info)
 
 
-def _gather(a, rows, columns):
+def _gather(a: Any, rows: ArrayLike, columns: ArrayLike) -> NDArray[Any]:
+    """Gather paired coordinates and normalize SciPy results to dense arrays."""
     result = a[rows, columns]
     # SciPy versions can return a sparse 1-D result for empty paired indices.
     return result.toarray() if sparse.issparse(result) else np.asarray(result)

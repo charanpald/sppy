@@ -1,7 +1,12 @@
 """Deterministic solver and decomposition tests with explicit numerical checks."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import pytest
+from numpy.typing import DTypeLike, NDArray
 from scipy.sparse.linalg import eigsh
 
 import sppy
@@ -10,8 +15,11 @@ from sppy.linalg import GeneralLinearOperator, bicgstab, norm, rsvd
 
 @pytest.mark.parametrize("parallel", [False, True])
 @pytest.mark.parametrize("operation", ["matvec", "rmatvec", "matmat", "rmatmat"])
-def test_linear_operator_products(operation, parallel, rng):
+def test_linear_operator_products(
+    operation: str, parallel: bool, rng: np.random.Generator
+) -> None:
     # Arrange
+    """Verify linear operator products."""
     dense = rng.normal(size=(8, 5))
     array = sppy.asarray(dense, order="C")
     operator = GeneralLinearOperator.as_linear_operator(array, parallel=parallel)
@@ -31,8 +39,9 @@ def test_linear_operator_products(operation, parallel, rng):
     np.testing.assert_allclose(result, expected, rtol=1e-12, atol=1e-12)
 
 
-def test_linear_operator_supports_scipy_eigensolver(rng):
+def test_linear_operator_supports_scipy_eigensolver(rng: np.random.Generator) -> None:
     # Arrange
+    """Verify linear operator supports scipy eigensolver."""
     dense = rng.normal(size=(15, 15))
     dense = dense + dense.T
     array = sppy.asarray(dense)
@@ -51,8 +60,9 @@ def test_linear_operator_supports_scipy_eigensolver(rng):
 
 
 @pytest.mark.parametrize("operation", ["matvec", "rmatvec", "matmat", "rmatmat"])
-def test_linear_operator_sum(operation, rng):
+def test_linear_operator_sum(operation: str, rng: np.random.Generator) -> None:
     # Arrange
+    """Verify linear operator sum."""
     left = rng.normal(size=(8, 5))
     right = rng.normal(size=(8, 5))
     operator = GeneralLinearOperator.as_linear_operator_sum(
@@ -75,8 +85,9 @@ def test_linear_operator_sum(operation, rng):
     np.testing.assert_allclose(result, expected, rtol=1e-12, atol=1e-12)
 
 
-def test_linear_operator_sum_rejects_shape_mismatch():
+def test_linear_operator_sum_rejects_shape_mismatch() -> None:
     # Arrange
+    """Verify linear operator sum rejects shape mismatch."""
     left = GeneralLinearOperator.as_linear_operator(sppy.zeros((2, 3)))
     right = GeneralLinearOperator.as_linear_operator(sppy.zeros((3, 2)))
 
@@ -86,8 +97,9 @@ def test_linear_operator_sum_rejects_shape_mismatch():
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
-def test_bicgstab_solves_known_system(dtype, order):
+def test_bicgstab_solves_known_system(dtype: DTypeLike, order: str) -> None:
     # Arrange
+    """Verify bicgstab solves known system."""
     dense = np.diag(np.array([2, 3, 4, 5], dtype=dtype))
     array = sppy.asarray(dense, order=order)
     expected = np.array([1, -2, 3, -4], dtype=dtype)
@@ -102,8 +114,11 @@ def test_bicgstab_solves_known_system(dtype, order):
 
 
 @pytest.mark.parametrize("shape,rhs", [((3, 2), np.ones(3)), ((3, 3), np.ones(4))])
-def test_bicgstab_rejects_invalid_dimensions(shape, rhs):
+def test_bicgstab_rejects_invalid_dimensions(
+    shape: tuple[int, ...], rhs: NDArray[Any]
+) -> None:
     # Arrange
+    """Verify bicgstab rejects invalid dimensions."""
     array = sppy.ones(shape)
 
     # Act / Assert
@@ -112,8 +127,9 @@ def test_bicgstab_rejects_invalid_dimensions(shape, rhs):
 
 
 @pytest.mark.parametrize("options", [{"maxiter": 0}, {"rtol": 0}, {"maxiter": -1}])
-def test_bicgstab_rejects_invalid_options(options):
+def test_bicgstab_rejects_invalid_options(options: dict[str, Any]) -> None:
     # Arrange
+    """Verify bicgstab rejects invalid options."""
     array = sppy.eye(3)
     rhs = np.ones(3)
 
@@ -122,8 +138,9 @@ def test_bicgstab_rejects_invalid_options(options):
         bicgstab(array, rhs, **options)
 
 
-def test_integer_solver_rejected():
+def test_integer_solver_rejected() -> None:
     # Arrange
+    """Verify integer solver rejected."""
     array = sppy.eye(2, dtype=np.int64)
     rhs = np.ones(2, dtype=np.int64)
 
@@ -134,8 +151,11 @@ def test_integer_solver_rejected():
 
 @pytest.mark.parametrize("storage", ["dense", "sparse", "operator"])
 @pytest.mark.parametrize("rank", [3, 6, 10])
-def test_randomized_svd_is_orthonormal_and_bounded(storage, rank, rng):
+def test_randomized_svd_is_orthonormal_and_bounded(
+    storage: str, rank: int, rng: np.random.Generator
+) -> None:
     # Arrange
+    """Verify randomized svd is orthonormal and bounded."""
     dense = rng.normal(size=(24, 20))
     array = sppy.asarray(dense)
     source = {
@@ -158,8 +178,9 @@ def test_randomized_svd_is_orthonormal_and_bounded(storage, rank, rng):
     assert optimal_error - 1e-10 <= error <= np.linalg.norm(dense)
 
 
-def test_randomized_svd_uses_warm_start(rng):
+def test_randomized_svd_uses_warm_start(rng: np.random.Generator) -> None:
     # Arrange
+    """Verify randomized svd uses warm start."""
     dense = rng.normal(size=(18, 12))
     rank = 4
     _, exact_values, exact_right = np.linalg.svd(dense, full_matrices=False)
@@ -177,8 +198,9 @@ def test_randomized_svd_uses_warm_start(rng):
 
 
 @pytest.mark.parametrize("options", [{"k": 0}, {"k": 2, "p": -1}, {"k": 2, "q": -1}])
-def test_randomized_svd_rejects_invalid_options(options):
+def test_randomized_svd_rejects_invalid_options(options: dict[str, Any]) -> None:
     # Arrange
+    """Verify randomized svd rejects invalid options."""
     dense = np.eye(4)
 
     # Act / Assert
@@ -186,8 +208,9 @@ def test_randomized_svd_rejects_invalid_options(options):
         rsvd(dense, **options)
 
 
-def test_sparse_norm_matches_numpy(order, rng):
+def test_sparse_norm_matches_numpy(order: str, rng: np.random.Generator) -> None:
     # Arrange
+    """Verify sparse norm matches numpy."""
     dense = rng.normal(size=(8, 5))
     array = sppy.asarray(dense, order=order)
     expected = np.linalg.norm(dense)
@@ -199,7 +222,8 @@ def test_sparse_norm_matches_numpy(order, rng):
     assert result == pytest.approx(expected)
 
 
-def test_builtin_solvers_do_not_import_scipy():
+def test_builtin_solvers_do_not_import_scipy() -> None:
+    """Verify builtin solvers do not import scipy."""
     import subprocess
     import sys
     import textwrap
@@ -236,7 +260,10 @@ def test_builtin_solvers_do_not_import_scipy():
     "left_dtype,right_dtype",
     [(np.float32, np.float64), (np.float32, np.complex128), (np.complex64, np.float64)],
 )
-def test_linear_operator_sum_promotes_dtype(operation, left_dtype, right_dtype):
+def test_linear_operator_sum_promotes_dtype(
+    operation: str, left_dtype: DTypeLike, right_dtype: DTypeLike
+) -> None:
+    """Verify linear operator sum promotes dtype."""
     left = np.array([[1, 2], [0, 3]], dtype=left_dtype)
     right = np.array([[2, 0], [1, 4]], dtype=right_dtype)
     if np.issubdtype(right_dtype, np.complexfloating):
@@ -260,7 +287,10 @@ def test_linear_operator_sum_promotes_dtype(operation, left_dtype, right_dtype):
 @pytest.mark.parametrize("ord", [-1, -2, -np.inf, np.float32(-1)])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64, np.complex64, np.complex128])
 @pytest.mark.parametrize("value", [2, np.inf, np.nan, complex(np.nan, np.inf)])
-def test_negative_vector_norm_preserves_nonfinite_values(ord, dtype, value):
+def test_negative_vector_norm_preserves_nonfinite_values(
+    ord: Any, dtype: DTypeLike, value: Any
+) -> None:
+    """Verify negative vector norm preserves nonfinite values."""
     if isinstance(value, complex) and not np.issubdtype(dtype, np.complexfloating):
         pytest.skip("Complex values require complex storage")
     dense = np.array([0, value, 0], dtype=dtype)

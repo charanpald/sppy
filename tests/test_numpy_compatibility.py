@@ -1,5 +1,9 @@
 """NumPy interface regressions; each scenario has a single explicit action."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -10,8 +14,11 @@ import sppy
 @pytest.mark.parametrize("axis", [None, 0, 1, -1])
 @pytest.mark.parametrize("keepdims", [False, True])
 @pytest.mark.parametrize("use_out", [False, True])
-def test_numpy_reductions(operation, axis, keepdims, use_out):
+def test_numpy_reductions(
+    operation: str, axis: int | None, keepdims: bool, use_out: bool
+) -> None:
     # Arrange
+    """Verify numpy reductions."""
     dense = np.array([[0.0, 2.0, -3.0], [1.0, 0.0, 0.0]])
     array = sppy.asarray(dense)
     expected = getattr(np, operation)(dense, axis=axis, keepdims=keepdims)
@@ -27,8 +34,9 @@ def test_numpy_reductions(operation, axis, keepdims, use_out):
 
 
 @pytest.mark.parametrize("operation", ["sum", "mean", "var", "std"])
-def test_reduction_dtype(operation):
+def test_reduction_dtype(operation: str) -> None:
     # Arrange
+    """Verify reduction dtype."""
     dense = np.array([[0, 2], [-3, 0]], dtype=np.int8)
     array = sppy.asarray(dense)
     expected = getattr(np, operation)(dense, dtype=np.float32)
@@ -43,8 +51,9 @@ def test_reduction_dtype(operation):
 
 @pytest.mark.parametrize("operation", ["var", "std"])
 @pytest.mark.parametrize("axis", [None, 0, 1])
-def test_variance_degrees_of_freedom(operation, axis):
+def test_variance_degrees_of_freedom(operation: str, axis: int | None) -> None:
     # Arrange
+    """Verify variance degrees of freedom."""
     dense = np.array([[0.0, 2.0, -3.0], [1.0, 0.0, 0.0]])
     array = sppy.asarray(dense)
     expected = getattr(np, operation)(dense, axis=axis, ddof=1)
@@ -70,8 +79,9 @@ def test_variance_degrees_of_freedom(operation, axis):
         (slice(0, 0), slice(None)),
     ],
 )
-def test_numpy_indexing(key):
+def test_numpy_indexing(key: Any) -> None:
     # Arrange
+    """Verify numpy indexing."""
     dense = np.array([[0.0, 2.0, -3.0], [1.0, 0.0, 0.0]])
     array = sppy.asarray(dense)
     expected = dense[key]
@@ -92,8 +102,9 @@ def test_numpy_indexing(key):
         (([0, 1], [1, 2]), [8, 9]),
     ],
 )
-def test_numpy_assignment(key, value):
+def test_numpy_assignment(key: Any, value: Any) -> None:
     # Arrange
+    """Verify numpy assignment."""
     expected = np.zeros((2, 3))
     expected[key] = value
     array = sppy.zeros(expected.shape)
@@ -117,8 +128,9 @@ def test_numpy_assignment(key, value):
         (np.array([0, 2]), np.array([1, 1])),
     ],
 )
-def test_invalid_index_rejected(key):
+def test_invalid_index_rejected(key: Any) -> None:
     # Arrange
+    """Verify invalid index rejected."""
     array = sppy.zeros((2, 3))
 
     # Act / Assert
@@ -128,8 +140,9 @@ def test_invalid_index_rejected(key):
 
 @pytest.mark.parametrize("function", ["ceil", "floor", "sin", "cos", "sign"])
 @pytest.mark.parametrize("dtype", [np.int64, np.float32, np.float64])
-def test_numpy_unary(function, dtype, order):
+def test_numpy_unary(function: Any, dtype: np.dtype[Any], order: str) -> None:
     # Arrange
+    """Verify numpy unary."""
     dense = np.array([[0, 2.3], [-1.2, 0]], dtype=dtype)
     array = sppy.asarray(dense, order=order)
     expected = getattr(np, function)(dense)
@@ -143,8 +156,9 @@ def test_numpy_unary(function, dtype, order):
 
 
 @pytest.mark.parametrize("bounds", [(0, 2), (1, 2), (-2, None), (None, 1)])
-def test_numpy_clip(bounds):
+def test_numpy_clip(bounds: Any) -> None:
     # Arrange
+    """Verify numpy clip."""
     dense = np.array([[0.0, 2.3], [-1.2, 0.0]])
     array = sppy.asarray(dense)
     expected = np.clip(dense, *bounds)
@@ -157,8 +171,9 @@ def test_numpy_clip(bounds):
 
 
 @pytest.mark.parametrize("offset", [-1, 0, 1, 10])
-def test_numpy_trace_and_diagonal(offset):
+def test_numpy_trace_and_diagonal(offset: int) -> None:
     # Arrange
+    """Verify numpy trace and diagonal."""
     dense = np.arange(12.0).reshape(3, 4)
     array = sppy.asarray(dense)
     expected_diagonal = np.diagonal(dense, offset=offset)
@@ -174,8 +189,9 @@ def test_numpy_trace_and_diagonal(offset):
 
 
 @pytest.mark.parametrize("shape", [(2,), (2, 2)])
-def test_large_integer_roundtrip_and_product(shape):
+def test_large_integer_roundtrip_and_product(shape: tuple[int, ...]) -> None:
     # Arrange
+    """Verify large integer roundtrip and product."""
     dense = np.zeros(shape, dtype=np.int64)
     dense.flat[-1] = 2**60 + 1
     array = sppy.asarray(dense)
@@ -193,8 +209,9 @@ def test_large_integer_roundtrip_and_product(shape):
 
 
 @pytest.mark.parametrize("method", ["asarray", "astype"])
-def test_copy_false_reuses_compatible_sparse_input(method):
+def test_copy_false_reuses_compatible_sparse_input(method: str) -> None:
     # Arrange
+    """Verify copy false reuses compatible sparse input."""
     array = sppy.eye(2)
 
     # Act
@@ -208,8 +225,9 @@ def test_copy_false_reuses_compatible_sparse_input(method):
     assert result is array
 
 
-def test_dense_conversion_preserves_dtype(dtype):
+def test_dense_conversion_preserves_dtype(dtype: np.dtype[Any]) -> None:
     # Arrange
+    """Verify dense conversion preserves dtype."""
     expected = np.array([[0, 2], [-3, 0]], dtype=dtype)
     array = sppy.asarray(expected)
 
@@ -221,8 +239,9 @@ def test_dense_conversion_preserves_dtype(dtype):
     np.testing.assert_array_equal(result, expected)
 
 
-def test_dense_conversion_rejects_copy_false():
+def test_dense_conversion_rejects_copy_false() -> None:
     # Arrange
+    """Verify dense conversion rejects copy false."""
     array = sppy.eye(2)
 
     # Act / Assert
@@ -230,8 +249,9 @@ def test_dense_conversion_rejects_copy_false():
         np.asarray(array, copy=False)
 
 
-def test_astype_rejects_unsafe_cast():
+def test_astype_rejects_unsafe_cast() -> None:
     # Arrange
+    """Verify astype rejects unsafe cast."""
     array = sppy.asarray(np.array([[0, 2], [-3, 0]], dtype=np.int64))
 
     # Act / Assert
@@ -239,8 +259,9 @@ def test_astype_rejects_unsafe_cast():
         array.astype(np.int8, casting="safe")
 
 
-def test_astype_changes_dtype_and_order(order):
+def test_astype_changes_dtype_and_order(order: str) -> None:
     # Arrange
+    """Verify astype changes dtype and order."""
     dense = np.array([[0, 2], [-3, 0]], dtype=np.int64)
     array = sppy.asarray(dense)
     expected = dense.astype(np.float32)
@@ -254,8 +275,9 @@ def test_astype_changes_dtype_and_order(order):
     np.testing.assert_array_equal(result.toarray(), expected)
 
 
-def test_missing_attribute_raises():
+def test_missing_attribute_raises() -> None:
     # Arrange
+    """Verify missing attribute raises."""
     array = sppy.zeros((2, 2))
 
     # Act / Assert
@@ -263,8 +285,9 @@ def test_missing_attribute_raises():
         getattr(array, "missing_attribute")
 
 
-def test_eliminate_zeros_updates_stored_count():
+def test_eliminate_zeros_updates_stored_count() -> None:
     # Arrange
+    """Verify eliminate zeros updates stored count."""
     array = sppy.asarray([[1.0, 2.0], [0.0, 3.0]])
     array[0, 1] = 0
     expected = np.diag([1.0, 3.0])
@@ -287,8 +310,11 @@ def test_eliminate_zeros_updates_stored_count():
         (1.0, [0], [0, 1]),
     ],
 )
-def test_put_rejects_invalid_inputs(init, values, rows, columns):
+def test_put_rejects_invalid_inputs(
+    init: bool, values: Any, rows: Any, columns: int
+) -> None:
     # Arrange
+    """Verify put rejects invalid inputs."""
     array = sppy.zeros((2, 2))
     rows = np.array(rows, dtype=np.int32)
     columns = np.array(columns, dtype=np.int32)
@@ -299,8 +325,9 @@ def test_put_rejects_invalid_inputs(init, values, rows, columns):
 
 
 @pytest.mark.parametrize("init", [False, True])
-def test_put_accepts_empty_inputs(init):
+def test_put_accepts_empty_inputs(init: bool) -> None:
     # Arrange
+    """Verify put accepts empty inputs."""
     array = sppy.zeros((2, 2))
     indices = np.array([], dtype=np.int32)
     values = np.array([])
@@ -314,8 +341,11 @@ def test_put_accepts_empty_inputs(init):
 
 @pytest.mark.parametrize("shape", [(0,), (0, 0)])
 @pytest.mark.parametrize("operation", ["min", "max", "mean", "var", "std"])
-def test_empty_reductions_retain_nan_contract(shape, operation):
+def test_empty_reductions_retain_nan_contract(
+    shape: tuple[int, ...], operation: str
+) -> None:
     # Arrange
+    """Verify empty reductions retain nan contract."""
     array = sppy.zeros(shape)
 
     # Act
@@ -336,8 +366,9 @@ def test_empty_reductions_retain_nan_contract(shape, operation):
         np.array([True, False, False, True, False]),
     ],
 )
-def test_vector_indexing(key):
+def test_vector_indexing(key: Any) -> None:
     # Arrange
+    """Verify vector indexing."""
     dense = np.array([2.0, 0.0, -3.0, 4.0, 0.0])
     array = sppy.asarray(dense)
     expected = dense[key]
@@ -352,8 +383,9 @@ def test_vector_indexing(key):
 @pytest.mark.parametrize(
     "key,value", [(-1, 2.0), (slice(1, 4), [1, 2, 3]), ([0, 3], -2)]
 )
-def test_vector_assignment(key, value):
+def test_vector_assignment(key: Any, value: Any) -> None:
     # Arrange
+    """Verify vector assignment."""
     expected = np.zeros(5)
     expected[key] = value
     array = sppy.zeros(5)
@@ -369,8 +401,9 @@ def test_vector_assignment(key, value):
 @pytest.mark.parametrize(
     "values", [[0, 2, 3], [0, -2, -3], [1, 2, 3], [-1, -2, -3], [0, 0, 0]]
 )
-def test_vector_reductions_include_implicit_zeros(operation, values):
+def test_vector_reductions_include_implicit_zeros(operation: str, values: Any) -> None:
     # Arrange
+    """Verify vector reductions include implicit zeros."""
     dense = np.array(values, dtype=np.float64)
     array = sppy.asarray(dense)
     expected = getattr(np, operation)(dense)

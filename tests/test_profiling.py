@@ -1,11 +1,15 @@
 """Benchmark correctness, isolation, metadata, and CLI contracts (not speed thresholds)."""
 
+from __future__ import annotations
+
+import argparse
 import gc
 import json
-from pathlib import Path
 import pstats
 import subprocess
 import sys
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -19,12 +23,14 @@ from profiling.workloads import Fixture, SolveResult
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def options(*arguments):
+def options(*arguments: str) -> argparse.Namespace:
+    """Create small deterministic benchmark options."""
     return parser("test").parse_args(["--size", "7", "--entries", "20", *arguments])
 
 
 @pytest.mark.parametrize("module", ["benchmark", "profile", "workloads"])
-def test_import_has_no_output_or_global_rng_changes(module):
+def test_import_has_no_output_or_global_rng_changes(module: str) -> None:
+    """Verify import has no output or global rng changes."""
     script = f"""
 import numpy as np
 before = np.random.get_state()
@@ -46,7 +52,8 @@ assert before[2:] == after[2:]
 
 
 @pytest.mark.parametrize("module", ["benchmark", "profile"])
-def test_help(module):
+def test_help(module: str) -> None:
+    """Verify help."""
     result = subprocess.run(
         [sys.executable, "-m", f"profiling.{module}", "--help"],
         cwd=ROOT,
@@ -62,8 +69,9 @@ def test_help(module):
 @pytest.mark.parametrize("pattern", ["random", "banded"])
 @pytest.mark.parametrize("operation", OPERATIONS)
 def test_workloads_pass_numeric_validation_and_preserve_inputs(
-    dtype, pattern, operation
-):
+    dtype: str, pattern: str, operation: str
+) -> None:
+    """Verify workloads pass numeric validation and preserve inputs."""
     fixture = Fixture(options("--dtype", dtype, "--pattern", pattern))
     before = fixture.fingerprint()
     with numerical_threads(1):
@@ -79,14 +87,16 @@ def test_workloads_pass_numeric_validation_and_preserve_inputs(
 
 
 @pytest.mark.parametrize("operation", OPERATIONS)
-def test_zero_entry_inputs(operation):
+def test_zero_entry_inputs(operation: str) -> None:
+    """Verify zero entry inputs."""
     fixture = Fixture(options("--entries", "0"))
     with numerical_threads(1):
         for workload in fixture.workloads(operation).values():
             assert workload.check(workload.run())["passed"]
 
 
-def test_fixture_is_reproducible_and_uses_matched_data():
+def test_fixture_is_reproducible_and_uses_matched_data() -> None:
+    """Verify fixture is reproducible and uses matched data."""
     first, second = Fixture(options()), Fixture(options())
     assert first.fingerprint() == second.fingerprint()
     for backend in BACKENDS:
@@ -96,7 +106,8 @@ def test_fixture_is_reproducible_and_uses_matched_data():
     assert Fixture(options("--seed", "22")).fingerprint() != first.fingerprint()
 
 
-def test_validation_rejects_bad_results_and_nonconvergence():
+def test_validation_rejects_bad_results_and_nonconvergence() -> None:
+    """Verify validation rejects bad results and nonconvergence."""
     fixture = Fixture(options())
     with pytest.raises(AssertionError, match="differ"):
         fixture.check_equal(sparse.eye_array(7), fixture.csr)
@@ -108,8 +119,11 @@ def test_validation_rejects_bad_results_and_nonconvergence():
         fixture.check_solution(np.zeros(7), sparse.eye_array(7), np.ones(7))
 
 
-def test_time_batch_restores_gc_after_failure():
-    def fails():
+def test_time_batch_restores_gc_after_failure() -> None:
+    """Verify time batch restores gc after failure."""
+
+    def fails() -> None:
+        """Raise an error to exercise cleanup after a failed benchmark."""
         raise RuntimeError("intentional")
 
     previous = gc.isenabled()
@@ -118,14 +132,16 @@ def test_time_batch_restores_gc_after_failure():
     assert gc.isenabled() == previous
 
 
-def test_thread_context_restores_eigen_settings():
+def test_thread_context_restores_eigen_settings() -> None:
+    """Verify thread context restores eigen settings."""
     previous = sppy.get_num_threads()
     with numerical_threads(1):
         assert sppy.get_num_threads() == 1
     assert sppy.get_num_threads() == previous
 
 
-def test_benchmark_cli_saves_checked_samples_and_summary(tmp_path):
+def test_benchmark_cli_saves_checked_samples_and_summary(tmp_path: Path) -> None:
+    """Verify benchmark cli saves checked samples and summary."""
     output, summary = tmp_path / "report.json", tmp_path / "report.md"
     result = subprocess.run(
         [
@@ -174,7 +190,8 @@ def test_benchmark_cli_saves_checked_samples_and_summary(tmp_path):
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_profile_cli_saves_readable_stats(backend, tmp_path):
+def test_profile_cli_saves_readable_stats(backend: str, tmp_path: Path) -> None:
+    """Verify profile cli saves readable stats."""
     output = tmp_path / "workload.prof"
     result = subprocess.run(
         [
@@ -213,7 +230,8 @@ def test_profile_cli_saves_readable_stats(backend, tmp_path):
         ("--size", str(2**31)),
     ],
 )
-def test_invalid_options_are_cli_errors(argument, value):
+def test_invalid_options_are_cli_errors(argument: Any, value: Any) -> None:
+    """Verify invalid options are cli errors."""
     result = subprocess.run(
         [sys.executable, "-m", "profiling.benchmark", argument, value],
         cwd=ROOT,

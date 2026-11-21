@@ -1,6 +1,10 @@
 """Matrix Market interoperability uses isolated streams and temporary paths."""
 
+from __future__ import annotations
+
 import io
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -11,8 +15,11 @@ from sppy.io import mmread, mmwrite
 
 @pytest.mark.parametrize("dtype", [np.float64, np.int64, np.complex128])
 @pytest.mark.parametrize("use_stream", [False, True])
-def test_roundtrip(dtype, use_stream, order, tmp_path):
+def test_roundtrip(
+    dtype: np.dtype[Any], use_stream: bool, order: str, tmp_path: Path
+) -> None:
     # Arrange
+    """Verify roundtrip."""
     dense = np.array([[0, 2], [-3, 0]], dtype=dtype)
     array = sppy.asarray(dense)
     destination = io.BytesIO() if use_stream else tmp_path / "matrix.mtx"
@@ -29,8 +36,9 @@ def test_roundtrip(dtype, use_stream, order, tmp_path):
     np.testing.assert_array_equal(result.toarray(), dense)
 
 
-def test_roundtrip_preserves_float_precision():
+def test_roundtrip_preserves_float_precision() -> None:
     # Arrange
+    """Verify roundtrip preserves float precision."""
     dense = np.array([[0.0, np.pi], [1e-15, 0.0]])
     array = sppy.asarray(dense)
     stream = io.BytesIO()
@@ -44,8 +52,9 @@ def test_roundtrip_preserves_float_precision():
     np.testing.assert_array_equal(result.toarray(), dense)
 
 
-def test_read_symmetric_file():
+def test_read_symmetric_file() -> None:
     # Arrange
+    """Verify read symmetric file."""
     source = io.BytesIO(
         b"%%MatrixMarket matrix coordinate real symmetric\n% comment\n2 2 2\n1 1 2\n2 1 3\n"
     )
@@ -58,8 +67,9 @@ def test_read_symmetric_file():
     np.testing.assert_array_equal(result.toarray(), expected)
 
 
-def test_read_complex_values():
+def test_read_complex_values() -> None:
     # Arrange
+    """Verify read complex values."""
     source = io.BytesIO(
         b"%%MatrixMarket matrix coordinate complex general\n1 1 1\n1 1 2 3\n"
     )
@@ -71,8 +81,9 @@ def test_read_complex_values():
     np.testing.assert_array_equal(result.toarray(), [[2 + 3j]])
 
 
-def test_write_rejects_vector(tmp_path):
+def test_write_rejects_vector(tmp_path: Path) -> None:
     # Arrange
+    """Verify write rejects vector."""
     array = sppy.ones(3)
 
     # Act / Assert

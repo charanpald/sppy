@@ -1,8 +1,10 @@
 """NumPy-style sparse arrays backed by Eigen."""
 
+from __future__ import annotations
+
+from sppy import _native
 from sppy.sparse_array import SparseArray
-from sppy._native import get_num_threads, set_num_threads, openmp_enabled
-from sppy.util import asarray, diag, eye, rand, ones, zeros
+from sppy.util import asarray, diag, eye, ones, rand, zeros
 from sppy.version import __version__
 
 __all__ = [
@@ -20,8 +22,20 @@ __all__ = [
     "test",
 ]
 
+openmp_enabled: bool = _native.openmp_enabled
 
-def test(*pytest_args):
+
+def get_num_threads() -> int:
+    """Return Eigen's configured numerical thread count."""
+    return _native.get_num_threads()
+
+
+def set_num_threads(n: int) -> None:
+    """Set Eigen's positive thread count; parallel kernels require OpenMP support."""
+    _native.set_num_threads(n)
+
+
+def test(*pytest_args: str) -> int:
     """Run pytest from a source checkout and return its exit status.
 
     Tests are development resources in the top-level tests/ directory; wheels

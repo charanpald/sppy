@@ -1,7 +1,12 @@
 """Contracts at the actual pybind11/Eigen boundary, without a second compiler."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 import pytest
+
 from sppy import _native
 
 
@@ -20,7 +25,8 @@ from sppy import _native
     ],
 )
 @pytest.mark.parametrize("order", ["C", "F"])
-def test_native_assembly_and_compressed_storage(name, order):
+def test_native_assembly_and_compressed_storage(name: str, order: str) -> None:
+    """Verify native assembly and compressed storage."""
     matrix = getattr(_native, f"{name}_{order}")(2, 3)
     matrix.assemble(
         np.array([0, 0, 1], np.int32),
@@ -46,7 +52,10 @@ def test_native_assembly_and_compressed_storage(name, order):
         ([0], [0], [1.0, 2.0]),
     ],
 )
-def test_native_boundary_rejects_invalid_coordinates(rows, columns, values):
+def test_native_boundary_rejects_invalid_coordinates(
+    rows: Any, columns: int, values: Any
+) -> None:
+    """Verify native boundary rejects invalid coordinates."""
     matrix = _native.float64_F(2, 2)
     with pytest.raises(ValueError):
         matrix.assemble(

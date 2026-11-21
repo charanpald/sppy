@@ -1,12 +1,16 @@
 """Numerics for direct sorted products, SIMD panels, and relative tolerances."""
 
+from __future__ import annotations
+
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
+from numpy.typing import DTypeLike, NDArray
 from scipy.sparse import csr_array
 
 import sppy
@@ -17,7 +21,10 @@ from sppy.linalg import ComputationInfo, bicgstab
 @pytest.mark.parametrize(
     "width", [63, 64, 65, 4095, 4096, 4097, 262145, 1048576, 1048577]
 )
-def test_product_word_boundaries_reset_and_keep_structural_zeros(width, dtype, order):
+def test_product_word_boundaries_reset_and_keep_structural_zeros(
+    width: int, dtype: np.dtype[Any], order: str
+) -> None:
+    """Verify product word boundaries reset and keep structural zeros."""
     targets = sorted(
         {v for v in [0, 1, 63, 64, 4095, 4096, 262143, 262144, width - 1] if v < width}
     )
@@ -74,12 +81,18 @@ def test_product_word_boundaries_reset_and_keep_structural_zeros(width, dtype, o
 @pytest.mark.parametrize("scaled", [False, True])
 @pytest.mark.parametrize("padding", [0, 3])
 def test_panel_products_and_fallbacks_preserve_accumulation(
-    value_dtype, shape, adjoint, scaled, padding
-):
+    value_dtype: DTypeLike,
+    shape: tuple[int, ...],
+    adjoint: bool,
+    scaled: bool,
+    padding: int,
+) -> None:
+    """Verify panel products and fallbacks preserve accumulation."""
     rng = np.random.default_rng(12)
     m, n, k = shape
 
-    def values(shape):
+    def values(shape: tuple[int, ...]) -> NDArray[Any]:
+        """Construct deterministic real or complex input values."""
         a = rng.normal(size=shape).astype(value_dtype)
         if np.dtype(value_dtype).kind == "c":
             a += 0.3j * a
@@ -102,7 +115,10 @@ def test_panel_products_and_fallbacks_preserve_accumulation(
     "value_dtype", [np.float32, np.float64, np.complex64, np.complex128]
 )
 @pytest.mark.parametrize("scale", [1e-12, 1.0, 1e12])
-def test_bicgstab_relative_tolerance_matches_rhs_scale(value_dtype, scale, order):
+def test_bicgstab_relative_tolerance_matches_rhs_scale(
+    value_dtype: DTypeLike, scale: Any, order: str
+) -> None:
+    """Verify bicgstab relative tolerance matches rhs scale."""
     rng = np.random.default_rng(91)
     dense = rng.normal(size=(31, 31)).astype(value_dtype)
     dense[rng.random(dense.shape) < 0.85] = 0
@@ -127,7 +143,8 @@ def test_bicgstab_relative_tolerance_matches_rhs_scale(value_dtype, scale, order
     )
 
 
-def test_bicgstab_each_rhs_has_its_own_absolute_threshold(order):
+def test_bicgstab_each_rhs_has_its_own_absolute_threshold(order: str) -> None:
+    """Verify bicgstab each rhs has its own absolute threshold."""
     rng = np.random.default_rng(33)
     dense = rng.normal(size=(17, 17)) + 10 * np.eye(17)
     scales = np.array([1e-12, 1.0, 1e12])
@@ -142,7 +159,8 @@ def test_bicgstab_each_rhs_has_its_own_absolute_threshold(order):
     assert np.all(errors < 3e-9)
 
 
-def test_bicgstab_iteration_limit_uses_relative_status(order):
+def test_bicgstab_iteration_limit_uses_relative_status(order: str) -> None:
+    """Verify bicgstab iteration limit uses relative status."""
     rng = np.random.default_rng(31)
     dense = rng.normal(size=(17, 17)) + 10 * np.eye(17)
     rhs = rng.normal(size=17) * 1e12
@@ -151,14 +169,16 @@ def test_bicgstab_iteration_limit_uses_relative_status(order):
     assert result.error > 1e-9
 
 
-def test_bicgstab_zero_rhs_reports_zero_work(order):
+def test_bicgstab_zero_rhs_reports_zero_work(order: str) -> None:
+    """Verify bicgstab zero rhs reports zero work."""
     result = bicgstab(sppy.eye(5, order=order), np.zeros(5), x0=np.ones(5))
     np.testing.assert_array_equal(result.solution, np.zeros(5))
     assert result.info == ComputationInfo.SUCCESS
     assert result.iterations == result.error == 0
 
 
-def test_runtime_simd_opt_out_uses_numerically_equivalent_fallback():
+def test_runtime_simd_opt_out_uses_numerically_equivalent_fallback() -> None:
+    """Verify runtime simd opt out uses numerically equivalent fallback."""
     script = """
 import numpy as np
 import sppy

@@ -1,11 +1,22 @@
 """Matrix Market interoperability using SciPy's maintained reader and writer."""
 
+from __future__ import annotations
+
+from os import PathLike
+from typing import BinaryIO
+
 import numpy as np
 
 from sppy import SparseArray
 
 
-def mmwrite(filename, A, comment="", field=None, precision=None):
+def mmwrite(
+    filename: str | PathLike[str] | BinaryIO,
+    A: SparseArray,
+    comment: str = "",
+    field: str | None = None,
+    precision: int | None = None,
+) -> None:
     """Write a two-dimensional sparse array to a Matrix Market file.
 
     SciPy is required. Paths and open binary streams are accepted.
@@ -24,7 +35,9 @@ def mmwrite(filename, A, comment="", field=None, precision=None):
     )
 
 
-def mmread(filename, *, order="C"):
+def mmread(
+    filename: str | PathLike[str] | BinaryIO, *, order: str = "C"
+) -> SparseArray:
     """Read a Matrix Market file into a sparse array.
 
     SciPy is required. Symmetric files, comments, and compressed files are

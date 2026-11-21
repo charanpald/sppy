@@ -1,11 +1,18 @@
 """Sparse norms and randomized singular-value decomposition."""
 
+from __future__ import annotations
+
 import gc
+from typing import Any
+
 import numpy
+from numpy.typing import ArrayLike, NDArray
+
 from sppy.linalg.general_linear_operator import GeneralLinearOperator
+from sppy.sparse_array import SparseArray
 
 
-def norm(a, ord=None):
+def norm(a: SparseArray, ord: int | float | str | None = None) -> float:
     """Vector p-norm or matrix Frobenius/1/infinity norm, without densifying."""
     if a.ndim == 1:
         values = a.values()
@@ -20,6 +27,10 @@ def norm(a, ord=None):
         return numpy.linalg.norm(values, ord=ord)
     if ord in (None, "fro"):
         return a._array.norm()
+    if a.dtype.kind == "i":
+        # Matrix norms accumulate magnitudes in floating point, as NumPy does.
+        # Taking abs first would overflow at the minimum signed integer.
+        a = a.astype(numpy.float64)
     if ord == 1:
         return abs(a).sum(axis=0).max(initial=0)
     if ord == numpy.inf:
@@ -27,7 +38,15 @@ def norm(a, ord=None):
     raise ValueError("Supported matrix norms are fro, 1, and infinity")
 
 
-def rsvd(A, k, p=10, q=2, omega=None, *, rng=None):
+def rsvd(
+    A: SparseArray | NDArray[Any] | GeneralLinearOperator,
+    k: int,
+    p: int = 10,
+    q: int = 2,
+    omega: ArrayLike | None = None,
+    *,
+    rng: numpy.random.Generator | int | None = None,
+) -> tuple[NDArray[Any], NDArray[Any], NDArray[Any]]:
     """
     Compute the randomised SVD using the algorithm on page 9 of Halko et al.,
     Finding Structure with randomness: stochastic algorithms for constructing

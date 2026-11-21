@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Fix signed integer overflow in zero checks, approximate comparisons, and matrix
+  1/infinity norms.
+- Match NumPy for nonfinite scalar multiplication and complex extrema with
+  infinite real components.
+- Validate transpose axes and diagonal offsets; normalize mixed positive and
+  negative reduction axes and reject duplicate axes.
+- Support dense inputs in parallel linear operators and integer seeds in `rand`.
+- Add Python docstrings and type annotations, a `py.typed` marker, lint enforcement,
+  and repository guidance in `AGENTS.md`.
+
 ## 1.0.0
 
 - Generate sorted sparse products with hierarchical occupancy bits, avoiding sorting and conversion copies; fuse compressed-index copying with validation.

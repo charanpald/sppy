@@ -1,8 +1,20 @@
 """One- and two-dimensional arrays with owned Eigen sparse storage."""
 
+from __future__ import annotations
+
 import operator
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING, Any
+
 import numpy
+from numpy.typing import ArrayLike, DTypeLike, NDArray
+
 from sppy import _native
+from sppy._typing import Scalar
+
+if TYPE_CHECKING:
+    from scipy.sparse import csc_matrix, csr_matrix
+
 
 _DTYPES = {
     numpy.dtype(name): name
@@ -19,7 +31,8 @@ _DTYPES = {
 }
 
 
-def _shape(shape):
+def _shape(shape: int | tuple[int, ...]) -> tuple[int, ...]:
+    """Validate and normalize a sparse vector or matrix shape."""
     if isinstance(shape, (int, numpy.integer)):
         shape = (operator.index(shape),)
     if not isinstance(shape, tuple) or len(shape) not in {1, 2}:
@@ -49,7 +62,14 @@ class SparseArray:
 
     __array_priority__ = 1000
 
-    def __init__(self, data, dtype=None, *, order="C"):
+    def __init__(
+        self,
+        data: ArrayLike | SparseArray | int | tuple[int, ...],
+        dtype: DTypeLike | None = None,
+        *,
+        order: str = "C",
+    ) -> None:
+        """Create owned sparse storage from a shape, dense data, or sparse input."""
         if order not in {"C", "F"}:
             raise ValueError("order must be 'C' or 'F'")
         source = data
@@ -97,70 +117,88 @@ class SparseArray:
             self._put_coordinates(source[indices], indices)
 
     @classmethod
-    def _from_backend(cls, backend, dtype, order, shape=None):
+    def _from_backend(
+        cls,
+        backend: Any,
+        dtype: DTypeLike | None,
+        order: str,
+        shape: tuple[int, ...] | None = None,
+    ) -> SparseArray:
+        """Wrap owned native storage with its logical shape and dtype."""
         result = object.__new__(cls)
         result._array, result._dtype, result._order = backend, numpy.dtype(dtype), order
         result._shape = tuple(backend.shape) if shape is None else tuple(shape)
         return result
 
-    def _wrap_backend(self, backend, shape=None):
+    def _wrap_backend(
+        self, backend: Any, shape: tuple[int, ...] | None = None
+    ) -> SparseArray:
+        """Wrap native storage using this array's dtype and order."""
         return self._from_backend(backend, self.dtype, self.order, shape)
 
     @property
-    def dtype(self):
+    def dtype(self) -> numpy.dtype[Any]:
         """Stored NumPy scalar dtype."""
         return self._dtype
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, ...]:
         """Logical vector or matrix dimensions."""
         return self._shape
 
     @property
-    def ndim(self):
+    def ndim(self) -> int:
+        """Number of logical array dimensions."""
         return len(self.shape)
 
     @property
-    def size(self):
+    def size(self) -> int:
+        """Number of logical entries, including implicit zeros."""
         return self.shape[0] if self.ndim == 1 else self.shape[0] * self.shape[1]
 
     @property
-    def order(self):
+    def order(self) -> str:
         """'C' for row storage, 'F' for column storage."""
         return self._order
 
     @property
-    def nnz(self):
+    def nnz(self) -> int:
         """Number of stored entries, including explicit zeros."""
         return self._array.nnz
 
     @property
-    def is_compressed(self):
+    def is_compressed(self) -> bool:
+        """Whether storage uses compressed sparse buffers."""
         return self._array.is_compressed
 
     @property
-    def inner_size(self):
+    def inner_size(self) -> int:
+        """Length of each inner storage vector."""
         return self._array.inner_size
 
     @property
-    def outer_size(self):
+    def outer_size(self) -> int:
+        """Number of outer storage vectors."""
         return self._array.outer_size
 
-    def stored_indices(self):
+    def stored_indices(self) -> tuple[NDArray[numpy.int32], ...]:
         """Coordinates in storage order, aligned with :meth:`values`, including zeros."""
         coordinates = self._array.coordinates()
         return coordinates if self.ndim == 2 else coordinates[:1]
 
-    def nonzero(self):
+    def nonzero(self) -> tuple[NDArray[numpy.int32], ...]:
         """Coordinates of nonzero values, excluding explicitly stored zeros."""
         mask = self.values() != 0
         return tuple(index[mask] for index in self.stored_indices())
 
-    def values(self):
+    def values(self) -> NDArray[Any]:
         """Return a copy of stored values aligned with :meth:`stored_indices`."""
         return self._array.values()
 
-    def _put_coordinates(self, values, coordinates):
+    def _put_coordinates(
+        self, values: ArrayLike, coordinates: tuple[ArrayLike, ...]
+    ) -> None:
+        """Replace storage with coordinates, summing duplicate entries."""
         indices = tuple(numpy.asarray(i) for i in coordinates)
         if len(indices) != self.ndim or any(i.ndim != 1 for i in indices):
             raise ValueError("Expected one coordinate vector per axis")
@@ -183,8 +221,11 @@ class SparseArray:
         )
         self._array.assemble(rows, columns, numpy.ascontiguousarray(values))
 
-    def _put_assignment(self, values, coordinates):
+    def _put_assignment(
+        self, values: ArrayLike, coordinates: tuple[ArrayLike, ...]
+    ) -> None:
         # Assignment has last-write-wins semantics; assembly sums duplicates.
+        """Assign coordinates with last-write-wins semantics."""
         rows = numpy.ascontiguousarray(coordinates[0], dtype=numpy.int32)
         columns = (
             numpy.ascontiguousarray(coordinates[1], dtype=numpy.int32)
@@ -195,7 +236,14 @@ class SparseArray:
             rows, columns, numpy.ascontiguousarray(values, dtype=self.dtype)
         )
 
-    def put(self, data, row_indices, column_indices=None, *, init=False):
+    def put(
+        self,
+        data: ArrayLike | SparseArray | int | tuple[int, ...],
+        row_indices: ArrayLike,
+        column_indices: ArrayLike | None = None,
+        *,
+        init: bool = False,
+    ) -> None:
         """Assign paired coordinates; init=True replaces storage and sums duplicates."""
         indices = (numpy.asarray(row_indices),)
         if self.ndim == 2:
@@ -225,7 +273,16 @@ class SparseArray:
             self._put_assignment(values, indices)
 
     @classmethod
-    def from_triplets(cls, shape, rows, columns, values, *, dtype=None, order="C"):
+    def from_triplets(
+        cls,
+        shape: int | tuple[int, ...],
+        rows: ArrayLike,
+        columns: ArrayLike,
+        values: ArrayLike,
+        *,
+        dtype: DTypeLike | None = None,
+        order: str = "C",
+    ) -> SparseArray:
         """Assemble a matrix from unsorted coordinates; duplicate entries are summed."""
         values = numpy.asarray(values, dtype=dtype)
         result = cls(_shape(shape), dtype=values.dtype, order=order)
@@ -235,7 +292,16 @@ class SparseArray:
         return result
 
     @classmethod
-    def from_compressed(cls, shape, values, indices, indptr, *, order="C", dtype=None):
+    def from_compressed(
+        cls,
+        shape: int | tuple[int, ...],
+        values: ArrayLike,
+        indices: ArrayLike,
+        indptr: ArrayLike,
+        *,
+        order: str = "C",
+        dtype: DTypeLike | None = None,
+    ) -> SparseArray:
         """Copy CSR (C) or CSC (F) arrays, validating pointer bounds and indices."""
         shape = _shape(shape)
         if len(shape) != 2 or order not in {"C", "F"}:
@@ -288,19 +354,21 @@ class SparseArray:
             shape,
         )
 
-    def compressed_arrays(self):
+    def compressed_arrays(
+        self,
+    ) -> tuple[NDArray[Any], NDArray[numpy.int32], NDArray[numpy.int32]]:
         """Return independent (values, indices, indptr) copies in CSR/CSC order."""
         if self.ndim != 2:
             raise ValueError("Compressed arrays require a matrix")
         return self._array.compressed_arrays()
 
-    def toarray(self):
+    def toarray(self) -> NDArray[Any]:
         """Allocate a dense array, preserving dtype."""
         result = numpy.zeros(self.shape, dtype=self.dtype)
         result[self.stored_indices()] = self.values()
         return result
 
-    def to_scipy_csr(self):
+    def to_scipy_csr(self) -> csr_matrix:
         """Copy into a SciPy CSR matrix (SciPy is optional)."""
         from scipy.sparse import csr_matrix
 
@@ -311,7 +379,7 @@ class SparseArray:
         ).compressed_arrays()
         return csr_matrix((data, indices, indptr), shape=self.shape)
 
-    def to_scipy_csc(self):
+    def to_scipy_csc(self) -> csc_matrix:
         """Copy into a SciPy CSC matrix (SciPy is optional)."""
         from scipy.sparse import csc_matrix
 
@@ -322,13 +390,20 @@ class SparseArray:
         ).compressed_arrays()
         return csc_matrix((data, indices, indptr), shape=self.shape)
 
-    def copy(self, order="K"):
+    def copy(self, order: str = "K") -> SparseArray:
         """Independent copy, optionally changing storage order."""
         if order not in {"K", "C", "F"}:
             raise ValueError("Invalid order")
         return self.astype(self.dtype, order=order, copy=True)
 
-    def astype(self, dtype, order="K", casting="unsafe", subok=True, copy=True):
+    def astype(
+        self,
+        dtype: DTypeLike | None,
+        order: str = "K",
+        casting: str = "unsafe",
+        subok: bool = True,
+        copy: bool | None = True,
+    ) -> SparseArray:
         """Cast stored values without allocating a dense array."""
         dtype = numpy.dtype(dtype)
         if not numpy.can_cast(self.dtype, dtype, casting=casting):
@@ -356,7 +431,10 @@ class SparseArray:
         )
         return result
 
-    def _binary_sparse(self, other, operation):
+    def _binary_sparse(
+        self, other: SparseArray | ArrayLike, operation: str
+    ) -> SparseArray:
+        """Apply a native coefficient operation to equal-shaped operands."""
         if numpy.isscalar(other):
             if other == 0:
                 return self.copy()
@@ -382,30 +460,37 @@ class SparseArray:
             getattr(left._array, operation)(right._array), self.shape
         )
 
-    def __add__(self, other):
+    def __add__(self, other: SparseArray | ArrayLike) -> SparseArray:
+        """Add equal-shaped arrays, or copy when adding zero."""
         return self._binary_sparse(other, "add")
 
-    def __sub__(self, other):
+    def __sub__(self, other: SparseArray | ArrayLike) -> SparseArray:
+        """Subtract equal-shaped arrays, or copy when subtracting zero."""
         return self._binary_sparse(other, "subtract")
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: SparseArray | ArrayLike) -> SparseArray:
+        """Subtract this array from the left operand."""
         return -self + other
 
     __radd__ = __add__
 
-    def __neg__(self):
+    def __neg__(self) -> SparseArray:
+        """Return the elementwise additive inverse."""
         return self * -1
 
-    def __abs__(self):
+    def __abs__(self) -> SparseArray:
+        """Return elementwise magnitudes."""
         return self._map_values(numpy.abs)
 
-    def multiply(self, other):
+    def multiply(self, other: SparseArray | ArrayLike) -> SparseArray:
         """Elementwise sparse multiplication, with matching shapes."""
         if numpy.isscalar(other):
             return self * other
         return self._binary_sparse(other, "multiply")
 
-    def dot(self, other):
+    def dot(
+        self, other: SparseArray | ArrayLike
+    ) -> SparseArray | NDArray[Any] | Scalar:
         """Matrix/vector product, equivalent to @ (without conjugation)."""
         if isinstance(other, SparseArray):
             if self.shape[-1] != other.shape[0]:
@@ -456,17 +541,20 @@ class SparseArray:
 
     __matmul__ = dot
 
-    def __rmatmul__(self, other):
+    def __rmatmul__(self, other: SparseArray | ArrayLike) -> NDArray[Any] | Scalar:
+        """Multiply a dense left operand by this array."""
         dense = numpy.asarray(other)
         if dense.ndim == 1:
             return self.T.dot(dense)
         return self.T.dot(dense.T).T
 
-    def parallel_dot(self, other):
+    def parallel_dot(
+        self, other: SparseArray | ArrayLike
+    ) -> SparseArray | NDArray[Any] | Scalar:
         """Dense product using Eigen's configured thread count and optional OpenMP."""
         return self.dot(other)
 
-    def transpose(self, *axes):
+    def transpose(self, *axes: int | Sequence[int]) -> SparseArray:
         """Return a sparse copy with axes reversed."""
         if len(axes) == 1 and isinstance(axes[0], (tuple, list)):
             axes = tuple(axes[0])
@@ -476,6 +564,8 @@ class SparseArray:
         ):
             raise ValueError("Invalid transpose axes")
         axes = tuple(a % self.ndim for a in axes)
+        if axes and (len(axes) != self.ndim or len(set(axes)) != self.ndim):
+            raise ValueError("Invalid transpose axes")
         if axes == tuple(range(self.ndim)) or self.ndim == 1:
             return self.copy()
         if axes and axes != tuple(reversed(range(self.ndim))):
@@ -484,11 +574,11 @@ class SparseArray:
 
     T = property(transpose)
 
-    def conjugate(self):
+    def conjugate(self) -> SparseArray:
         """Conjugate stored values without changing sparsity."""
         return self._map_values(numpy.conjugate)
 
-    def adjoint(self):
+    def adjoint(self) -> SparseArray:
         """Conjugate transpose (H)."""
         return (
             self.conjugate()
@@ -499,14 +589,16 @@ class SparseArray:
     H = property(adjoint)
 
     @property
-    def real(self):
+    def real(self) -> SparseArray:
+        """Real components in independent sparse storage."""
         return self._map_values(numpy.real)
 
     @property
-    def imag(self):
+    def imag(self) -> SparseArray:
+        """Imaginary components in independent sparse storage."""
         return self._map_values(numpy.imag)
 
-    def reserve(self, n):
+    def reserve(self, n: int | ArrayLike) -> None:
         """Reserve a total capacity, or additional capacity per outer vector."""
         if numpy.ndim(n) == 0:
             self._array.reserve(operator.index(n))
@@ -520,23 +612,23 @@ class SparseArray:
                 raise ValueError("Invalid capacities")
             self._array.reserve_per_outer(numpy.ascontiguousarray(n, dtype=numpy.int32))
 
-    def compress(self):
+    def compress(self) -> None:
         """Convert to compressed storage."""
         self._array.compress()
 
-    def uncompress(self):
+    def uncompress(self) -> None:
         """Enable uncompressed insertion storage."""
         self._array.uncompress()
 
-    def squeeze(self):
+    def squeeze(self) -> None:
         """Compress storage and release unused entry capacity."""
         self._array.squeeze()
 
-    def set_zero(self):
+    def set_zero(self) -> None:
         """Remove all entries while preserving shape."""
         self._array.set_zero()
 
-    def fill(self, value):
+    def fill(self, value: Scalar) -> None:
         """Fill every position; nonzero values store the entire logical array."""
         if value == 0:
             self.set_zero()
@@ -546,11 +638,11 @@ class SparseArray:
                 numpy.full(self.size, value, dtype=self.dtype), indices
             )
 
-    def ones(self):
+    def ones(self) -> None:
         """Fill every position with one."""
         self.fill(1)
 
-    def resize(self, shape, *, preserve=False):
+    def resize(self, shape: int | tuple[int, ...], *, preserve: bool = False) -> None:
         """Resize in place; preserve=True retains entries within new bounds."""
         shape = _shape(shape)
         if len(shape) != self.ndim:
@@ -558,30 +650,35 @@ class SparseArray:
         self._array.resize(shape[0], shape[1] if self.ndim == 2 else 1, preserve)
         self._shape = shape
 
-    def prune(self, tolerance=1e-12):
+    def prune(self, tolerance: float = 1e-12) -> None:
         """Remove entries whose absolute value is at most tolerance, in place."""
         self._array.prune(tolerance)
 
-    def eliminate_zeros(self):
+    def eliminate_zeros(self) -> None:
         """Remove only exact stored zeros, in place."""
         self.prune(0)
 
-    def triangular(self, *, lower=True, unit_diagonal=False):
+    def triangular(
+        self, *, lower: bool = True, unit_diagonal: bool = False
+    ) -> SparseArray:
         """Materialize a sparse lower/upper triangular copy."""
         if self.ndim != 2:
             raise ValueError("Triangular operations require a matrix")
         return self._wrap_backend(self._array.triangular(lower, unit_diagonal))
 
-    def selfadjoint(self, *, lower=True):
+    def selfadjoint(self, *, lower: bool = True) -> SparseArray:
         """Reconstruct a Hermitian matrix from its lower or upper triangle."""
         if self.ndim != 2:
             raise ValueError("Self-adjoint operations require a matrix")
         return self._wrap_backend(self._array.selfadjoint(lower))
 
-    def permuted(self, rows=None, columns=None):
+    def permuted(
+        self, rows: ArrayLike | None = None, columns: ArrayLike | None = None
+    ) -> SparseArray:
         """Gather rows/columns in permutation order; vectors accept only rows."""
 
-        def check(values, size):
+        def check(values: ArrayLike | None, size: int) -> NDArray[Any]:
+            """Validate a gather permutation, using the identity when omitted."""
             if values is None:
                 return numpy.arange(size)
             values = numpy.asarray(values)
@@ -600,30 +697,34 @@ class SparseArray:
             return self[rows]
         return self.subarray(rows, check(columns, self.shape[1]))
 
-    def row_indices(self, row):
+    def row_indices(self, row: int) -> NDArray[numpy.int32]:
         """Stored column indices in a row."""
         if self.ndim != 2 or not 0 <= row < self.shape[0]:
             raise ValueError("Row out of bounds")
         rows, columns = self.stored_indices()
         return numpy.sort(columns[rows == row])
 
-    def column_indices(self, column):
+    def column_indices(self, column: int) -> NDArray[numpy.int32]:
         """Stored row indices in a column."""
         if self.ndim != 2 or not 0 <= column < self.shape[1]:
             raise ValueError("Column out of bounds")
         rows, columns = self.stored_indices()
         return numpy.sort(rows[columns == column])
 
-    def nonzero_rows_list(self):
+    def nonzero_rows_list(self) -> list[NDArray[numpy.int32]]:
+        """Return stored column indices for each matrix row."""
         return [self.row_indices(i) for i in range(self.shape[0])]
 
-    def nonzero_rows_ptr(self):
+    def nonzero_rows_ptr(self) -> tuple[NDArray[numpy.int32], NDArray[numpy.int32]]:
+        """Return independent CSR row pointers and stored column indices."""
         _, indices, indptr = self.astype(
             self.dtype, order="C", copy=False
         ).compressed_arrays()
         return indptr, indices
 
-    def submatrix(self, start_row, start_column, rows, columns):
+    def submatrix(
+        self, start_row: int, start_column: int, rows: int, columns: int
+    ) -> SparseArray:
         """Copy a rectangular block."""
         if (
             self.ndim != 2
@@ -634,13 +735,14 @@ class SparseArray:
             raise ValueError("Invalid block bounds")
         return self[start_row : start_row + rows, start_column : start_column + columns]
 
-    def __truediv__(self, scalar):
+    def __truediv__(self, scalar: Scalar) -> SparseArray:
         """Divide by a scalar; division by zero also transforms implicit zeros."""
         if not numpy.isscalar(scalar):
             raise ValueError("Sparse division requires a scalar")
         return self._map_values(lambda values: numpy.true_divide(values, scalar))
 
-    def _inplace(self, result):
+    def _inplace(self, result: SparseArray) -> SparseArray:
+        """Replace storage after enforcing shape and same-kind casting."""
         if result.shape != self.shape:
             raise ValueError("In-place operations cannot change shape")
         result = result.astype(
@@ -649,19 +751,23 @@ class SparseArray:
         self._array = result._array
         return self
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: SparseArray | ArrayLike) -> SparseArray:
+        """Add in place with same-kind casting."""
         return self._inplace(self + other)
 
-    def __isub__(self, other):
+    def __isub__(self, other: SparseArray | ArrayLike) -> SparseArray:
+        """Subtract in place with same-kind casting."""
         return self._inplace(self - other)
 
-    def __imul__(self, other):
+    def __imul__(self, other: SparseArray | ArrayLike) -> SparseArray:
+        """Multiply elementwise in place with same-kind casting."""
         return self._inplace(self * other)
 
-    def __itruediv__(self, other):
+    def __itruediv__(self, other: SparseArray | ArrayLike) -> SparseArray:
+        """Divide in place with same-kind casting."""
         return self._inplace(self / other)
 
-    def vdot(self, other):
+    def vdot(self, other: SparseArray | ArrayLike) -> Scalar:
         """Conjugating inner product of equally sized sparse vectors."""
         if not isinstance(other, SparseArray):
             other = SparseArray(numpy.asarray(other))
@@ -669,7 +775,7 @@ class SparseArray:
             raise ValueError("vdot requires equal-length vectors")
         return self.conjugate().dot(other)
 
-    def outer(self, other):
+    def outer(self, other: SparseArray | ArrayLike) -> SparseArray:
         """Sparse vector outer product without conjugation."""
         if not isinstance(other, SparseArray):
             other = SparseArray(numpy.asarray(other))
@@ -680,7 +786,7 @@ class SparseArray:
         backend = left._array.matmul(right._array.transpose())
         return self._from_backend(backend, dtype, "F").copy(order=self.order)
 
-    def lp_norm(self, p=2):
+    def lp_norm(self, p: int = 2) -> float:
         """Entrywise p-norm for p >= 1, including the infinity norm."""
         if p < 1 or numpy.isnan(p):
             raise ValueError("p must be at least one")
@@ -691,7 +797,7 @@ class SparseArray:
             return values.max(initial=0)
         return numpy.sum(values**p) ** (1 / p)
 
-    def normalize(self):
+    def normalize(self) -> SparseArray:
         """Normalize a floating-point or complex vector in place."""
         if self.dtype.kind not in "fc":
             raise TypeError(
@@ -699,7 +805,7 @@ class SparseArray:
             )
         return self._inplace(self.normalized())
 
-    def set_identity(self):
+    def set_identity(self) -> None:
         """Replace a matrix with an identity of the same (possibly rectangular) shape."""
         if self.ndim != 2:
             raise ValueError("Identity requires a matrix")
@@ -708,8 +814,9 @@ class SparseArray:
             numpy.ones(len(indices), dtype=self.dtype), (indices, indices)
         )
 
-    def set_diagonal(self, values, offset=0):
+    def set_diagonal(self, values: ArrayLike, offset: int = 0) -> None:
         """Assign a diagonal without allocating the full matrix."""
+        offset = operator.index(offset)
         if self.ndim != 2:
             raise ValueError("Diagonal assignment requires a matrix")
         length = max(
@@ -719,7 +826,7 @@ class SparseArray:
         columns = numpy.arange(length) + max(offset, 0)
         self[rows, columns] = values
 
-    def swap(self, other):
+    def swap(self, other: SparseArray) -> None:
         """Exchange owned storage in constant time; dtype/order/dimensionality must match."""
         if (
             not isinstance(other, SparseArray)
@@ -731,14 +838,16 @@ class SparseArray:
         self._array, other._array = other._array, self._array
         self._shape, other._shape = other._shape, self._shape
 
-    def insert_from_triplets(self, rows, columns, values):
+    def insert_from_triplets(
+        self, rows: ArrayLike, columns: ArrayLike, values: ArrayLike
+    ) -> None:
         """Add triplets to existing entries, summing duplicate contributions."""
         addition = SparseArray.from_triplets(
             self.shape, rows, columns, values, dtype=self.dtype, order=self.order
         )
         self._array = self._array.add(addition._array)
 
-    def scale_rows(self, values):
+    def scale_rows(self, values: ArrayLike) -> SparseArray:
         """Return diag(values) @ self without forming the diagonal matrix."""
         if self.ndim != 2:
             raise ValueError("Row scaling requires a matrix")
@@ -751,31 +860,39 @@ class SparseArray:
         result._put_coordinates(data, indices)
         return result
 
-    def scale_columns(self, values):
+    def scale_columns(self, values: ArrayLike) -> SparseArray:
         """Return self @ diag(values) without forming the diagonal matrix."""
         return self.T.scale_rows(values).T
 
-    def unary(self, function):
+    def unary(self, function: Callable[[NDArray[Any]], ArrayLike]) -> SparseArray:
         """Map a NumPy-compatible function, including implicit zeros.
 
         If function(0) is nonzero, every logical position must be stored.
         """
         return self._map_values(function)
 
-    def abs2(self):
+    def abs2(self) -> SparseArray:
         """Squared magnitudes, with real output for complex input."""
         return self._map_values(lambda x: numpy.abs(x) ** 2)
 
-    def sqrt(self):
+    def sqrt(self) -> SparseArray:
+        """Apply square root to every logical entry."""
         return self._map_values(numpy.sqrt)
 
-    def exp(self):
+    def exp(self) -> SparseArray:
+        """Apply exponential to every logical entry."""
         return self._map_values(numpy.exp)
 
-    def log(self):
+    def log(self) -> SparseArray:
+        """Apply natural logarithm to every logical entry."""
         return self._map_values(numpy.log)
 
-    def _cwise_extreme(self, other, function):
+    def _cwise_extreme(
+        self,
+        other: SparseArray | ArrayLike,
+        function: Callable[[NDArray[Any]], ArrayLike],
+    ) -> SparseArray:
+        """Combine stored coordinates using an elementwise extremum."""
         if not isinstance(other, SparseArray):
             other = SparseArray(numpy.asarray(other))
         if other.shape != self.shape:
@@ -797,57 +914,73 @@ class SparseArray:
         result.eliminate_zeros()
         return result
 
-    def minimum(self, other):
+    def minimum(self, other: SparseArray | ArrayLike) -> SparseArray:
         """Elementwise minimum, including implicit zeros."""
         return self._cwise_extreme(other, numpy.minimum)
 
-    def maximum(self, other):
+    def maximum(self, other: SparseArray | ArrayLike) -> SparseArray:
         """Elementwise maximum, including implicit zeros."""
         return self._cwise_extreme(other, numpy.maximum)
 
-    def squared_norm(self):
+    def squared_norm(self) -> float:
         """Squared Euclidean/Frobenius norm, accumulated in floating point."""
         values = self.values().astype(numpy.result_type(self.dtype, numpy.float64))
         return numpy.vdot(values, values).real
 
-    def normalized(self):
+    def normalized(self) -> SparseArray:
         """Return a vector divided by its Euclidean norm; zero vectors remain zero."""
         if self.ndim != 1:
             raise ValueError("Normalization requires a vector")
         length = numpy.sqrt(self.squared_norm())
         return self.copy() if length == 0 else self * (1 / length)
 
-    def is_approx(self, other, *, rtol=1e-5, atol=1e-8):
+    def is_approx(
+        self, other: SparseArray | ArrayLike, *, rtol: float = 1e-5, atol: float = 1e-8
+    ) -> bool:
         """Compare equal-shaped arrays using a Frobenius error bound, without densifying."""
         if not isinstance(other, SparseArray) or other.shape != self.shape:
             return False
         if rtol < 0 or atol < 0 or not numpy.isfinite([rtol, atol]).all():
             raise ValueError("Tolerances must be nonnegative and finite")
-        return numpy.sqrt((self - other).squared_norm()) <= atol + rtol * numpy.sqrt(
-            other.squared_norm()
+        dtype = numpy.result_type(self.dtype, other.dtype, numpy.float64)
+        difference = self.astype(dtype, copy=False) - other.astype(dtype, copy=False)
+        return bool(
+            numpy.sqrt(difference.squared_norm())
+            <= atol + rtol * numpy.sqrt(other.squared_norm())
         )
 
-    def is_zero(self, tolerance=0):
+    def is_zero(self, tolerance: float = 0) -> bool:
         """Whether all stored values are within an absolute tolerance of zero."""
         if not numpy.isfinite(tolerance) or tolerance < 0:
             raise ValueError("Invalid tolerance")
-        return bool((numpy.abs(self.values()) <= tolerance).all())
+        values = self.values()
+        if self.dtype.kind == "i":
+            # abs(min_signed_integer) overflows in fixed-width integer dtypes.
+            return bool(((values >= -tolerance) & (values <= tolerance)).all())
+        return bool((numpy.abs(values) <= tolerance).all())
 
-    def __getstate__(self):
+    def __getstate__(self) -> tuple[Any, ...]:
+        """Export owned coordinates and values for serialization."""
         return self.shape, self.dtype, self.order, self.stored_indices(), self.values()
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: tuple[Any, ...]) -> None:
+        """Restore owned storage from serialized coordinates and values."""
         shape, dtype, order, indices, values = state
         self.__init__(shape, dtype=dtype, order=order)
         self._put_coordinates(values, indices)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Return a concise representation of array metadata."""
         return f"SparseArray(shape={self.shape}, dtype={self.dtype}, nnz={self.nnz}, order={self.order!r})"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Describe dtype, shape, storage size, and order."""
         return f"SparseArray dtype:{self.dtype} shape:{self.shape} non-zeros:{self.nnz} order:{self.order}"
 
-    def _indices(self, index, axis):
+    def _indices(
+        self, index: Any, axis: int | tuple[int, ...] | None
+    ) -> tuple[NDArray[Any], bool]:
+        """Normalize and validate indices for a single axis."""
         if isinstance(index, slice):
             return numpy.arange(
                 *index.indices(self.shape[axis]), dtype=numpy.int64
@@ -871,7 +1004,8 @@ class SparseArray:
         )
         return values, scalar
 
-    def _index_tuple(self, key):
+    def _index_tuple(self, key: Any) -> tuple[Any, ...]:
+        """Expand ellipsis and omitted axes in an indexing key."""
         key = key if isinstance(key, tuple) else (key,)
         if any(item is Ellipsis for item in key):
             if sum(item is Ellipsis for item in key) > 1:
@@ -886,7 +1020,7 @@ class SparseArray:
             raise ValueError("Too many indices")
         return key + (slice(None),) * (self.ndim - len(key))
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> SparseArray | NDArray[Any] | Scalar:
         """Index with integers, slices (including steps), or integer/boolean arrays."""
         key = self._index_tuple(key)
         if all(
@@ -981,18 +1115,20 @@ class SparseArray:
         )
         return result
 
-    def __mul__(self, other):
+    def __mul__(self, other: SparseArray | ArrayLike) -> SparseArray:
         """Multiply elementwise, promoting scalar types as NumPy does."""
         if isinstance(other, SparseArray):
             return self.multiply(other)
         if not numpy.isscalar(other):
             return self.multiply(SparseArray(numpy.asarray(other)))
+        if not numpy.isfinite(other):
+            return self._map_values(lambda values: values * other)
         values = self.values() * other
         result = SparseArray(self.shape, dtype=values.dtype, order=self.order)
         result._put_coordinates(values, self.stored_indices())
         return result
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Any, value: Scalar) -> None:
         """Assign scalars or broadcastable arrays to basic and advanced indices."""
         key = self._index_tuple(key)
         parsed = [self._indices(index, axis) for axis, index in enumerate(key)]
@@ -1016,11 +1152,17 @@ class SparseArray:
         values = numpy.broadcast_to(value, shape).astype(self.dtype).ravel()
         self._put_assignment(values, tuple(index.ravel() for index in coordinates))
 
-    def ceil(self):
+    def ceil(self) -> SparseArray:
         """Apply numpy.ceil elementwise, including implicit zeros."""
         return self._map_values(numpy.ceil)
 
-    def clip(self, min=None, max=None, out=None, **kwargs):
+    def clip(
+        self,
+        min: Scalar | ArrayLike | None = None,
+        max: Scalar | ArrayLike | None = None,
+        out: NDArray[Any] | None = None,
+        **kwargs: Any,
+    ) -> SparseArray:
         """Clamp values to bounds as NumPy does, including implicit zeros."""
         if min is None and max is None:
             raise ValueError("At least one clipping bound is required")
@@ -1033,19 +1175,30 @@ class SparseArray:
             return out
         return result
 
-    def cos(self):
+    def cos(self) -> SparseArray:
         """Apply numpy.cos elementwise, including implicit zeros."""
         return self._map_values(numpy.cos)
 
-    def floor(self):
+    def floor(self) -> SparseArray:
         """Apply numpy.floor elementwise, including implicit zeros."""
         return self._map_values(numpy.floor)
 
-    def max(self, axis=None, out=None, keepdims=False):
+    def max(
+        self,
+        axis: int | tuple[int, ...] | None = None,
+        out: NDArray[Any] | None = None,
+        keepdims: bool = False,
+    ) -> Scalar | NDArray[Any]:
         """Maximum including implicit zeros; empty arrays return NaN."""
         return self._extreme(numpy.maximum, axis, out, keepdims)
 
-    def mean(self, axis=None, dtype=None, out=None, keepdims=False):
+    def mean(
+        self,
+        axis: int | tuple[int, ...] | None = None,
+        dtype: DTypeLike | None = None,
+        out: NDArray[Any] | None = None,
+        keepdims: bool = False,
+    ) -> Scalar | NDArray[Any]:
         """Compute means without materializing implicit zeros."""
         axis = self._normalize_axis(axis)
         if dtype is None:
@@ -1057,23 +1210,35 @@ class SparseArray:
             result = numpy.asarray(self.sum(axis=axis, dtype=dtype)) / count
         return self._finish_reduction(result, axis, out, keepdims)
 
-    def min(self, axis=None, out=None, keepdims=False):
+    def min(
+        self,
+        axis: int | tuple[int, ...] | None = None,
+        out: NDArray[Any] | None = None,
+        keepdims: bool = False,
+    ) -> Scalar | NDArray[Any]:
         """Minimum including implicit zeros; empty arrays return NaN."""
         return self._extreme(numpy.minimum, axis, out, keepdims)
 
-    def power(self, exponent):
+    def power(self, exponent: float) -> SparseArray:
         """Elementwise power; equivalent to ``self ** exponent``."""
         return self**exponent
 
-    def sign(self):
+    def sign(self) -> SparseArray:
         """Apply numpy.sign elementwise, including implicit zeros."""
         return self._map_values(numpy.sign)
 
-    def sin(self):
+    def sin(self) -> SparseArray:
         """Apply numpy.sin elementwise, including implicit zeros."""
         return self._map_values(numpy.sin)
 
-    def std(self, axis=None, dtype=None, out=None, ddof=0, keepdims=False):
+    def std(
+        self,
+        axis: int | tuple[int, ...] | None = None,
+        dtype: DTypeLike | None = None,
+        out: NDArray[Any] | None = None,
+        ddof: float = 0,
+        keepdims: bool = False,
+    ) -> Scalar | NDArray[Any]:
         """Standard deviation with NumPy-compatible reduction arguments."""
         result = numpy.sqrt(
             self.var(axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
@@ -1083,7 +1248,13 @@ class SparseArray:
             return out
         return result
 
-    def sum(self, axis=None, dtype=None, out=None, keepdims=False):
+    def sum(
+        self,
+        axis: int | tuple[int, ...] | None = None,
+        dtype: DTypeLike | None = None,
+        out: NDArray[Any] | None = None,
+        keepdims: bool = False,
+    ) -> Scalar | NDArray[Any]:
         """Sum values, including NumPy's axis/dtype/out/keepdims conventions."""
         axis = self._normalize_axis(axis)
         expected_dtype = (
@@ -1106,11 +1277,25 @@ class SparseArray:
             numpy.add.at(result, self.stored_indices()[target], values)
         return self._finish_reduction(result, axis, out, keepdims)
 
-    def trace(self, offset=0, axis1=0, axis2=1, dtype=None, out=None):
+    def trace(
+        self,
+        offset: int = 0,
+        axis1: int = 0,
+        axis2: int = 1,
+        dtype: DTypeLike | None = None,
+        out: NDArray[Any] | None = None,
+    ) -> Scalar | NDArray[Any]:
         """Sum a diagonal, with NumPy's trace arguments."""
         return self.diagonal(offset, axis1, axis2).sum(dtype=dtype, out=out)
 
-    def var(self, axis=None, dtype=None, out=None, ddof=0, keepdims=False):
+    def var(
+        self,
+        axis: int | tuple[int, ...] | None = None,
+        dtype: DTypeLike | None = None,
+        out: NDArray[Any] | None = None,
+        ddof: float = 0,
+        keepdims: bool = False,
+    ) -> Scalar | NDArray[Any]:
         """Variance including implicit zeros, using a stable centered sum."""
         axis = self._normalize_axis(axis)
         if dtype is None:
@@ -1140,15 +1325,21 @@ class SparseArray:
             result = numpy.asarray(result) / max(count - ddof, 0)
         return self._finish_reduction(result, axis, out, keepdims)
 
-    def _normalize_axis(self, axis):
+    def _normalize_axis(self, axis: int | tuple[int, ...] | None) -> int | None:
+        """Validate reduction axes and normalize negative indices."""
         if axis is None:
             return None
         if isinstance(axis, tuple):
-            if len(axis) == self.ndim and set(axis) == set(range(self.ndim)):
+            if any(item is None or isinstance(item, tuple) for item in axis):
+                raise ValueError("Axes must be integers")
+            normalized = tuple(self._normalize_axis(item) for item in axis)
+            if len(set(normalized)) != len(normalized):
+                raise ValueError("Duplicate axes are not allowed")
+            if len(normalized) == self.ndim:
                 return None
-            if len(axis) != 1:
+            if len(normalized) != 1:
                 raise ValueError("Expected one axis or all axes")
-            axis = axis[0]
+            return normalized[0]
         if (
             not isinstance(axis, (int, numpy.integer))
             or not -self.ndim <= axis < self.ndim
@@ -1156,7 +1347,14 @@ class SparseArray:
             raise ValueError("Axis out of range")
         return axis % self.ndim
 
-    def _finish_reduction(self, result, axis, out, keepdims):
+    def _finish_reduction(
+        self,
+        result: Any,
+        axis: int | tuple[int, ...] | None,
+        out: NDArray[Any] | None,
+        keepdims: bool,
+    ) -> Scalar | NDArray[Any]:
+        """Apply keepdims and out conventions to a reduction result."""
         result = numpy.asarray(result)
         if keepdims:
             shape = (
@@ -1170,7 +1368,14 @@ class SparseArray:
             return out
         return result[()] if result.ndim == 0 else result
 
-    def _extreme(self, operation, axis, out, keepdims):
+    def _extreme(
+        self,
+        operation: Callable[..., Any],
+        axis: int | tuple[int, ...] | None,
+        out: NDArray[Any] | None,
+        keepdims: bool,
+    ) -> Scalar | NDArray[Any]:
+        """Reduce extrema while accounting for implicit zeros."""
         axis = self._normalize_axis(axis)
         values = self.values()
         count = self.size if axis is None else self.shape[axis]
@@ -1189,6 +1394,9 @@ class SparseArray:
             if self.dtype.kind == "i":
                 info = numpy.iinfo(self.dtype)
                 identity = info.max if operation is numpy.minimum else info.min
+            elif self.dtype.kind == "c":
+                # Complex extrema compare real, then imaginary components.
+                identity = complex(identity, identity)
             result = numpy.full(self.shape[1 - axis], identity, dtype=self.dtype)
             indices = self.stored_indices()[1 - axis]
             operation.at(result, indices, values)
@@ -1196,7 +1404,8 @@ class SparseArray:
             result[mask] = operation(result[mask], 0)
         return self._finish_reduction(result, axis, out, keepdims)
 
-    def __pow__(self, exponent):
+    def __pow__(self, exponent: float) -> SparseArray:
+        """Raise stored values to a nonnegative scalar power."""
         if exponent == 0:
             from sppy.util import ones
 
@@ -1208,14 +1417,13 @@ class SparseArray:
         result._put_coordinates(values, self.stored_indices())
         return result
 
-    def _map_values(self, operation):
+    def _map_values(self, operation: Callable[..., Any]) -> SparseArray:
+        """Transform stored values and materialize transformed implicit zeros."""
         values = numpy.asarray(operation(self.values()))
         zero = numpy.asarray(operation(numpy.zeros(1, dtype=self.dtype)))[0]
         result = SparseArray(self.shape, dtype=values.dtype, order=self.order)
         if zero != 0:
-            from sppy.util import ones
-
-            result = ones(self.shape, dtype=values.dtype, order=self.order) * zero
+            result.fill(zero)
             result._put_assignment(values, self.stored_indices())
         else:
             mask = values != 0
@@ -1224,19 +1432,29 @@ class SparseArray:
             )
         return result
 
-    def __array__(self, dtype=None, copy=None):
+    def __array__(
+        self, dtype: DTypeLike | None = None, copy: bool | None = None
+    ) -> NDArray[Any]:
         """Explicit conversion to a dense NumPy array always allocates."""
         if copy is False:
             raise ValueError("Sparse-to-dense conversion requires a copy")
         result = self.toarray()
         return result if dtype is None else result.astype(dtype, copy=False)
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Return the length of the first logical axis."""
         return self.shape[0]
 
-    def diagonal(self, offset=0, axis1=0, axis2=1):
+    def diagonal(self, offset: int = 0, axis1: int = 0, axis2: int = 1) -> NDArray[Any]:
         """Extract a diagonal as a dense vector, without densifying the matrix."""
-        if self.ndim != 2 or (axis1 % 2, axis2 % 2) not in {(0, 1), (1, 0)}:
+        offset = operator.index(offset)
+        axis1, axis2 = operator.index(axis1), operator.index(axis2)
+        if (
+            self.ndim != 2
+            or not -2 <= axis1 < 2
+            or not -2 <= axis2 < 2
+            or axis1 % 2 == axis2 % 2
+        ):
             raise ValueError("diagonal requires two distinct matrix axes")
         if axis1 % 2 == 1:
             return self.T.diagonal(offset)
@@ -1247,7 +1465,9 @@ class SparseArray:
         cols = numpy.arange(length) + max(offset, 0)
         return self[rows, cols]
 
-    def subarray(self, row_indices, column_indices=None):
+    def subarray(
+        self, row_indices: ArrayLike, column_indices: ArrayLike | None = None
+    ) -> SparseArray:
         """Take the Cartesian product of index vectors, like NumPy's ix_."""
         if self.ndim == 1:
             if column_indices is not None:
@@ -1255,7 +1475,9 @@ class SparseArray:
             return self[row_indices]
         return self[numpy.asarray(row_indices), :][:, numpy.asarray(column_indices)]
 
-    def count_nonzero(self, axis=None):
+    def count_nonzero(
+        self, axis: int | tuple[int, ...] | None = None
+    ) -> int | NDArray[numpy.int64]:
         """Count nonzero values, excluding explicitly stored zeros."""
         axis = self._normalize_axis(axis)
         mask = self.values() != 0

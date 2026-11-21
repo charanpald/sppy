@@ -1,8 +1,11 @@
 """Profile one checked SpPy/SciPy workload; inspect saved output with pstats."""
 
+from __future__ import annotations
+
 import cProfile
-from pathlib import Path
 import pstats
+from collections.abc import Sequence
+from pathlib import Path
 
 from profiling._common import (
     BACKENDS,
@@ -13,7 +16,8 @@ from profiling._common import (
 )
 
 
-def main(argv=None):
+def main(argv: Sequence[str] | None = None) -> None:
+    """Parse command-line options and execute the profiling tool."""
     arguments = parser(__doc__)
     arguments.add_argument("--operation", choices=OPERATIONS, default="matmat")
     arguments.add_argument("--backend", choices=BACKENDS, default="sppy_C")

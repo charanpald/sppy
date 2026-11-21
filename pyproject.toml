@@ -51,4 +51,6 @@ target-version = "py311"
 exclude = ["build"]
 
 [tool.ruff.lint]
-select = ["E9", "F63", "F7", "F82"]
+select = ["E9", "F63", "F7", "F82", "ANN", "D100", "D101", "D102", "D103", "D104", "D105", "D107"]
+# Dynamic native bindings, heterogeneous reports, and invalid test inputs need Any.
+ignore = ["ANN401"]

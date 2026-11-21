@@ -1,0 +1,4 @@
+# Pybind11 uses pybind11_builtins.pybind11_type, a runtime-only metaclass.
+# Suppress only class-level metaclass mismatches; member signatures remain checked.
+sppy\._native\.(Factor|Preconditioner)_(float32|float64|complex64|complex128)
+sppy\._native\.(int8|int16|int32|int64|float32|float64|complex64|complex128)_[CF]

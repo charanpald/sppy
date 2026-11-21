@@ -1,16 +1,29 @@
 name: tests
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest]
         python: ['3.11', '3.12', '3.13', '3.14']
         openmp: ['0', '1']
+        include:
+          - os: macos-latest
+            python: '3.13'
+            openmp: '0'
+          - os: windows-2022
+            python: '3.13'
+            openmp: '0'
+            generator: Visual Studio 17 2022
     env:
       EIGEN_INCLUDE_DIR: ${{ github.workspace }}/vendor/eigen
       SPPY_OPENMP: ${{ matrix.openmp }}
-      CMAKE_BUILD_PARALLEL_LEVEL: '2'
+      CMAKE_BUILD_PARALLEL_LEVEL: '1'
+      CMAKE_GENERATOR: ${{ matrix.generator || 'Ninja' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
@@ -19,12 +32,44 @@ jobs:
           enable-cache: true
           python-version: ${{ matrix.python }}
       - name: Install Eigen 5.0.1
+        shell: bash
         run: |
           mkdir -p vendor/eigen
           curl -fL https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz | tar xz --strip-components=1 -C vendor/eigen
       - run: uv sync --locked
       - run: uv run --locked pytest
+      - run: uv run --locked mypy
+      - run: uv run --locked python -m mypy.stubtest sppy._native --allowlist tools/native-stubtest-allowlist.txt
       - run: uv run --locked ruff check .
-      - run: uv run --locked ruff format --check sppy tests profiling
-      - run: uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
+      - run: uv run --locked ruff format --check sppy tests profiling tools
+      - name: Check C++ formatting
+        shell: bash
+        run: uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
       - run: uv build
+      - name: Validate the installed wheel in isolation
+        run: uv run --locked python tools/validate_wheel.py
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      EIGEN_INCLUDE_DIR: ${{ github.workspace }}/vendor/eigen
+      SPPY_OPENMP: '0'
+      SPPY_SANITIZERS: address,undefined
+      CMAKE_BUILD_PARALLEL_LEVEL: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.10.12"
+          enable-cache: true
+          python-version: '3.13'
+      - name: Install Eigen 5.0.1
+        run: |
+          mkdir -p vendor/eigen
+          curl -fL https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz | tar xz --strip-components=1 -C vendor/eigen
+      - run: uv sync --locked --no-install-project
+      - name: Build an instrumented wheel
+        run: uv build --wheel -Cbuild-dir=build/sanitizers/{wheel_tag} -Cinstall.strip=false
+      - name: Test with address and undefined-behavior sanitizers
+        run: .venv/bin/python tools/validate_wheel.py --asan-runtime "$(gcc -print-file-name=libasan.so)"

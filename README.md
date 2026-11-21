@@ -124,10 +124,13 @@ validation and commands to measure your own inputs.
 
 ```sh
 uv run --locked pytest
+uv run --locked mypy
+uv run --locked python -m mypy.stubtest sppy._native --allowlist tools/native-stubtest-allowlist.txt
 uv run --locked ruff check .
-uv run --locked ruff format --check sppy tests profiling
+uv run --locked ruff format --check sppy tests profiling tools
 uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
 uv build
+uv run --locked python tools/validate_wheel.py
 ```
 
 Enable OpenMP with `SPPY_OPENMP=1` before syncing or building. Keep it set on

@@ -52,7 +52,7 @@ def _arguments(
 ) -> tuple[int, int, NDArray[np.int32], NDArray[np.int32], NDArray[Any]]:
     """Export matrix shape, coordinates, and values for a native call."""
     rows, columns = a.stored_indices()
-    return *a.shape, rows, columns, a.values()
+    return a.shape[0], a.shape[1], rows, columns, a.values()
 
 
 def _rhs(b: ArrayLike, dtype: np.dtype[Any], rows: int) -> tuple[NDArray[Any], bool]:
@@ -96,6 +96,10 @@ class SparseFactorization:
         shift_scale: Cholesky diagonal scale, applied before the offset.
         pivot_threshold: Optional LU or QR pivot threshold.
     """
+
+    _native: _native._Factor[Any] | None
+    _shape: tuple[int, int] | None
+    _dtype: np.dtype[Any] | None
 
     def __init__(
         self,
@@ -154,7 +158,7 @@ class SparseFactorization:
             self.shift_scale,
             -1.0 if self.pivot_threshold is None else self.pivot_threshold,
         )
-        self._shape, self._dtype = a.shape, a.dtype
+        self._shape, self._dtype = (a.shape[0], a.shape[1]), a.dtype
         self._native.analyze_matrix(a._array)
         return self
 
@@ -192,7 +196,7 @@ class SparseFactorization:
             self.shift_scale,
             -1.0 if self.pivot_threshold is None else self.pivot_threshold,
         )
-        self._shape, self._dtype = a.shape, a.dtype
+        self._shape, self._dtype = (a.shape[0], a.shape[1]), a.dtype
         self.info = ComputationInfo(self._native.compute_matrix(a._array))
         if self.info != ComputationInfo.SUCCESS:
             raise np.linalg.LinAlgError(
@@ -223,17 +227,22 @@ class SparseFactorization:
         directly from the factorization, without copying the sparse factors.
         """
         self._require_ready()
+        assert (
+            self._native is not None
+            and self._shape is not None
+            and self._dtype is not None
+        )
         if isinstance(b, SparseArray):
-            if b.ndim != 2 or b.shape[0] != self.shape[0]:
+            if b.ndim != 2 or b.shape[0] != self._shape[0]:
                 raise ValueError("Sparse RHS must be a matrix with compatible rows")
-            if b.dtype.kind == "c" and self.dtype.kind != "c":
+            if b.dtype.kind == "c" and self._dtype.kind != "c":
                 raise TypeError("A real solver cannot discard a complex RHS")
             if not np.isfinite(b.values()).all():
                 raise ValueError("Right-hand side must be finite")
             b = b.astype(self.dtype, copy=False)
             rows, columns, ri, ci, values = self._native.solve_sparse(*_arguments(b))
             return SparseArray.from_triplets((rows, columns), ri, ci, values, order="F")
-        b, vector = _rhs(b, self.dtype, self.shape[0])
+        b, vector = _rhs(b, self._dtype, self._shape[0])
         result = self._native.solve(b)
         return result[:, 0] if vector else result
 
@@ -245,6 +254,11 @@ class SparseFactorization:
         row permutation P and column permutation Q; QR exposes column P.
         """
         self._require_ready()
+        assert (
+            self._native is not None
+            and self._shape is not None
+            and self._dtype is not None
+        )
         value = self._native.factor(name)
         if isinstance(value, tuple):
             rows, columns, ri, ci, values = value
@@ -255,12 +269,22 @@ class SparseFactorization:
     def determinant(self) -> Scalar:
         """Return the determinant for LU or Cholesky."""
         self._require_ready()
+        assert (
+            self._native is not None
+            and self._shape is not None
+            and self._dtype is not None
+        )
         return self._native.determinant()
 
     @_locked
     def slogdet(self) -> tuple[Scalar, float]:
         """Return (phase, log(abs(det))) for LU or Cholesky without overflow."""
         self._require_ready()
+        assert (
+            self._native is not None
+            and self._shape is not None
+            and self._dtype is not None
+        )
         return self._native.slogdet()
 
     @property
@@ -268,13 +292,23 @@ class SparseFactorization:
     def rank(self) -> int:
         """Numerical rank from rank-revealing QR."""
         self._require_ready()
+        assert (
+            self._native is not None
+            and self._shape is not None
+            and self._dtype is not None
+        )
         return self._native.rank
 
     @_locked
     def apply_q(self, b: ArrayLike, *, adjoint: bool = False) -> NDArray[Any]:
         """Apply QR's implicit Q or Q.H without forming a dense Q."""
         self._require_ready()
-        b, vector = _rhs(b, self.dtype, self.shape[0])
+        assert (
+            self._native is not None
+            and self._shape is not None
+            and self._dtype is not None
+        )
+        b, vector = _rhs(b, self._dtype, self._shape[0])
         result = self._native.apply_q(b, adjoint)
         return result[:, 0] if vector else result
 

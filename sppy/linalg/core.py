@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import gc
-from typing import Any
+from typing import Any, Literal
 
 import numpy
 from numpy.typing import ArrayLike, NDArray
@@ -12,7 +11,9 @@ from sppy.linalg.general_linear_operator import GeneralLinearOperator
 from sppy.sparse_array import SparseArray
 
 
-def norm(a: SparseArray, ord: int | float | str | None = None) -> float:
+def norm(
+    a: SparseArray, ord: int | float | Literal["fro", "nuc"] | None = None
+) -> float:
     """Vector p-norm or matrix Frobenius/1/infinity norm, without densifying."""
     if a.ndim == 1:
         values = a.values()
@@ -32,9 +33,9 @@ def norm(a: SparseArray, ord: int | float | str | None = None) -> float:
         # Taking abs first would overflow at the minimum signed integer.
         a = a.astype(numpy.float64)
     if ord == 1:
-        return abs(a).sum(axis=0).max(initial=0)
+        return numpy.asarray(abs(a).sum(axis=0)).max(initial=0)
     if ord == numpy.inf:
-        return abs(a).sum(axis=1).max(initial=0)
+        return numpy.asarray(abs(a).sum(axis=1)).max(initial=0)
     raise ValueError("Supported matrix norms are fro, 1, and infinity")
 
 
@@ -102,31 +103,12 @@ def rsvd(
         missing = min(n, p + k) - omega.shape[1]
         omega = numpy.c_[omega, rng.standard_normal((n, missing))]
 
-    Y = L.matmat(omega)
-    Q, R = numpy.linalg.qr(Y)
+    Q = numpy.linalg.qr(L.matmat(omega), mode="reduced")[0]
     del omega
-
-    for i in range(q):
-        Y = L.rmatmat(Q)
-        Q, R = numpy.linalg.qr(Y)
-        gc.collect()
-
-        Y = L.matmat(Q)
-        Q, R = numpy.linalg.qr(Y)
-        gc.collect()
-
-    del Y
-    del R
-    gc.collect()
+    for _ in range(q):
+        Q = numpy.linalg.qr(L.rmatmat(Q), mode="reduced")[0]
+        Q = numpy.linalg.qr(L.matmat(Q), mode="reduced")[0]
 
     B = L.rmatmat(Q).conj().T
-    U, s, V = numpy.linalg.svd(B, full_matrices=False)
-    del B
-    V = V.conj().T
-    U = Q.dot(U)
-
-    U = U[:, 0:k]
-    s = s[0:k]
-    V = V[:, 0:k]
-
-    return U, s, V
+    U, s, Vh = numpy.linalg.svd(B, full_matrices=False)
+    return Q @ U[:, :k], s[:k], Vh[:k].conj().T

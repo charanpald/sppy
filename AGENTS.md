@@ -27,8 +27,10 @@ Run the checks relevant to each change, then the full suite before completion:
 
 ```sh
 uv run --locked pytest
+uv run --locked mypy
+uv run --locked python -m mypy.stubtest sppy._native --allowlist tools/native-stubtest-allowlist.txt
 uv run --locked ruff check .
-uv run --locked ruff format --check sppy tests profiling
+uv run --locked ruff format --check sppy tests profiling tools
 uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
 ```
 
@@ -36,6 +38,12 @@ Use `uv build` for packaging changes. For documentation, run
 `uv run --locked --only-group docs mkdocs build --strict`; this needs no native
 extension. The docs-only dependency group can replace the development environment,
 so use a separate environment or restore it with `uv sync --locked` afterward.
+
+After building, run `uv run --locked python tools/validate_wheel.py` to test the
+installed wheel in a fresh environment away from checkout imports. Native sanitizer
+builds use `SPPY_SANITIZERS=address,undefined`, `SPPY_OPENMP=0`, and a separate
+build directory; see `docs/contributing.md` for runtime preloading and commands.
+CI covers Linux, macOS, Windows, and a Linux sanitizer build.
 
 ## Implementation contracts
 
@@ -59,6 +67,10 @@ so use a separate environment or restore it with `uv sync --locked` afterward.
 - Add regression tests for bug fixes, comparing against NumPy, SciPy, or known
   residuals. Cover both storage orders, relevant dtypes, empty inputs, and
   explicit versus implicit zeros. Use local seeded generators and temporary files.
+  Generated numerical tests use Hypothesis with deterministic CI examples and no
+  timing deadlines. Preserve minimized failures as deterministic regressions.
+- Keep `sppy/_native.pyi` synchronized with the bindings. Stubtest's allowlist only
+  excludes pybind11's runtime metaclass differences, not member signatures.
 - Keep performance assertions out of unit tests. Benchmark changes with matched
   inputs, validate outside timed sections, and record the environment and scope.
 - Keep `uv.lock` consistent with dependency changes. Do not hand-edit generated

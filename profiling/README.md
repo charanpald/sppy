@@ -123,3 +123,19 @@ The [remaining-gap follow-up](results/remaining-gaps/README.md) records the late
 paired results and runtime SIMD path. Set `SPPY_DISABLE_SIMD=1` before Python
 starts to measure the generic CPU path. BiCGSTAB now applies the requested
 relative tolerance per RHS instead of using Eigen 5's internal absolute threshold.
+
+## Randomized SVD
+
+Run the deterministic dense/sparse real/complex SVD benchmark with:
+
+```sh
+uv run --locked python -m profiling.rsvd --output /tmp/rsvd.json
+```
+
+`--rows`, `--columns`, `--rank`, and `--repeats` control input size and sampling.
+Inputs have approximately 2% nonzeros; dense and sparse cases use identical
+coefficients. Timings use one numerical thread, a warmup, and fixed RNG seeds.
+Reconstruction residuals and orthogonality are validated outside timing. Peak
+tracked Python/NumPy allocations are measured in a separate call with
+`tracemalloc`; untracked native allocations are excluded. See the
+[before/after report](results/rsvd/README.md) for raw samples and scope.

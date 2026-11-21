@@ -241,3 +241,32 @@ def test_invalid_options_are_cli_errors(argument: Any, value: Any) -> None:
     )
     assert result.returncode == 2
     assert "error:" in result.stderr
+
+
+def test_rsvd_benchmark_saves_validated_time_and_memory(tmp_path: Path) -> None:
+    """The SVD benchmark must record each dtype/storage/power case and memory scope."""
+    from profiling.rsvd import main
+
+    output = tmp_path / "rsvd.json"
+    report = main(
+        [
+            "--rows",
+            "8",
+            "--columns",
+            "5",
+            "--rank",
+            "2",
+            "--repeats",
+            "1",
+            "--output",
+            str(output),
+        ]
+    )
+    assert json.loads(output.read_text()) == report
+    assert len(report["cases"]) == 8
+    for case in report["cases"]:
+        assert len(case["samples_seconds"]) == 1
+        assert case["median_seconds"] >= 0
+        assert case["tracked_peak_bytes"] > 0
+        assert np.isfinite(case["residual_norm"])
+    assert "untracked native" in report["scope"]

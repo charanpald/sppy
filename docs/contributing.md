@@ -54,8 +54,10 @@ With the default development environment:
 
 ```sh
 uv run --locked pytest
+uv run --locked mypy
+uv run --locked python -m mypy.stubtest sppy._native --allowlist tools/native-stubtest-allowlist.txt
 uv run --locked ruff check .
-uv run --locked ruff format --check sppy tests profiling
+uv run --locked ruff format --check sppy tests profiling tools
 uv run --locked clang-format --dry-run --Werror sppy/native/*.h sppy/native/*.cpp
 uv build
 ```
@@ -63,6 +65,37 @@ uv build
 `uv build` writes the source distribution and wheel to `dist/`. Native
 bindings are compiled from `sppy/native/` using pybind11 and Eigen. `setup.py` and `MANIFEST.in`
 are no longer needed; package and archive settings live in `pyproject.toml`.
+
+Test the built wheel with `uv run --locked python tools/validate_wheel.py`.
+The validator creates a temporary environment, installs the wheel and locked test
+dependencies, copies the tests and profiling helpers, and runs them outside the
+checkout. It checks import provenance, typing artifacts, and import without SciPy.
+Use an explicit wheel path if `dist/` contains more than one wheel. `--offline`
+uses cached dependencies. Pass `--pytest-args` followed by pytest arguments to
+select tests; this option must come last. Sanitizer runs disable output capture
+so fatal native diagnostics remain visible. CI runs these checks on Linux, macOS,
+and Windows.
+
+### Native sanitizers
+
+With GCC or Clang on Linux, build address and undefined-behavior instrumentation
+in a separate directory:
+
+```sh
+SPPY_OPENMP=0 SPPY_SANITIZERS=address,undefined uv build --wheel \
+  -Cbuild-dir=build/sanitizers/{wheel_tag} -Cinstall.strip=false --out-dir /tmp/sppy-sanitizers
+.venv/bin/python tools/validate_wheel.py '/tmp/sppy-sanitizers/*.whl' \
+  --asan-runtime "$(gcc -print-file-name=libasan.so)"
+```
+
+Use the ASan runtime matching the compiler used for the build. For Clang, obtain
+its shared runtime from the installed compiler runtime directory. The validator
+preloads it only for Python test processes and their children, stops on sanitizer
+errors, and disables leak detection for CPython/third-party shutdown allocations.
+Memory safety and undefined-behavior checks remain enabled. The CI sanitizer job
+uses GCC and runs the full installed-wheel suite, including integer overflow and
+generated numerical cases. Set `SPPY_SANITIZERS` to an empty string when reusing a
+build directory for a regular build; separate directories are preferable.
 
 After editing dependency declarations, run `uv lock` and commit the lockfile.
 After changing external Eigen headers, force a rebuild:
@@ -94,6 +127,17 @@ intentionally invalid test inputs where a narrower type would be misleading.
 Ruff checks these requirements. The package includes a `py.typed` marker so type
 checkers can use its inline annotations. Repository-specific development guidance
 is in the root `AGENTS.md`.
+
+Mypy checks all modules under `sppy/`, including the native extension stub. This
+is a gradual configuration: dynamic dtype dispatch and optional SciPy APIs still
+use explicit dynamic boundaries, while typed function bodies and optional values
+are checked. Stubtest compares the native stub against the installed bindings;
+its narrowly scoped allowlist covers pybind11's runtime-only class metaclass.
+
+`tests/test_generated_numerics.py` uses Hypothesis to explore shapes, signed
+integer boundaries, complex values, duplicate coordinates, storage orders,
+compressed/uncompressed arithmetic, slicing, products, reductions, and solvers.
+It uses deterministic examples and numerical checks rather than time thresholds.
 
 The pytest suite lives in the repository's top-level `tests/` directory.
 Tests use Arrange–Act–Assert sections, parametrized cases, isolated temporary

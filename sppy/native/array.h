@@ -127,6 +127,23 @@ template <class T, int O> void bind_matrix(py::module_ &m, const std::string &na
                      return output;
                  const T *input_data = y.data();
                  T *output_data = output.mutable_data();
+                 if constexpr (std::is_integral_v<T>) {
+                     py::gil_scoped_release release;
+                     if (columns == 8) {
+                         dense_block_product<8>(x.a, input_data, output_data);
+                     } else {
+                         std::fill_n(output_data, x.a.rows() * columns, T(0));
+                         for (int outer = 0; outer < x.a.outerSize(); ++outer)
+                             for (typename S::InnerIterator it(x.a, outer); it; ++it)
+                                 for (Eigen::Index k = 0; k < columns; ++k) {
+                                     auto &value = output_data[it.row() * columns + k];
+                                     value = sum_value(
+                                         value, product_value(it.value(),
+                                                              input_data[it.col() * columns + k]));
+                                 }
+                     }
+                     return output;
+                 }
                  Eigen::Map<const Dense<T>> input(input_data, y.shape(0), columns);
                  Eigen::Map<Dense<T>> result(output_data, x.a.rows(), columns);
                  bool block = columns == 8;

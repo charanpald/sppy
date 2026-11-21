@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Preserve adjacent large integer values in approximate comparisons by subtracting
+  Python integers before computing the norm; define native integer merges and
+  duplicate coalescing and all dense-product widths with modular arithmetic free
+  of signed overflow.
+- Validate linear-operator callbacks and product dimensions, provide matrix
+  fallbacks from vector products, and report unsupported adjoints and addition.
+- Remove forced cyclic garbage collections and unused QR outputs from randomized
+  SVD; record matched runtime and tracked-memory benchmarks.
+- Add package-wide mypy checks, native extension stubs and stubtest validation,
+  generated numerical tests, isolated wheel tests on Linux/macOS/Windows, and
+  Linux address/undefined-behavior sanitizer builds.
+
 - Fix signed integer overflow in zero checks, approximate comparisons, and matrix
   1/infinity norms.
 - Match NumPy for nonfinite scalar multiplication and complex extrema with

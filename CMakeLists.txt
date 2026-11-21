@@ -20,6 +20,18 @@ file(GLOB _sources CONFIGURE_DEPENDS "sppy/native/*.cpp")
 pybind11_add_module(_native MODULE NO_EXTRAS ${_sources})
 target_compile_features(_native PRIVATE cxx_std_17)
 target_link_libraries(_native PRIVATE Eigen3::Eigen)
+set(SPPY_SANITIZERS "" CACHE STRING "Comma-separated GCC/Clang sanitizers")
+if(DEFINED ENV{SPPY_SANITIZERS})
+    set(SPPY_SANITIZERS "$ENV{SPPY_SANITIZERS}" CACHE STRING "Comma-separated GCC/Clang sanitizers" FORCE)
+endif()
+if(SPPY_SANITIZERS)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR "SPPY_SANITIZERS requires GCC or Clang")
+    endif()
+    target_compile_options(_native PRIVATE
+        -fsanitize=${SPPY_SANITIZERS} -fno-sanitize-recover=all -fno-omit-frame-pointer -O1 -g1)
+    target_link_options(_native PRIVATE -fsanitize=${SPPY_SANITIZERS})
+endif()
 # Eigen solver templates are memory intensive; serialize compilation even when
 # callers request a parallel build. This also makes wheel builds predictable.
 set_property(GLOBAL PROPERTY JOB_POOLS eigen_compile=1)

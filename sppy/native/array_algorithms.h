@@ -62,7 +62,42 @@ template <int Operation, class S> S coefficient_binary(const S &a, const S &b) {
         }
         return result;
     }
-    if constexpr (Operation == 0)
+    if constexpr (std::is_integral_v<T>) {
+        // Eigen's default coefficient expressions can overflow signed integers.
+        // Merge mismatched/uncompressed patterns using modular scalar helpers.
+        S result(a.rows(), a.cols());
+        result.reserve(Eigen::Index(std::min<int64_t>(int64_t(a.nonZeros()) + b.nonZeros(),
+                                                      std::numeric_limits<int>::max())));
+        for (int outer = 0; outer < a.outerSize(); ++outer) {
+            result.startVec(outer);
+            typename S::InnerIterator left(a, outer), right(b, outer);
+            while (left || right) {
+                if (left && right && left.index() == right.index()) {
+                    T value;
+                    if constexpr (Operation == 0)
+                        value = sum_value(left.value(), right.value());
+                    else if constexpr (Operation == 1)
+                        value = sum_value(left.value(), product_value(T(-1), right.value()));
+                    else
+                        value = product_value(left.value(), right.value());
+                    result.insertBackByOuterInner(outer, left.index()) = value;
+                    ++left;
+                    ++right;
+                } else if (left && (!right || left.index() < right.index())) {
+                    if constexpr (Operation != 2)
+                        result.insertBackByOuterInner(outer, left.index()) = left.value();
+                    ++left;
+                } else {
+                    if constexpr (Operation != 2)
+                        result.insertBackByOuterInner(outer, right.index()) =
+                            Operation == 0 ? right.value() : product_value(T(-1), right.value());
+                    ++right;
+                }
+            }
+        }
+        result.finalize();
+        return result;
+    } else if constexpr (Operation == 0)
         return S(a + b);
     else if constexpr (Operation == 1)
         return S(a - b);

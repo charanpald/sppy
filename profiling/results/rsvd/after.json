@@ -1,0 +1,182 @@
+{
+  "environment": {
+    "recorded_at_utc": "2026-11-21T09:59:18.749148+00:00",
+    "python": "3.14.3",
+    "numpy": "2.5.5",
+    "scipy": "1.18.1",
+    "sppy": "1.0.0",
+    "platform": "Linux-6.8.0-151-generic-x86_64-with-glibc2.44",
+    "cpu": "AMD Ryzen 5 5600X 6-Core Processor",
+    "available_cpus": 12,
+    "openmp_enabled": true,
+    "runtime_simd": "avx2-fma",
+    "eigen_threads": 1,
+    "threadpools": [
+      {
+        "user_api": "openmp",
+        "internal_api": "openmp",
+        "num_threads": 1,
+        "prefix": "libgomp",
+        "version": null,
+        "library": "libgomp.so.1.0.0"
+      },
+      {
+        "user_api": "blas",
+        "internal_api": "openblas",
+        "num_threads": 1,
+        "prefix": "libscipy_openblas",
+        "version": "0.3.34.237.2",
+        "threading_layer": "pthreads",
+        "architecture": "Haswell",
+        "library": "libscipy_openblas64_-4b78795a.so"
+      }
+    ],
+    "git_revision": "c96736f4eecd1263bbd049671e28652f06f1fc25",
+    "git_dirty": true
+  },
+  "configuration": {
+    "rows": 600,
+    "columns": 300,
+    "rank": 20,
+    "repeats": 7
+  },
+  "scope": "One numerical thread; fixed RNG seed; input preparation and validation excluded from timing. Memory measured in a separate call with tracemalloc; excludes untracked native allocations.",
+  "cases": [
+    {
+      "dtype": "float64",
+      "storage": "dense",
+      "q": 0,
+      "samples_seconds": [
+        0.0010969770000883727,
+        0.0010759679998955107,
+        0.0011186869996890891,
+        0.0011128579999422072,
+        0.001080457000171009,
+        0.0011632079995251843,
+        0.0010675969997464563
+      ],
+      "median_seconds": 0.0010969770000883727,
+      "tracked_peak_bytes": 804094,
+      "residual_norm": 57.26083475726596
+    },
+    {
+      "dtype": "float64",
+      "storage": "dense",
+      "q": 2,
+      "samples_seconds": [
+        0.0025636050004322897,
+        0.002655383000274014,
+        0.0025664840004537837,
+        0.0025583849992472096,
+        0.002554623999458272,
+        0.002547074000176508,
+        0.002550154000346083
+      ],
+      "median_seconds": 0.0025583849992472096,
+      "tracked_peak_bytes": 803552,
+      "residual_norm": 55.00544326453
+    },
+    {
+      "dtype": "float64",
+      "storage": "sparse",
+      "q": 0,
+      "samples_seconds": [
+        0.000723677999303618,
+        0.0007094390002748696,
+        0.0007276380001712823,
+        0.0007085180004651193,
+        0.0007004990002315026,
+        0.000704248000147345,
+        0.0007040880000204197
+      ],
+      "median_seconds": 0.0007085180004651193,
+      "tracked_peak_bytes": 803504,
+      "residual_norm": 57.26083475726596
+    },
+    {
+      "dtype": "float64",
+      "storage": "sparse",
+      "q": 2,
+      "samples_seconds": [
+        0.001465145999645756,
+        0.0014948070001992164,
+        0.001458865999666159,
+        0.0014569269997082301,
+        0.0014609170002586325,
+        0.0014450259996010573,
+        0.0014495969999188674
+      ],
+      "median_seconds": 0.001458865999666159,
+      "tracked_peak_bytes": 803504,
+      "residual_norm": 55.00544326453
+    },
+    {
+      "dtype": "complex128",
+      "storage": "dense",
+      "q": 0,
+      "samples_seconds": [
+        0.002493534000677755,
+        0.002507195000362117,
+        0.0024631039996165782,
+        0.0024695140000403626,
+        0.0025302750000264496,
+        0.002503343999705976,
+        0.002482793999661226
+      ],
+      "median_seconds": 0.002493534000677755,
+      "tracked_peak_bytes": 3314416,
+      "residual_norm": 79.19924202867566
+    },
+    {
+      "dtype": "complex128",
+      "storage": "dense",
+      "q": 2,
+      "samples_seconds": [
+        0.006450214999858872,
+        0.006575014999725681,
+        0.006660744000328123,
+        0.00649948500085884,
+        0.006809295000493876,
+        0.006537045000186481,
+        0.0063859849997243145
+      ],
+      "median_seconds": 0.006537045000186481,
+      "tracked_peak_bytes": 3314416,
+      "residual_norm": 76.4417978715903
+    },
+    {
+      "dtype": "complex128",
+      "storage": "sparse",
+      "q": 0,
+      "samples_seconds": [
+        0.0013933569998698658,
+        0.001382686999932048,
+        0.001381197000227985,
+        0.001472875999752432,
+        0.00144461699983367,
+        0.0013990460001878091,
+        0.0013827370003127726
+      ],
+      "median_seconds": 0.0013933569998698658,
+      "tracked_peak_bytes": 1531664,
+      "residual_norm": 79.19924202867566
+    },
+    {
+      "dtype": "complex128",
+      "storage": "sparse",
+      "q": 2,
+      "samples_seconds": [
+        0.003099212999586598,
+        0.003183603000252333,
+        0.003170322999721975,
+        0.0030976019997979165,
+        0.003089014000579482,
+        0.003084102000684652,
+        0.0031431229999725474
+      ],
+      "median_seconds": 0.003099212999586598,
+      "tracked_peak_bytes": 1603664,
+      "residual_norm": 76.4417978715903
+    }
+  ]
+}

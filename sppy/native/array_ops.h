@@ -63,9 +63,9 @@ S assemble_triplets(int rows, int cols, Array<int> ri, Array<int> ci, Array<T> v
         end{{rows_data, cols_data, values.data(), count}};
     S result(rows, cols);
     if (!unsorted)
-        result.setFromSortedTriplets(begin, end);
+        result.setFromSortedTriplets(begin, end, sum_value<T>);
     else
-        result.setFromTriplets(begin, end);
+        result.setFromTriplets(begin, end, sum_value<T>);
     return result;
 }
 
@@ -128,7 +128,7 @@ S import_compressed(int rows, int cols, Array<T> values, Array<int> indices, Arr
             for (int k = indptr.data()[j]; k < indptr.data()[j + 1]; ++k)
                 entries.emplace_back(S::IsRowMajor ? j : indices.data()[k],
                                      S::IsRowMajor ? indices.data()[k] : j, values.data()[k]);
-        result.setFromTriplets(entries.begin(), entries.end());
+        result.setFromTriplets(entries.begin(), entries.end(), sum_value<T>);
     }
     return result;
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "eigen_kernels.h"
+#include "scalar_arithmetic.h"
 #include <Eigen/Sparse>
 #include <complex>
 #include <limits>
@@ -46,7 +47,7 @@ Sparse<T> sparse_copy(int rows, int cols, Array<int> ri, Array<int> ci, Array<T>
         entries.emplace_back(ri.data()[k], ci.data()[k], values.data()[k]);
     }
     Sparse<T> result(rows, cols);
-    result.setFromTriplets(entries.begin(), entries.end());
+    result.setFromTriplets(entries.begin(), entries.end(), sum_value<T>);
     result.makeCompressed();
     return result;
 }

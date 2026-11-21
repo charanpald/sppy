@@ -14,12 +14,12 @@ dependencies = ["numpy>=2,<3"]
 
 [project.optional-dependencies]
 scipy = ["scipy>=1.14"]
-test = ["pytest>=8", "scipy>=1.14"]
+test = ["pytest>=8", "scipy>=1.14", "hypothesis>=6.100", "threadpoolctl>=3.6"]
 
 [dependency-groups]
 # mkdocstrings 0.30 is incompatible with the pymdown Highlight API in 12+.
 docs = ["mkdocs>=1.6,<2", "mkdocstrings[python]>=0.30,<1", "pymdown-extensions>=10,<12"]
-dev = ["pytest>=8", "scipy>=1.14", "ruff>=0.9", "clang-format>=18", "threadpoolctl>=3.6"]
+dev = ["pytest>=8", "scipy>=1.14", "ruff>=0.9", "clang-format>=18", "threadpoolctl>=3.6", "mypy>=1.15,<3", "hypothesis>=6.100"]
 
 [tool.scikit-build]
 build-dir = "build/native/{wheel_tag}"
@@ -39,6 +39,8 @@ cache-keys = [
     { file = "sppy/native/**/*.cpp" },
     { env = "EIGEN_INCLUDE_DIR" },
     { env = "SPPY_OPENMP" },
+    { env = "SPPY_SANITIZERS" },
+    { file = "sppy/**/*.pyi" },
 ]
 
 [tool.pytest.ini_options]
@@ -54,3 +56,20 @@ exclude = ["build"]
 select = ["E9", "F63", "F7", "F82", "ANN", "D100", "D101", "D102", "D103", "D104", "D105", "D107"]
 # Dynamic native bindings, heterogeneous reports, and invalid test inputs need Any.
 ignore = ["ANN401"]
+
+[tool.mypy]
+files = ["sppy"]
+python_version = "3.11"
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["scipy.*"]
+ignore_missing_imports = true
+
+[tool.ruff.lint.per-file-ignores]
+# Stubs document signatures; implementation docstrings live in the source/bindings.
+"*.pyi" = ["D"]
